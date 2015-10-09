@@ -13,6 +13,7 @@ contains
     !read parameter in the input file : ./input_parameter.dat
     implicit none
     
+
        !function parameters
     real(kind=x_precision),intent(out)::M !Black hole mass
     real(kind=x_precision),intent(out)::r_max !maximal radius of black hole

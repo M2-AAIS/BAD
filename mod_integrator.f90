@@ -11,8 +11,8 @@ contains
   subroutine do_timestep (state_in, state_out)
     use mod_constants
     implicit none
-    type (state), intent(in) :: state_in
-    type (state), intent(out) :: state_out
+    type (state), intent(in), dimension(:)  :: state_in
+    type (state), intent(out), dimension(:) :: state_out
     
   end subroutine do_timestep
   
