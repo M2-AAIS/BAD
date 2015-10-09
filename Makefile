@@ -21,3 +21,6 @@ mod_constants.o: mod_constants.f90
 
 clean:
 	\rm -rf *.o $(OUT)
+
+run: all
+	./$(OUT)
