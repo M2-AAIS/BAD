@@ -6,7 +6,13 @@ module mod_constants
   integer, parameter, public :: n_iterations = 1000
 
   type parameters
-     real(kind = x_precision) :: M, Mdot, X, Y, alpha, rmax
+     real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
+     !M : Black hole Mass
+     !Mdot : acretion rate at rmax
+     !X : chemical composition
+     !mu : atomic mass
+     !alpha :viscosity parameter
+     !rmax : maximal radius of accretion disk
   end type parameters
 
   type state
