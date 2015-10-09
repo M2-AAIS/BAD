@@ -12,7 +12,7 @@ contains
     use mod_constants
     implicit none
     
-    character(len=*), intent(in) :: filename
+    character(len=*), intent(in)   :: filename
     type (parameters), intent(out) :: params
     
   end subroutine get_parameters
