@@ -20,7 +20,7 @@ mod_constants.o: mod_constants.f90
 	$(GC) $(CFLAGS) -c $^
 
 clean:
-	\rm -rf *.o $(OUT)
+	\rm -rf *.o $(OUT) *.mod
 
 run: all
 	./$(OUT)
