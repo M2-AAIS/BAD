@@ -24,3 +24,5 @@ clean:
 
 run: all
 	./$(OUT)
+
+rerun: clean all run
