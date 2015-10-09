@@ -8,23 +8,19 @@ module mod_read_parameters
   
 contains
   
-  subroutine get_parameters (M,r_max,M_0_dot,alpha,X,mu)
+  subroutine get_parameters (initial_param)
     use mod_constants
     !read parameter in the input file : ./input_parameter.dat
+
     implicit none
     
 
-       !function parameters
-    real(kind=x_precision),intent(out)::M !Black hole mass
-    real(kind=x_precision),intent(out)::r_max !maximal radius of black hole
-    real(kind=x_precision),intent(out)::M_0_dot !accretion rate at r_max
-    real(kind=x_precision),intent(out)::alpha !viscosity parameter
-    real(kind=x_precision),intent(out)::X !chemical composition
-    real(kind=x_precision),intent(out)::mu !atomic mass
-
+    !function parameters
+    type(parameters),intent(out)::initial_param !contains the initial parameters of Black hole accretion disk (see mod_constants.f90 for details)
+    
     !internal variable
-    real(kind=x_precision)::Y,Z !chemical composition
-    integer(kind=4)::ios !i/o variable
+    real(kind=x_precision)::Y,Z !chemical composition : x+y+z = 1 
+    integer(kind=4)::ios !i/o variable test 
     character(len=50)::bla !string reading variable
 
     !Opening file
@@ -35,16 +31,16 @@ contains
 
     
     !reading parameter
-    read(11,fmt=*)bla,M
-    read(11,fmt=*)bla,r_max
-    read(11,fmt=*)bla,M_0_dot
-    read(11,fmt=*)bla,alpha
-    read(11,fmt=*)bla,X
+    read(11,fmt=*)bla,initial_param%M
+    read(11,fmt=*)bla,initial_param%rmax
+    read(11,fmt=*)bla,initial_param%Mdot
+    read(11,fmt=*)bla,initial_param%alpha
+    read(11,fmt=*)bla,initial_param%X
     read(11,fmt=*)bla,Y
 
     !processing mu
-    Z=1.D0-X-Y
-    mu=1.D0/(2.D0*X + 3.D0*Y/4.D0 + Z/2.D0)
+    Z=1.D0-initial_param%X-Y
+    initial_param%mu=1.D0/(2.D0*initial_param%X + 3.D0*Y/4.D0 + Z/2.D0)
     
     
 
