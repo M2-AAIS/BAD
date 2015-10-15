@@ -7,16 +7,28 @@ module mod_constants
 
   type parameters
      real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
-     !M : Black hole Mass
-     !Mdot : acretion rate at rmax
-     !X : chemical composition
-     !mu : atomic mass
-     !alpha :viscosity parameter
-     !rmax : maximal radius of accretion disk
+     !M     : Black hole Mass
+     !Mdot  : Acretion rate at rmax
+     !X     : Chemical composition
+     !mu    : Atomic mass
+     !alpha : Viscosity parameter
+     !rmax  : Maximal radius of accretion disk
   end type parameters
 
   type state
-     real(kind = x_precision) :: Omega, x, S, nu, v, T, L
+     real(kind = x_precision) :: Omega, x, nu, v, T, P, beta, cs, H, rho, sigma, Fz
+     !Omega : Angular velocity
+     !x     : Space variable
+     !nu    : Viscosity
+     !v     : Local speed accretion
+     !T     : Temperature
+     !P     : Pression
+     !beta  : Pressure indicator
+     !cs    : Speed of sound
+     !H     : Half height of disk
+     !rho   : Volume density
+     !sigma : Surface density
+     !Fz    : Radiative Flux
   end type state
   
 contains
