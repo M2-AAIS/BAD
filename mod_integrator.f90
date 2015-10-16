@@ -16,11 +16,11 @@ contains
     type (state), intent(in), dimension(:)  :: state_in
     type (state), intent(out), dimension(:) :: state_out
 
-    real(kind = x_precision)                :: timestep
+    real(kind = x_precision)                :: dt
     integer                                 :: i
 
     ! Get the timestep
-    call timestep(state_in, timestep)
+    call timestep(state_in, dt)
     
     ! Do the integration
     do i = 0, n_iterations

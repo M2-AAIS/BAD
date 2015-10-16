@@ -8,9 +8,10 @@ module mod_timestep
   
 contains
   
-  subroutine timestep (state_in, timestep)
+  subroutine timestep (state_in, dt)
     use mod_constants
     implicit none
+    
     type (state), intent(in), dimension(:)  :: state_in
     real(kind = x_precision)                :: dt    
     
