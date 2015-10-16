@@ -10,6 +10,7 @@ module mod_constants
   real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0) 
   real(kind = x_precision), parameter, public :: stefan = 5.66956e-5 !stefan cst in cgs
   real(kind = x_precision), parameter, public :: M_sol = 1.98855d33 !mass of the sun in cgs
+
   type parameters
      real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
      !M     : Black hole Mass
