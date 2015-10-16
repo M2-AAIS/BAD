@@ -2,7 +2,7 @@
 
 module mod_constants
   integer, parameter, public :: x_precision = selected_real_kind(15)
-  integer, parameter, public :: n_cell = 100
+  integer, parameter, public :: n_cell = 256
   integer, parameter, public :: n_iterations = 1000
 
   real(kind = x_precision), parameter, public :: G = 6.67384e-8
