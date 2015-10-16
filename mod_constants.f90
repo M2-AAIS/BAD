@@ -22,7 +22,7 @@ module mod_constants
      !nu    : Viscosity
      !v     : Local speed accretion
      !T     : Temperature
-     !P     : Pression
+     !P     : Pressure
      !beta  : Pressure indicator
      !cs    : Speed of sound
      !H     : Half height of disk
