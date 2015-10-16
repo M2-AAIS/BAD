@@ -12,9 +12,7 @@ contains
     use mod_constants
     implicit none
     type (state), intent(in), dimension(:)  :: state_in
-    real(kind = x_precision)                :: timestep
-
-    
+    real(kind = x_precision)                :: dt    
     
   end subroutine timestep
   
