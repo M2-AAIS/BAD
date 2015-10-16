@@ -16,7 +16,7 @@ contains
     type (state), intent(in), dimension(:)        :: state_in
     type (state), intent(out), dimension(:)       :: state_out
 
-    real(kind = x_precision)                      :: dt, dx2
+    real(kind = x_precision)                      :: dt, dx2, dx = 0
     integer                                       :: i, info
 
     real(kind = x_precision), dimension(n_cell)   :: S, T, nu, diag
@@ -34,7 +34,7 @@ contains
 
        diag(i) = 1/dt + 2/dx2 * (state_in(i)%nu / state_in(i)%x)
        
-       if (i < n_step) then
+       if (i < n_cell) then
           diag_up(i) = -1/dx2 * state_in(i+1)%nu / state_in(i)%x**2
        else ! i = n_cell
           diag(i)       = state_in(i)%nu
@@ -52,7 +52,7 @@ contains
     call dgtsv(n_cell, 1, diag_low, diag, diag_up, S, n_cell, info)
     
     if (info /= 0) then
-       print *, * 'Ooops, something bad happened!'
+       print *, "Ooops, something bad happened!"
     end if
 
     ! Solve for T

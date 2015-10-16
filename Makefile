@@ -1,6 +1,6 @@
 GC=gfortran
 GFLAGS=-Wall -Wextra -pedantic -std=f2008
-CFLAGS=
+CFLAGS=-llapack
 OUT=simul
 
 
