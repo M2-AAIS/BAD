@@ -43,11 +43,11 @@ contains
        
        state_in%v = state_in%v / (omega_max * rs)
 
-       state_in%sigma = state_in%sigma * 2 * pi * rs * rs * omega_max / para%Mdot
+      ! state_in%sigma = state_in%sigma * 2 * pi * rs * rs * omega_max / para%Mdot
 
        state_in%x = sqrt( state_in%x / rs )
 
-       state_in%s = state_in%sigma * state_in%x
+      ! state_in%s = state_in%sigma * state_in%x
 
        state_in%m_dot = state_in%v * state_in%s * state_in%x
 
@@ -56,12 +56,7 @@ contains
        state_in%rho = state_in%rho * rs * 2 * pi * rs * rs * omega_max / para%Mdot
 
        state_in%nu = 3.0/4.0 * state_in%nu / omega_max / rs /rs
-
        
- 
-
-
-
        state_in%M_dot = state_in%M_dot       
        print*,para%m
      

@@ -22,7 +22,6 @@ module mod_constants
 
   type state
      real(kind = x_precision) :: Omega, x, nu, v, T, P, beta, cs, H, rho, S, Fz, M_dot
-
      !Omega : Angular velocity
      !x     : Space variable
      !nu    : Viscosity
@@ -38,9 +37,6 @@ module mod_constants
      !M_dot : acretion rate
      !s     : S
   end type state
-
-
-  
 contains
     
 end module mod_constants
