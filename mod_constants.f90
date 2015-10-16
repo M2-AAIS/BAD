@@ -5,11 +5,11 @@ module mod_constants
   integer, parameter, public :: n_cell = 256
   integer, parameter, public :: n_iterations = 1000
 
-  real(kind = x_precision), parameter, public :: G = 6.67384e-8
-  real(kind = x_precision), parameter, public :: c = 2.99792458e10
-  real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0)
-  real(kind = x_precision), parameter, public :: stefan = 5.66956e-5
-
+  real(kind = x_precision), parameter, public :: G = 6.67384e-8 !gravitationnal cst in cgs
+  real(kind = x_precision), parameter, public :: c = 2.99792458e10 !speed of light in cgs
+  real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0) 
+  real(kind = x_precision), parameter, public :: stefan = 5.66956e-5 !stefan cst in cgs
+  real(kind = x_precision), parameter, public :: M_sol = 1.98855d33 !mass of the sun in cgs
   type parameters
      real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
      !M     : Black hole Mass
