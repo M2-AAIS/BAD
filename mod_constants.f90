@@ -6,7 +6,7 @@ module mod_constants
   integer, parameter, public :: n_iterations = 1000
 
   real(kind = x_precision), parameter, public :: G = 6.67384e-8
-  real(kind = x_precision), parameter, public :: c = 2.99792458e10
+  real(kind = x_precision), parameter, public :: c = 2.99792458e10 
   real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0)
   real(kind = x_precision), parameter, public :: stefan = 5.66956e-5
 
