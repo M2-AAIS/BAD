@@ -1,15 +1,14 @@
 ! Module that reads the parameter out of a file
 
 module mod_read_parameters
-  
+  use mod_constants  
   private
 
-  public :: get_parameters
+  public :: get_parameters, process_dx
   
 contains
   
   subroutine get_parameters (initial_param)
-    use mod_constants
     !read parameter in the input file : ./input_parameter.dat
 
     implicit none
@@ -39,15 +38,24 @@ contains
     read(11,fmt=*)bla,Y
 
     !processing mu
-    Z=1.D0-initial_param%X-Y
-    initial_param%mu=1_x_precision/(2_x_precision*initial_param%X + 3_x_precision*Y/4_x_precision + Z/2_x_precision)
-    
-    
-
+    Z=1._x_precision-initial_param%X-Y
+    initial_param%mu=1._x_precision/(2._x_precision*initial_param%X + 3._x_precision*Y/4._x_precision + Z/2._x_precision)
     
 
     close(11)
     
   end subroutine get_parameters
+
+
+
+  subroutine process_dx(dx)
+  !process the space step
+
+  !function parameter
+  real(kind=x_precision),intent(out)::dx !space step
+  
+  dx=(10._x_precision-sqrt(3._x_precision))/n_cell
+
+  end subroutine process_dx
   
 end module mod_read_parameters

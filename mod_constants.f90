@@ -5,15 +5,14 @@ module mod_constants
   integer, parameter, public :: n_cell = 256
   integer, parameter, public :: n_iterations = 1000
 
-  !Unit of constants : cgs
-  real(kind = x_precision), parameter, public :: G = 6.67384e-8 
-  real(kind = x_precision), parameter, public :: c = 2.99792458e10
-  real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0)
-  real(kind = x_precision), parameter, public :: stefan = 5.66956e-5
-  real(kind = x_precision), parameter, public :: kb_mp = 8.31434e7   !kb/mp
-  real(kind = x_precision), parameter, public :: a = 7.564e-15
+  real(kind = x_precision), parameter, public :: G = 6.67384e-8 !gravitationnal cst in cgs
+  real(kind = x_precision), parameter, public :: c = 2.99792458e10 !speed of light in cgs
+  real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0) 
+  real(kind = x_precision), parameter, public :: stefan = 5.66956e-5 !stefan cst in cgs
+  real(kind = x_precision), parameter, public :: M_sol = 1.98855d33 !mass of the sun in cgs
+  real(kind = x_precision), parameter, public :: a = 7.564d-15 !constant of radiation in cgs
+  real(kind = x_precision), parameter, public :: kmp = 8.31434d7 !ratio of the boltzmann cst over the proton massin cgs
   real(kind = x_precision), parameter, public :: mu = 0.62
-    
 
   type parameters
      real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax

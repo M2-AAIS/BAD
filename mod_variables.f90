@@ -77,7 +77,7 @@ contains
     state_0%nu = 4.0/3.0 * omega_max * rs * rs
     state_0%M_dot = para%Mdot
     state_0%P_rad = 1.0/3.0 * a * (state_0%T **4)
-    state_0%P_gaz = state_0%rho * kb_mp * state_0%T / mu
+    state_0%P_gaz = state_0%rho * kmp * state_0%T / mu
   
   end subroutine init_variable_0
   
