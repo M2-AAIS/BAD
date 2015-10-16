@@ -5,6 +5,11 @@ module mod_constants
   integer, parameter, public :: n_cell = 100
   integer, parameter, public :: n_iterations = 1000
 
+  real(kind = x_precision), parameter, public :: G = 6.67384e-8
+  real(kind = x_precision), parameter, public :: c = 2.99792458e10
+  real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0)
+  real(kind = x_precision), parameter, public :: stefan = 5.66956e-5
+
   type parameters
      real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
      !M     : Black hole Mass
@@ -16,20 +21,24 @@ module mod_constants
   end type parameters
 
   type state
-     real(kind = x_precision) :: Omega, x, nu, v, T, P, beta, cs, H, rho, sigma, Fz
+     real(kind = x_precision) :: Omega, x, nu, v, T, P, beta, cs, H, rho, sigma, Fz, M_dot, s
      !Omega : Angular velocity
      !x     : Space variable
      !nu    : Viscosity
      !v     : Local speed accretion
      !T     : Temperature
-     !P     : Pression
+     !P     : Pressure
      !beta  : Pressure indicator
      !cs    : Speed of sound
      !H     : Half height of disk
      !rho   : Volume density
      !sigma : Surface density
      !Fz    : Radiative Flux
+     !M_dot : acretion rate
+     !s     : S
   end type state
+
+
   
 contains
     

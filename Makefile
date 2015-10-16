@@ -4,7 +4,7 @@ CFLAGS=
 OUT=simul
 
 
-all: mod_constants.o mod_variables.o mod_output.o mod_read_parameters.o mod_timestep.o mod_integrator.o main.o 
+all: mod_constants.o mod_read_parameters.o mod_variables.o mod_output.o mod_timestep.o mod_integrator.o main.o 
 	$(GC) $(CFLAGS) $^ -o $(OUT)
 
 main.o: main.f90
