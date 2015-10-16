@@ -16,7 +16,7 @@ module mod_constants
   end type parameters
 
   type state
-     real(kind = x_precision) :: Omega, x, nu, v, T, P, beta, cs, H, rho, sigma, Fz
+     real(kind = x_precision) :: Omega, x, nu, v, T, P, beta, cs, H, rho, S, Fz
      !Omega : Angular velocity
      !x     : Space variable
      !nu    : Viscosity
@@ -27,7 +27,7 @@ module mod_constants
      !cs    : Speed of sound
      !H     : Half height of disk
      !rho   : Volume density
-     !sigma : Surface density
+     !S     : Variable of density
      !Fz    : Radiative Flux
   end type state
   
