@@ -26,55 +26,56 @@ contains
 	
     select case(mode)
     case(0)
-       state_in%H = state_in%H / state_0%H
-       state_in%v = state_in%v / state_0%v
-       state_in%cs = state_in%cs / state_0%cs
-       state_in%S = state_in%S / state_0%S
-       state_in%T = state_in%T / state_0%T
-       state_in%rho = state_in%rho / state_0%rho
-       state_in%nu = state_in%nu / state_0%nu
+       state_in%H     = state_in%H / state_0%H
+       state_in%v     = state_in%v / state_0%v
+       state_in%cs    = state_in%cs / state_0%cs
+       state_in%S     = state_in%S / state_0%S
+       state_in%T     = state_in%T / state_0%T
+       state_in%rho   = state_in%rho / state_0%rho
+       state_in%nu    = state_in%nu / state_0%nu
        state_in%M_dot = state_in%M_dot / state_0%M_dot
        state_in%P_rad = state_in%P_rad / state_0%P_rad
        state_in%P_gaz = state_in%P_gaz / state_0%P_gaz
     case(1)
-       state_in%H = state_in%H * state_0%H
-       state_in%v = state_in%v * state_0%v
-       state_in%cs = state_in%cs * state_0%cs
-       state_in%S = state_in%S * state_0%S
-       state_in%T = state_in%T * state_0%T
-       state_in%rho = state_in%rho * state_0%rho
-       state_in%nu = state_in%nu * state_0%nu
+       state_in%H     = state_in%H * state_0%H
+       state_in%v     = state_in%v * state_0%v
+       state_in%cs    = state_in%cs * state_0%cs
+       state_in%S     = state_in%S * state_0%S
+       state_in%T     = state_in%T * state_0%T
+       state_in%rho   = state_in%rho * state_0%rho
+       state_in%nu    = state_in%nu * state_0%nu
        state_in%M_dot = state_in%M_dot * state_0%M_dot
        state_in%P_rad = state_in%P_rad * state_0%P_rad
        state_in%P_gaz = state_in%P_gaz * state_0%P_gaz
     case default
-       write(*,*)'Enter 0 to adim and 1 to dim'
+       write(*,*) 'Enter 0 to adim and 1 to dim'
     end select
   end subroutine dim_adim
 
   subroutine init_variable_0(state_0)
     !Compute the initial adimention parameters
-    real(kind = x_precision)         :: omega_max
-    real(kind = x_precision)         :: rs
+    real(kind = x_precision)         :: omega_max, rs, c2
     type(parameters)                 :: para
     type(adim_state), intent(inout)  :: state_0
 
+    c2 = c**2
+    
     call get_parameters(para)
-    rs = 2*G*para%M/c/c
-    omega_max = sqrt( G*para%M/(3*rs)/(3*rs)/(3*rs) )
+    rs            = 2*G*para%M/c2
+    omega_max     = sqrt( G*para%M/(3*rs)**3 )
 
-    state_0%x = sqrt(rs)
-    state_0%H = rs
+    state_0%x     = sqrt(rs)
+    state_0%H     = rs
     state_0%omega = omega_max
-    state_0%v = omega_max * rs
-    state_0%cs = state_0%v
-    state_0%S = para%Mdot / (2 * pi * rs * rs * omega_max)
-    state_0%T = (1.0/sqrt(27.0) * 1.0/12.0 * para%Mdot * c * c &
+    state_0%v     = omega_max * rs
+    state_0%cs    = state_0%v
+    state_0%S     = para%Mdot / (2 * pi * rs**2 * omega_max)
+    state_0%T     = (1.0/sqrt(27.0) * 1.0/12.0 * para%Mdot * c2 &
          / ( 4 * pi * rs * rs * stefan ))**0.25_x_precision
-    state_0%rho = state_0%S / rs
-    state_0%nu = 4.0/3.0 * omega_max * rs * rs
+    state_0%rho   = state_0%S / rs
+    state_0%nu    = 4.0/3.0 * omega_max * rs**2
     state_0%M_dot = para%Mdot
-    state_0%P_rad = 1.0/3.0 * a * (state_0%T **4)
+    state_0%P_rad = 1.0/3.0 * a * (state_0%T**4)
     state_0%P_gaz = state_0%rho * kmp * state_0%T / mu
   
   end subroutine init_variable_0
