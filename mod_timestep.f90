@@ -1,7 +1,9 @@
 ! Module that gives the timestep
 
 module mod_timestep
-  
+  use mod_constants
+  implicit none
+
   private
 
   public :: timestep
@@ -9,11 +11,10 @@ module mod_timestep
 contains
   
   subroutine timestep (state_in, dt)
-    use mod_constants
     implicit none
     
-    type (state), intent(in), dimension(:)  :: state_in
-    real(kind = x_precision)                :: dt    
+    type (state), intent(in)              :: state_in
+    real(kind = x_precision), intent(out) :: dt    
     
   end subroutine timestep
   

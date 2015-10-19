@@ -1,7 +1,10 @@
 ! Module that provides a way to dump the state
 
 module mod_output
-  
+  use mod_constants
+  implicit none
+
+
   private
 
   public :: snapshot
@@ -9,7 +12,6 @@ module mod_output
 contains
   
   subroutine snapshot (state_in, filename)
-    use mod_constants
     implicit none
     
     type (state), intent(in), dimension(:)  :: state_in

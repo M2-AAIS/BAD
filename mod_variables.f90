@@ -1,6 +1,9 @@
 ! Module that computes the variables
-module mod_variables
-  
+module mod_variables 
+  use mod_constants
+  use mod_read_parameters
+  implicit none 
+
   private
 
   public :: compute_variables, dim_adim
@@ -8,7 +11,6 @@ module mod_variables
 contains
   
   subroutine compute_variables (T, Sigma, state_out)
-    use mod_constants
     implicit none
     real (kind = x_precision), dimension(:) :: T, Sigma
     type (state), intent(in), dimension(:)  :: state_out
@@ -16,8 +18,6 @@ contains
   end subroutine compute_variables
 
   subroutine dim_adim(mode,state_0,state_in)
-    use mod_constants
-    use mod_read_parameters
     implicit none
     !select 0 or 1 to adimension or dimension your state 
     integer         , intent(in)                 :: mode
@@ -54,8 +54,6 @@ contains
 
   subroutine init_variable_0(state_0)
     !Compute the initial adimention parameters
-    use mod_constants
-    use mod_read_parameters
     real(kind = x_precision)         :: omega_max
     real(kind = x_precision)         :: rs
     type(parameters)                 :: para

@@ -1,6 +1,8 @@
 ! Module that exposes the integrator that transforms the state_in to thet state_out
 
 module mod_constants
+  implicit none
+
   integer, parameter, public :: x_precision = selected_real_kind(15)
   integer, parameter, public :: n_cell = 256
   integer, parameter, public :: n_iterations = 1000

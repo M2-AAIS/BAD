@@ -1,7 +1,8 @@
 ! Module that reads the parameter out of a file
 
 module mod_read_parameters
-  use mod_constants  
+  use mod_constants
+  implicit none
   private
 
   public :: get_parameters, process_dx
