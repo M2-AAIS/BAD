@@ -30,7 +30,7 @@ contains
     kappa_e = 0.2 * (1 + para%X)
     !-------------Compute trinome coeff for H----------------
     a1 = ((Omega**2) * (state_0%Omega**2) * S * state_0%S) / (2.0 * x)
-    b1 = - (a * (T**4) * (state_0%T**4)) / (3.0)
+    b1 = - (cst_rad * (T**4) * (state_0%T**4)) / (3.0)
     c1 = - (kmp * T * S * state_0%S * state_0%T) / (2.0 * mu * x)
     Delta = b1**2 - (4.0 * a1 * c1)
     !--------------------------------------------------------
@@ -55,7 +55,7 @@ contains
        if (i .eq. n_cell) then
           state_out%M_dot(i) = para%Mdot
        else
-          state_out%M_dot(i) = state_out%v(i) * S(i) * x(i)
+          state_out%M_dot(i) = - state_out%v(i) * S(i) * x(i)
        endif
        !--------------Compute varaibles for Fz---------------
        kappa_ff(i) = 6.13e22 * state_0%rho * state_out%rho(i) * &
@@ -67,7 +67,7 @@ contains
             * sqrt((state_0%T * T(i))) 
 
        if (tau(i) .ge. 1.0) then
-          state_out%Fz(i) = (2.0 * a * c * (state_0%T * state_out%T(i))**4) / &
+          state_out%Fz(i) = (2.0 * cst_rad * c * (state_0%T * state_out%T(i))**4) / &
                (3.0 * (kappa_ff(i) * kappa_e) * (S(i)/x(i)) * state_0%S)
        else
           state_out%Fz(i) = epsil(i) * state_0%H * state_out%H(i)
@@ -139,7 +139,7 @@ contains
     state_0%rho   = state_0%S / (2.0*rs)
     
     state_0%M_dot = para%Mdot
-    state_0%P_rad = 1.0/3.0 * a * (state_0%T**4)
+    state_0%P_rad = 1.0/3.0 * cst_rad * (state_0%T**4)
     state_0%P_gaz = state_0%rho * kmp * state_0%T / mu
   end subroutine init_variable_0
   

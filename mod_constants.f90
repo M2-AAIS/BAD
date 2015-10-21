@@ -12,7 +12,7 @@ module mod_constants
   real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0) 
   real(kind = x_precision), parameter, public :: stefan = 5.66956e-5 !stefan cst in cgs
   real(kind = x_precision), parameter, public :: M_sol = 1.98855d33 !mass of the sun in cgs
-  real(kind = x_precision), parameter, public :: a = 7.564d-15 !constant of radiation in cgs
+  real(kind = x_precision), parameter, public :: cst_rad = 7.564d-15 !constant of radiation in cgs
   real(kind = x_precision), parameter, public :: kmp = 8.31434d7 !ratio of the boltzmann cst over the proton massin cgs
   real(kind = x_precision), parameter, public :: mu = 0.62
 
