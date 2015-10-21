@@ -27,15 +27,15 @@ contains
     type(state),               intent(out)                    :: state_out
 
     call get_parameters(para)
-    kappa_e = 0.2 * (1 + para%X)
+    kappa_e = 0.2_x_precision * (1._x_precision + para%X)
     !-------------Compute trinome coeff for H----------------
-    a1 = ((Omega**2) * (state_0%Omega_0**2) * S_in * state_0%S_0) / (2.0 * x)
-    b1 = - (cst_rad * (T_in**4) * (state_0%T_0**4)) / (3.0)
-    c1 = - (kmp * T_in * S_in * state_0%S_0 * state_0%T_0) / (2.0 * mu * x)
-    Delta = b1**2 - (4.0 * a1 * c1)
+    a1 = ((Omega**2) * (state_0%Omega_0**2) * S_in * state_0%S_0) / (2._x_precision * x)
+    b1 = - (cst_rad * (T_in**4) * (state_0%T_0**4)) / (3._x_precision)
+    c1 = - (kmp * T_in * S_in * state_0%S_0 * state_0%T_0) / (2._x_precision * mu * x)
+    Delta = b1**2 - (4._x_precision * a1 * c1)
     !--------------------------------------------------------
     do i=1,n_cell
-       state_out%H(i)     = - 0.5d0 * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) 
+       state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) 
        state_out%P_rad(i) = T_in(i)**4
        state_out%cs(i)    = Omega(i) * state_out%H(i)
        state_out%rho(i)   = S_in(i) / (state_out%H(i) * x(i))
@@ -47,25 +47,25 @@ contains
             / ( state_out%beta(i) * (gammag - 1._x_precision))
        !------------limit condition to compute v-------------
        if (i .eq. 1) then
-          state_out%v(i)  = 0.
+          state_out%v(i)  = 0._x_precision
        else if (i .eq. n_cell) then
-          state_out%v(i)  = - 1.0 / S_in(i) / x(i) 
+          state_out%v(i)  = - 1._x_precision / S_in(i) / x(i) 
        else
-          state_out%v(i)  = - 1.0 / S_in(i) / x(i) * ( ((state_out%nu(i) * S_in(i+1)) &
+          state_out%v(i)  = - 1._x_precision / S_in(i) / x(i) * ( ((state_out%nu(i) * S_in(i+1)) &
                - (state_out%nu(i-1) * S_in(i-1))) / (x(i+1) - x(i-1)) )
        endif
        state_out%M_dot(i) = - state_out%v(i) * S_in(i) * x(i)
       !--------------Compute varaibles for Fz---------------
-       kappa_ff(i) = 6.13e22 * state_0%rho_0 * state_out%rho(i) * &
-            (state_0%T_0 * T_in(i))**(-7.0/2.0) 
-       tau(i)      = 0.5 * sqrt(0.2 * (1.0 * para%X) * 6.13e22 * state_0%rho_0 &
-            * state_out%rho(i) * (state_0%T_0 * T_in(i))**(-7.0/2.0)) * state_0%S_0 &
+       kappa_ff(i) = 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
+            (state_0%T_0 * T_in(i))**(-7._x_precision/2._x_precision) 
+       tau(i)      = 0.5_x_precision * sqrt(0.2_x_precision * (1._x_precision * para%X) * 6.13e22 * state_0%rho_0 &
+            * state_out%rho(i) * (state_0%T_0 * T_in(i))**(-7._x_precision/2._x_precision)) * state_0%S_0 &
             * S_in(i) / x(i)
-       epsil(i)    = 6.22e20 * (state_0%rho_0 * state_out%rho(i))**2  &
+       epsil(i)    = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2  &
             * sqrt((state_0%T_0 * T_in(i))) 
 
        if (tau(i) .ge. 1.0) then
-          state_out%Fz(i) = (4.0 * c * c * T_in(i)**4) / (27.0 * sqrt(3.0) * &
+          state_out%Fz(i) = (4._x_precision * c * c * T_in(i)**4) / (27._x_precision * sqrt(3.0) * &
                (kappa_ff(i) + kappa_e) * (S_in(i)/x(i) * state_0%S_0)) 
        else
           state_out%Fz(i) = epsil(i) * state_0%H_0 * state_out%H(i)
@@ -121,25 +121,25 @@ contains
     c2 = c**2
     
     call get_parameters(para)
-    rs            = 2*G*para%M/c2
+    rs            = 2._x_precision*G*para%M/c2
     omega_max     = sqrt( G*para%M/(rs)**3 )
     
-    state_0%temps_0 = 2.0 / omega_max
+    state_0%temps_0 = 2._x_precision / omega_max
     state_0%x_0     = sqrt(rs)
     state_0%H_0     = rs
-    state_0%nu_0    = 2.0/3.0 * omega_max * rs**2
+    state_0%nu_0    = 2._x_precision/3._x_precision * omega_max * rs**2
     state_0%omega_0 = omega_max
     state_0%v_0     = omega_max * rs
     state_0%cs_0    = state_0%v_0
-    state_0%S_0     = para%Mdot / (3.0 * pi * state_0%nu_0 )
-    state_0%T_0     = (1.0/sqrt(27.0) * 1.0/48.0 * para%Mdot * c2 &
+    state_0%S_0     = para%Mdot / (3._x_precision * pi * state_0%nu_0 )
+    state_0%T_0     = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * para%Mdot * c2 &
          / ( pi * rs * rs * stefan ))**0.25_x_precision
-    state_0%rho_0   = state_0%S_0 / (2.0*rs)
+    state_0%rho_0   = state_0%S_0 / (2._x_precision*rs)
     
     state_0%M_dot_0 = para%Mdot
-    state_0%P_rad_0 = 1.0/3.0 * cst_rad * (state_0%T_0**4)
+    state_0%P_rad_0 = 1._x_precision/3._x_precision * cst_rad * (state_0%T_0**4)
     state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu
-    state_0%Fz_0    = state_0%S_0 / 2.0 / state_0%temps_0
+    state_0%Fz_0    = state_0%S_0 / 2._x_precision / state_0%temps_0
   end subroutine init_variable_0
   
 end module mod_variables
