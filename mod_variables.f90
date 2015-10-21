@@ -126,19 +126,19 @@ contains
     state_0%omega_0 = sqrt( G*para%M/(rs)**3 )
     state_0%temps_0 = 2._x_precision / state_0%omega_0
     state_0%x_0     = sqrt(rs)
-    state_0%H_0     = rs
     state_0%nu_0    = 2._x_precision/3._x_precision * state_0%omega_0 * rs**2
     state_0%v_0     = state_0%omega_0 * rs
     state_0%cs_0    = state_0%v_0
     state_0%S_0     = para%Mdot / (3._x_precision * pi * state_0%nu_0 )
+    state_0%H_0     = rs
+    state_0%M_dot_0 = para%Mdot
+    state_0%rho_0   = state_0%S_0 / (2._x_precision*rs)
     state_0%T_0     = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * para%Mdot * c2 &
          / ( pi * rs * rs * stefan ))**0.25_x_precision
-    state_0%rho_0   = state_0%S_0 / (2._x_precision*rs)
-    
-    state_0%M_dot_0 = para%Mdot
-    state_0%P_rad_0 = 1._x_precision/3._x_precision * cst_rad * (state_0%T_0**4)
-    state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu
     state_0%Fz_0    = state_0%S_0 / 2._x_precision / state_0%temps_0
+    state_0%Cv_0    = 1._x_precision / state_0%T_0
+    state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu
+    state_0%P_rad_0 = 1._x_precision/3._x_precision * cst_rad * (state_0%T_0**4)
   end subroutine init_variable_0
   
 end module mod_variables
