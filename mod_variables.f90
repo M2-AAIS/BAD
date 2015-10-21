@@ -115,21 +115,20 @@ contains
     use mod_constants
     use mod_read_parameters
     !Compute the initial adimention parameters
-    real(kind = x_precision)         :: omega_max, rs, c2
+    real(kind = x_precision)         :: rs, c2
     type(parameters)                 :: para
 
     c2 = c**2
     
     call get_parameters(para)
     rs            = 2._x_precision*G*para%M/c2
-    omega_max     = sqrt( G*para%M/(rs)**3 )
     
-    state_0%temps_0 = 2._x_precision / omega_max
+    state_0%omega_0 = sqrt( G*para%M/(rs)**3 )
+    state_0%temps_0 = 2._x_precision / state_0%omega_0
     state_0%x_0     = sqrt(rs)
     state_0%H_0     = rs
-    state_0%nu_0    = 2._x_precision/3._x_precision * omega_max * rs**2
-    state_0%omega_0 = omega_max
-    state_0%v_0     = omega_max * rs
+    state_0%nu_0    = 2._x_precision/3._x_precision * state_0%omega_0 * rs**2
+    state_0%v_0     = state_0%omega_0 * rs
     state_0%cs_0    = state_0%v_0
     state_0%S_0     = para%Mdot / (3._x_precision * pi * state_0%nu_0 )
     state_0%T_0     = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * para%Mdot * c2 &
