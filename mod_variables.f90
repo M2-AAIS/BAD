@@ -29,9 +29,9 @@ contains
     call get_parameters(para)
     kappa_e = 0.2 * (1 + para%X)
     !-------------Compute trinome coeff for H----------------
-    a1 = ((Omega**2) * (state_0%Omega**2) * S * state_0%S) / (2.0 * x)
-    b1 = - (cst_rad * (T**4) * (state_0%T**4)) / (3.0)
-    c1 = - (kmp * T * S * state_0%S * state_0%T) / (2.0 * mu * x)
+    a1 = ((Omega**2) * (state_0%Omega_0**2) * S * state_0%S_0) / (2.0 * x)
+    b1 = - (cst_rad * (T**4) * (state_0%T_0**4)) / (3.0)
+    c1 = - (kmp * T * S * state_0%S_0 * state_0%T_0) / (2.0 * mu * x)
     Delta = b1**2 - (4.0 * a1 * c1)
     !--------------------------------------------------------
     do i=1,n_cell
@@ -46,7 +46,7 @@ contains
        if (i .eq. 1) then
           state_out%v(i)  = 0.
        else if (i .eq. n_cell) then
-          state_out%v(i)  = 2.0 / S(i) / x(i) 
+          state_out%v(i)  = - 1.0 / S(i) / x(i) 
        else
           state_out%v(i)  = - 1.0 / S(i) / x(i) * ( ((state_out%nu(i) * S(i)) &
                - (state_out%nu(i-1) * S(i-1))) / (x(i) - x(i-1)) )
@@ -58,19 +58,19 @@ contains
           state_out%M_dot(i) = - state_out%v(i) * S(i) * x(i)
        endif
        !--------------Compute varaibles for Fz---------------
-       kappa_ff(i) = 6.13e22 * state_0%rho * state_out%rho(i) * &
-            (state_0%T * T(i))**(-7.0/2.0) 
-       tau(i)      = 0.5 * sqrt(0.2 * (1.0 * para%X) * 6.13e22 * state_0%rho &
-            * state_out%rho(i) * (state_0%T * T(i))**(-7.0/2.0)) * state_0%S &
+       kappa_ff(i) = 6.13e22 * state_0%rho_0 * state_out%rho(i) * &
+            (state_0%T_0 * T(i))**(-7.0/2.0) 
+       tau(i)      = 0.5 * sqrt(0.2 * (1.0 * para%X) * 6.13e22 * state_0%rho_0 &
+            * state_out%rho(i) * (state_0%T_0 * T(i))**(-7.0/2.0)) * state_0%S_0 &
             * S(i) / x(i)
-       epsil(i)    = 6.22e20 * (state_0%rho * state_out%rho(i))**2  &
-            * sqrt((state_0%T * T(i))) 
+       epsil(i)    = 6.22e20 * (state_0%rho_0 * state_out%rho(i))**2  &
+            * sqrt((state_0%T_0 * T(i))) 
 
        if (tau(i) .ge. 1.0) then
-          state_out%Fz(i) = (2.0 * cst_rad * c * (state_0%T * state_out%T(i))**4) / &
-               (3.0 * (kappa_ff(i) * kappa_e) * (S(i)/x(i)) * state_0%S)
+          state_out%Fz(i) = (2.0 * cst_rad * c * (state_0%T_0 * state_out%T(i))**4) / &
+               (3.0 * (kappa_ff(i) * kappa_e) * (S(i)/x(i)) * state_0%S_0)
        else
-          state_out%Fz(i) = epsil(i) * state_0%H * state_out%H(i)
+          state_out%Fz(i) = epsil(i) * state_0%H_0 * state_out%H(i)
        endif
     enddo
   end subroutine compute_variables
@@ -86,27 +86,27 @@ contains
 	
     select case(mode)
     case(0)
-       state_in%H     = state_in%H / state_0%H
-       state_in%v     = state_in%v / state_0%v
-       state_in%cs    = state_in%cs / state_0%cs
-       state_in%S     = state_in%S / state_0%S
-       state_in%T     = state_in%T / state_0%T
-       state_in%rho   = state_in%rho / state_0%rho
-       state_in%nu    = state_in%nu / state_0%nu
-       state_in%M_dot = state_in%M_dot / state_0%M_dot
-       state_in%P_rad = state_in%P_rad / state_0%P_rad
-       state_in%P_gaz = state_in%P_gaz / state_0%P_gaz
+       state_in%H     = state_in%H / state_0%H_0
+       state_in%v     = state_in%v / state_0%v_0
+       state_in%cs    = state_in%cs / state_0%cs_0
+       state_in%S     = state_in%S / state_0%S_0
+       state_in%T     = state_in%T / state_0%T_0
+       state_in%rho   = state_in%rho / state_0%rho_0
+       state_in%nu    = state_in%nu / state_0%nu_0
+       state_in%M_dot = state_in%M_dot / state_0%M_dot_0
+       state_in%P_rad = state_in%P_rad / state_0%P_rad_0
+       state_in%P_gaz = state_in%P_gaz / state_0%P_gaz_0
     case(1)
-       state_in%H     = state_in%H * state_0%H
-       state_in%v     = state_in%v * state_0%v
-       state_in%cs    = state_in%cs * state_0%cs
-       state_in%S     = state_in%S * state_0%S
-       state_in%T     = state_in%T * state_0%T
-       state_in%rho   = state_in%rho * state_0%rho
-       state_in%nu    = state_in%nu * state_0%nu
-       state_in%M_dot = state_in%M_dot * state_0%M_dot
-       state_in%P_rad = state_in%P_rad * state_0%P_rad
-       state_in%P_gaz = state_in%P_gaz * state_0%P_gaz
+       state_in%H     = state_in%H * state_0%H_0
+       state_in%v     = state_in%v * state_0%v_0
+       state_in%cs    = state_in%cs * state_0%cs_0
+       state_in%S     = state_in%S * state_0%S_0
+       state_in%T     = state_in%T * state_0%T_0
+       state_in%rho   = state_in%rho * state_0%rho_0
+       state_in%nu    = state_in%nu * state_0%nu_0
+       state_in%M_dot = state_in%M_dot * state_0%M_dot_0
+       state_in%P_rad = state_in%P_rad * state_0%P_rad_0
+       state_in%P_gaz = state_in%P_gaz * state_0%P_gaz_0
     case default
        stop
     end select
@@ -126,21 +126,21 @@ contains
     rs            = 2*G*para%M/c2
     omega_max     = sqrt( G*para%M/(rs)**3 )
     
-    state_0%temps = 2.0 / omega_max
-    state_0%x     = sqrt(rs)
-    state_0%H     = rs
-    state_0%nu    = 2.0/3.0 * omega_max * rs**2
-    state_0%omega = omega_max
-    state_0%v     = omega_max * rs
-    state_0%cs    = state_0%v
-    state_0%S     = para%Mdot / (3.0 * pi * state_0%nu )
-    state_0%T     = (1.0/sqrt(27.0) * 1.0/48.0 * para%Mdot * c2 &
+    state_0%temps_0 = 2.0 / omega_max
+    state_0%x_0     = sqrt(rs)
+    state_0%H_0     = rs
+    state_0%nu_0    = 2.0/3.0 * omega_max * rs**2
+    state_0%omega_0 = omega_max
+    state_0%v_0     = omega_max * rs
+    state_0%cs_0    = state_0%v_0
+    state_0%S_0     = para%Mdot / (3.0 * pi * state_0%nu_0 )
+    state_0%T_0     = (1.0/sqrt(27.0) * 1.0/48.0 * para%Mdot * c2 &
          / ( pi * rs * rs * stefan ))**0.25_x_precision
-    state_0%rho   = state_0%S / (2.0*rs)
+    state_0%rho_0   = state_0%S_0 / (2.0*rs)
     
-    state_0%M_dot = para%Mdot
-    state_0%P_rad = 1.0/3.0 * cst_rad * (state_0%T**4)
-    state_0%P_gaz = state_0%rho * kmp * state_0%T / mu
+    state_0%M_dot_0 = para%Mdot
+    state_0%P_rad_0 = 1.0/3.0 * cst_rad * (state_0%T_0**4)
+    state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu
   end subroutine init_variable_0
   
 end module mod_variables
