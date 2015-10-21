@@ -15,6 +15,7 @@ module mod_constants
   real(kind = x_precision), parameter, public :: stefan = (c * cst_rad) / 4.0_x_precision !stefan cst in cgs
   real(kind = x_precision), parameter, public :: kmp = 8.3144598_x_precision !ratio of the boltzmann cst over the proton massin cgs
   real(kind = x_precision), parameter, public :: mu = 0.62_x_precision
+  real(kind = x_precision), parameter, public :: gammag = 5._x_precision / 3._x_precision 
 
   type parameters
      real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
@@ -27,7 +28,7 @@ module mod_constants
   end type parameters
 
   type state
-     real(kind = x_precision), dimension(n_cell) :: Omega, x, nu, v, T, P_rad, P_gaz, beta, cs, H, rho, S, Fz, M_dot
+     real(kind = x_precision), dimension(n_cell) :: Omega, x, nu, v, T, P_rad, P_gaz, beta, cs, H, rho, S, Fz, M_dot, Cv
      !Omega : Angular velocity
      !x     : Space variable
      !nu    : Viscosity
