@@ -47,7 +47,7 @@ module mod_constants
   end type state
 
   type adim_state
-     real(kind= x_precision) :: Omega_0, x_0, nu_0, v_0, T_0, P_rad_0, P_gaz_0, cs_0, H_0, rho_0, S_0, M_dot_0, temps_0, Fz_0
+     real(kind= x_precision) :: Omega_0, temps_0, x_0, nu_0, v_0, cs_0, S_0, H_0, M_dot_0, rho_0, T_0, Fz_0, Cv_0, P_gaz_0, P_rad_0
   end type adim_state
   
 contains
