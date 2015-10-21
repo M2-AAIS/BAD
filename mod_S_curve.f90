@@ -15,13 +15,13 @@ contains
     implicit none
     integer::i
     real(kind = x_precision)                               :: temp
-    real(kind = x_precision), parameter                    :: t_min = 0.0d0
-    real(kind = x_precision), parameter                    :: t_max = 10.0d0
-    integer,                  parameter                    :: nb_it = 10
+    real(kind = x_precision), parameter                    :: t_min = 1.0d7
+    real(kind = x_precision), parameter                    :: t_max = 1.0d10
+    integer,                  parameter                    :: nb_it = 3
     real(kind = x_precision)                               :: sigma = 0.0d0
-    real(kind = x_precision)                               :: Smin=0.0d0
-    real(kind = x_precision)                               :: Smax=10.0d0
-    real(kind = x_precision)                               :: eps=1.0d0
+    real(kind = x_precision)                               :: Smin = 1.0d7
+    real(kind = x_precision)                               :: Smax = 1.0d10
+    real(kind = x_precision)                               :: eps = 1.0d0
     real(kind = x_precision)                               :: omega = 0.0d0
     real(kind = x_precision)                               :: r = 0.0d0
     type(parameters)                                       :: param
@@ -123,13 +123,16 @@ real(kind=x_precision) function f(T, Sigma, Omega)
 
   select case(optical_depth)
   case(1:)
-     Fz = 4 * c**2 * T**4/(27. * sqrt(3.) * (K_ff + K_e) * Sigma * Sigma_0)
+     Fz = 4._x_precision * c**2 * T**4/(27. * sqrt(3._x_precision) * (K_ff + K_e) * Sigma * Sigma_0)
   case default
-     Fz = 6.22d20 * 2 / state_0%Omega_0 * state_0%rho_0 *  H * rho**2 * sqrt(T*state_0%T_0)
+     Fz = 6.22d20 * 2._x_precision / state_0%Omega_0 * state_0%rho_0 *  H * rho**2 * sqrt(T*state_0%T_0)
   end select
   Q_minus             = 2._x_precision * Fz /Sigma
   Q_plus              = 9._x_precision /4._x_precision * nu * Omega**2
   f                   = Q_plus - Q_minus
+  write(*,*)'Q_plus = ', Q_plus
+  write(*,*)'Q_minus = ', Q_minus
+
   end function f
 
 
@@ -154,8 +157,8 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   ! eps -> Precision
   ! T-> Fixed variable
   !-------------------------------------------------------------------------
-  
   dichotomy             = (Smin+Smax)/2.
+
   if ( f(T,Smin,omega) * f(T,Smax,omega) .gt. 0.) then
      write(*,*)'This function image does not switch its sign in this particular interval.'
   endif
