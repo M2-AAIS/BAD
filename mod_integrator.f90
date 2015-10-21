@@ -22,7 +22,7 @@ contains
     real (kind=x_precision), dimension(n_cell) :: f
 
     real (kind=x_precision)                    :: overdx, overdt
-    real (kind=x_precision), dimension(n_cell) :: dS_over_dt, dS_over_x_over_dx, S_over_x, dT_over_dx
+    real (kind=x_precision), dimension(n_cell) :: dS_over_dt, dS_over_x_over_dx, S_over_x, dT_over_dx, nuS
 
     overdx = 1/dx
     overdt = 1/dt
@@ -32,9 +32,12 @@ contains
 
     S_over_x                        = s%S / s%x
     dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell-1)) * overdx
-    dS_over_x_over_dx(n_cell)       = 0 !TODO
+    dS_over_x_over_dx(n_cell)       = 0 ! FIXME
 
-    dS_over_dt  = 0 !TODO
+    nuS = s%nu*s%S
+    dS_over_dt(1)          = 0
+    dS_over_dt(2:n_cell-1) = 1/s%x(2:n_cell-1)**2 * (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + nuS(1:n_cell-2))
+    dS_over_dt(n_cell)     = 0 ! FIXME 
 
     dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell-1)) * overdx
     dS_over_dt = 0
