@@ -67,8 +67,8 @@ contains
             * sqrt((state_0%T_0 * T_in(i))) 
 
        if (tau(i) .ge. 1.0) then
-          state_out%Fz(i) = (2.0 * cst_rad * c * (state_0%T_0 * state_out%T(i))**4) / &
-               (3.0 * (kappa_ff(i) * kappa_e) * (S_in(i)/x(i)) * state_0%S_0)
+          state_out%Fz(i) = (4.0 * c * c * T_in(i)**4) / (27.0 * sqrt(3.0) * &
+               (kappa_ff(i) + kappa_e) * (S_in(i)/x(i) * state_0%S_0)) 
        else
           state_out%Fz(i) = epsil(i) * state_0%H_0 * state_out%H(i)
        endif
@@ -95,6 +95,7 @@ contains
        state_in%M_dot = state_in%M_dot / state_0%M_dot_0
        state_in%P_rad = state_in%P_rad / state_0%P_rad_0
        state_in%P_gaz = state_in%P_gaz / state_0%P_gaz_0
+       state_in%Fz    = state_in%Fz / state_0%Fz_0
     case(1)
        state_in%H     = state_in%H * state_0%H_0
        state_in%v     = state_in%v * state_0%v_0
@@ -106,6 +107,7 @@ contains
        state_in%M_dot = state_in%M_dot * state_0%M_dot_0
        state_in%P_rad = state_in%P_rad * state_0%P_rad_0
        state_in%P_gaz = state_in%P_gaz * state_0%P_gaz_0
+       state_in%Fz    = state_in%Fz * state_0%Fz_0
     case default
        stop
     end select
@@ -139,6 +141,7 @@ contains
     state_0%M_dot_0 = para%Mdot
     state_0%P_rad_0 = 1.0/3.0 * cst_rad * (state_0%T_0**4)
     state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu
+    state_0%Fz_0    = state_0%S_0 / 2.0 / state_0%temps_0
   end subroutine init_variable_0
   
 end module mod_variables

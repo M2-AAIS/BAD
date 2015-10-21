@@ -7,14 +7,14 @@ module mod_constants
   integer, parameter, public :: n_cell = 256
   integer, parameter, public :: n_iterations = 1000
 
-  real(kind = x_precision), parameter, public :: G = 6.67384e-8 !gravitationnal cst in cgs
-  real(kind = x_precision), parameter, public :: c = 2.99792458e10 !speed of light in cgs
-  real(kind = x_precision), parameter, public :: pi = 4.*datan(1.d0) 
-  real(kind = x_precision), parameter, public :: stefan = 5.66956e-5 !stefan cst in cgs
-  real(kind = x_precision), parameter, public :: M_sol = 1.98855d33 !mass of the sun in cgs
-  real(kind = x_precision), parameter, public :: cst_rad = 7.564d-15 !constant of radiation in cgs
-  real(kind = x_precision), parameter, public :: kmp = 8.31434d7 !ratio of the boltzmann cst over the proton massin cgs
-  real(kind = x_precision), parameter, public :: mu = 0.62
+  real(kind = x_precision), parameter, public :: G = 6.67408e-8_x_precision !gravitationnal cst in cgs
+  real(kind = x_precision), parameter, public :: c = 2.99792458e10_x_precision !speed of light in cgs
+  real(kind = x_precision), parameter, public :: pi = 4.0_x_precision*atan(1.0_x_precision) 
+  real(kind = x_precision), parameter, public :: M_sol = 1.98855e33_x_precision !mass of the sun in cgs
+  real(kind = x_precision), parameter, public :: cst_rad = 7.5657308531642009e-17_x_precision !constant of radiation in cgs
+  real(kind = x_precision), parameter, public :: stefan = (c * cst_rad) / 4.0_x_precision !stefan cst in cgs
+  real(kind = x_precision), parameter, public :: kmp = 8.3144598_x_precision !ratio of the boltzmann cst over the proton massin cgs
+  real(kind = x_precision), parameter, public :: mu = 0.62_x_precision
 
   type parameters
      real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
@@ -46,7 +46,7 @@ module mod_constants
   end type state
 
   type adim_state
-     real(kind= x_precision) :: Omega_0, x_0, nu_0, v_0, T_0, P_rad_0, P_gaz_0, cs_0, H_0, rho_0, S_0, M_dot_0, temps_0
+     real(kind= x_precision) :: Omega_0, x_0, nu_0, v_0, T_0, P_rad_0, P_gaz_0, cs_0, H_0, rho_0, S_0, M_dot_0, temps_0, Fz_0
   end type adim_state
   
 contains
