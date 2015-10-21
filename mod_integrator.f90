@@ -40,8 +40,8 @@ contains
     dS_over_dt(2:n_cell-1) = 1/s%x(2:n_cell-1)**2 * (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + nuS(1:n_cell-2)) * overdx2
     dS_over_dt(n_cell)     = 0 ! FIXME 
 
-    dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell-1)) * overdx
-    dS_over_dt = 0
+    dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell-1)) * overdx ! FIXME (dnuS?)
+    dS_over_dt = 0 ! FIXME (dnuS(n_cell)?)
     
     f = (3_x_precision * state_0%v_0**2 * s%nu * s%Omega**2 - &
          s%Fz * s%x / s%S &
