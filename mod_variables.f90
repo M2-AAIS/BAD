@@ -28,39 +28,43 @@ contains
 
     call get_parameters(para)
     kappa_e = 0.2 * (1 + para%X)
-
+    !-------------Compute trinome coeff for H----------------
     a1 = ((Omega**2) * (state_0%Omega**2) * S * state_0%S) / (2.0 * x)
     b1 = - (a * (T**4) * (state_0%T**4)) / (3.0)
     c1 = - (kmp * T * S * state_0%S * state_0%T) / (2.0 * mu * x)
     Delta = b1**2 - (4.0 * a1 * c1)
-    
+    !--------------------------------------------------------
     do i=1,n_cell
-       state_out%H(i) = - 0.5d0 * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) 
+       state_out%H(i)     = - 0.5d0 * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) 
        state_out%P_rad(i) = T(i)**4
-       state_out%cs(i) = Omega(i) * state_out%H(i)
-       state_out%rho(i) = S(i) / (2.0 * state_out%H(i) * x(i))
-       state_out%nu(i) = 0.5 * para%alpha * state_out%cs(i) * state_out%H(i)
-       
+       state_out%cs(i)    = Omega(i) * state_out%H(i)
+       state_out%rho(i)   = S(i) / (state_out%H(i) * x(i))
+       state_out%nu(i)    = para%alpha * state_out%cs(i) * state_out%H(i)
+       state_out%P_gaz(i) = state_out%rho(i) * (T(i)**4)
+
+       !------------limit condition to compute v-------------
        if (i .eq. 1) then
-          state_out%v(i) = 0.
+          state_out%v(i)  = 0.
        else if (i .eq. n_cell) then
-          state_out%v(i) = 2.0 / S(i) / x(i) * 0.5
+          state_out%v(i)  = 2.0 / S(i) / x(i) 
        else
-          state_out%v(i) = - 2.0 / S(i) / x(i) * ( ((state_out%nu(i) * S(i)) - (state_out%nu(i-1) * S(i-1))) / (x(i) - x(i-1)) )
+          state_out%v(i)  = - 1.0 / S(i) / x(i) * ( ((state_out%nu(i) * S(i)) &
+               - (state_out%nu(i-1) * S(i-1))) / (x(i) - x(i-1)) )
        endif
-       
+       !------------limit condition to compute M-------------
        if (i .eq. n_cell) then
           state_out%M_dot(i) = para%Mdot
        else
           state_out%M_dot(i) = state_out%v(i) * S(i) * x(i)
        endif
-       
-       state_out%P_gaz(i) = state_out%rho(i) * (T(i)**4)
-       
-       kappa_ff(i) = 6.13e22 * state_0%rho * state_out%rho(i) * (state_0%T * T(i))**(-7.0/2.0) 
-       tau(i) = 0.5 * sqrt(0.2 * (1.0 * para%X) * 6.13e22 * state_0%rho * state_out%rho(i) &
-            * (state_0%T * T(i))**(-7.0/2.0)) * state_0%S * S(i) / x(i)
-       epsil(i) = 6.22e20 * (state_0%rho * state_out%rho(i))**2 * sqrt((state_0%T * T(i))) 
+       !--------------Compute varaibles for Fz---------------
+       kappa_ff(i) = 6.13e22 * state_0%rho * state_out%rho(i) * &
+            (state_0%T * T(i))**(-7.0/2.0) 
+       tau(i)      = 0.5 * sqrt(0.2 * (1.0 * para%X) * 6.13e22 * state_0%rho &
+            * state_out%rho(i) * (state_0%T * T(i))**(-7.0/2.0)) * state_0%S &
+            * S(i) / x(i)
+       epsil(i)    = 6.22e20 * (state_0%rho * state_out%rho(i))**2  &
+            * sqrt((state_0%T * T(i))) 
 
        if (tau(i) .ge. 1.0) then
           state_out%Fz(i) = (2.0 * a * c * (state_0%T * state_out%T(i))**4) / &
