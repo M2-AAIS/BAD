@@ -120,18 +120,20 @@ contains
     
     call get_parameters(para)
     rs            = 2*G*para%M/c2
-    omega_max     = sqrt( G*para%M/(3*rs)**3 )
-
+    omega_max     = sqrt( G*para%M/(rs)**3 )
+    
+    state_0%temps = 2.0 / omega_max
     state_0%x     = sqrt(rs)
     state_0%H     = rs
+    state_0%nu    = 2.0/3.0 * omega_max * rs**2
     state_0%omega = omega_max
     state_0%v     = omega_max * rs
     state_0%cs    = state_0%v
-    state_0%S     = para%Mdot / (2 * pi * rs**2 * omega_max)
-    state_0%T     = (1.0/sqrt(27.0) * 1.0/12.0 * para%Mdot * c2 &
-         / ( 4 * pi * rs * rs * stefan ))**0.25_x_precision
-    state_0%rho   = state_0%S / rs
-    state_0%nu    = 4.0/3.0 * omega_max * rs**2
+    state_0%S     = para%Mdot / (3.0 * pi * state_0%nu )
+    state_0%T     = (1.0/sqrt(27.0) * 1.0/48.0 * para%Mdot * c2 &
+         / ( pi * rs * rs * stefan ))**0.25_x_precision
+    state_0%rho   = state_0%S / (2.0*rs)
+    
     state_0%M_dot = para%Mdot
     state_0%P_rad = 1.0/3.0 * a * (state_0%T**4)
     state_0%P_gaz = state_0%rho * kmp * state_0%T / mu
