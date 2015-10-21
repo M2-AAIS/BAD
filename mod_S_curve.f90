@@ -125,7 +125,7 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   case(1:)
      Fz = 4 * c**2 * T**4/(27. * sqrt(3.) * (K_ff + K_e) * Sigma * Sigma_0)
   case default
-     Fz = 6.22d20 * 2 / state_0%Omega_0 * state_0%rho_0 * state_0%T_0**2 * H * rho **2 * T**2
+     Fz = 6.22d20 * 2 / state_0%Omega_0 * state_0%rho_0 *  H * rho**2 * sqrt(T*state_0%T_0)
   end select
   Q_minus             = 2._x_precision * Fz /Sigma
   Q_plus              = 9._x_precision /4._x_precision * nu * Omega**2
