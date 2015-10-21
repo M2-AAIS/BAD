@@ -41,23 +41,21 @@ contains
        state_out%rho(i)   = S_in(i) / (state_out%H(i) * x(i))
        state_out%nu(i)    = para%alpha * state_out%cs(i) * state_out%H(i)
        state_out%P_gaz(i) = state_out%rho(i) * (T_in(i)**4)
-
+       state_out%beta(i)  = state_out%P_gaz(i) / (state_out%P_gaz(i) + state_out%P_rad(i))
+       state_out%Cv(i)    = (kmp/mu) * ((12._x_precision * gammag -1._x_precision ) &
+            * (1._x_precision - state_out%beta(i)) + state_out%beta(i)) &
+            / ( state_out%beta(i) * (gammag - 1._x_precision))
        !------------limit condition to compute v-------------
        if (i .eq. 1) then
           state_out%v(i)  = 0.
        else if (i .eq. n_cell) then
           state_out%v(i)  = - 1.0 / S_in(i) / x(i) 
        else
-          state_out%v(i)  = - 1.0 / S_in(i) / x(i) * ( ((state_out%nu(i) * S_in(i)) &
-               - (state_out%nu(i-1) * S_in(i-1))) / (x(i) - x(i-1)) )
+          state_out%v(i)  = - 1.0 / S_in(i) / x(i) * ( ((state_out%nu(i) * S_in(i+1)) &
+               - (state_out%nu(i-1) * S_in(i-1))) / (x(i+1) - x(i-1)) )
        endif
-       !------------limit condition to compute M-------------
-       if (i .eq. n_cell) then
-          state_out%M_dot(i) = para%Mdot
-       else
-          state_out%M_dot(i) = - state_out%v(i) * S_in(i) * x(i)
-       endif
-       !--------------Compute varaibles for Fz---------------
+       state_out%M_dot(i) = - state_out%v(i) * S_in(i) * x(i)
+      !--------------Compute varaibles for Fz---------------
        kappa_ff(i) = 6.13e22 * state_0%rho_0 * state_out%rho(i) * &
             (state_0%T_0 * T_in(i))**(-7.0/2.0) 
        tau(i)      = 0.5 * sqrt(0.2 * (1.0 * para%X) * 6.13e22 * state_0%rho_0 &
