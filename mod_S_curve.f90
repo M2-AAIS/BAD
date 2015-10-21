@@ -73,7 +73,6 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   type(parameters)::param
   real(kind=x_precision),intent(in)                        ::T,Sigma,Omega
   real(kind=x_precision)                                   ::coeff_a=0.,coeff_b=0.,coeff_c=0.
-  real(kind=x_precision)                                   ::A_coeff=1.
   real(kind=x_precision)                                   ::H=0.
   real(kind=x_precision)                                   ::rho=0.
   real(kind=x_precision)                                   ::cs=0.
@@ -110,7 +109,7 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   P_rad                = T**4
   P_gaz                = rho * T
   K_ff                 = 6.13d22 * state_0%rho_0 * rho * (state_0%T_0 * T)**(-3.5)
-  K_e                  = 0.2_x_precision * (1_x_precision +param%X)
+  K_e                  = 0.2_x_precision * (1_x_precision + param%X)
   E_ff                 = 6.22d20 * (state_0%rho_0 * rho)**2 * sqrt(state_0%T_0 * T)
   tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0    
   !-------------------------------------------------------------------------
@@ -124,12 +123,12 @@ real(kind=x_precision) function f(T, Sigma, Omega)
 
   select case(optical_depth)
   case(1:)
-     Fz = (2._x_precision * cst_rad * c * (state_0%T_0 * T)**4) / (3.0 * (K_ff * K_e) * Sigma * Sigma_0)
+     Fz = 4 * c**2 * T**4/(27. * sqrt(3.) * (K_ff + K_e) * Sigma * Sigma_0)
   case default
-     Fz = E_ff * A_coeff * H * state_0%H_0
+     Fz = 6.22d20 * 2 / state_0%Omega_0 * state_0%rho_0 * state_0%T_0**2 * H * rho **2 * T**2
   end select
   Q_minus             = 2._x_precision * Fz /Sigma
-  Q_plus              = 9._x_precision /4._x_precision * nu *Omega**2
+  Q_plus              = 9._x_precision /4._x_precision * nu * Omega**2
   f                   = Q_plus - Q_minus
   end function f
 
