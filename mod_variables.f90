@@ -2,15 +2,16 @@
 module mod_variables
   use mod_constants
   use mod_read_parameters
-  implicit none 
+  implicit none
+  type(adim_state)               :: state_0
 
   private
 
-  public :: compute_variables, dim_adim, init_variable_0
+  public :: compute_variables, dim_adim, init_variable_0, state_0
   
 contains
   !--------------------------------------------------------------
-  subroutine compute_variables(x, Omega, T_in, S_in, state_0, state_out)
+  subroutine compute_variables(x, Omega, T_in, S_in, state_out)
     use mod_constants
     use mod_read_parameters
     implicit none
@@ -23,7 +24,6 @@ contains
     
     real (kind = x_precision), intent(in),  dimension(n_cell) :: x, Omega
     real (kind = x_precision), intent(in),  dimension(n_cell) :: T_in, S_in
-    type(adim_state),          intent(in)                     :: state_0
     type(state),               intent(out)                    :: state_out
 
     call get_parameters(para)
@@ -75,13 +75,12 @@ contains
     enddo
   end subroutine compute_variables
   !--------------------------------------------------------------
-  subroutine dim_adim(mode,state_0,state_in)
+  subroutine dim_adim(mode,state_in)
     use mod_constants
     use mod_read_parameters
     implicit none
     !select 0 or 1 to adimension or dimension your state 
     integer         , intent(in)                 :: mode
-    type(adim_state), intent(inout)              :: state_0
     type(state)     , intent(inout)              :: state_in
 	
     select case(mode)
@@ -112,13 +111,12 @@ contains
     end select
   end subroutine dim_adim
  !--------------------------------------------------------------
-  subroutine init_variable_0(state_0)
+  subroutine init_variable_0()
     use mod_constants
     use mod_read_parameters
     !Compute the initial adimention parameters
     real(kind = x_precision)         :: omega_max, rs, c2
     type(parameters)                 :: para
-    type(adim_state), intent(inout)  :: state_0
 
     c2 = c**2
     
