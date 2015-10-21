@@ -13,7 +13,7 @@ module mod_constants
   real(kind = x_precision), parameter, public :: M_sol   = 1.98855e33_x_precision !mass of the sun in cgs
   real(kind = x_precision), parameter, public :: cst_rad = 7.5657308531642009e-17_x_precision !constant of radiation in cgs
   real(kind = x_precision), parameter, public :: stefan  = (c * cst_rad) / 4.0_x_precision !stefan cst in cgs
-  real(kind = x_precision), parameter, public :: kmp     = 8.3144598_x_precision !boltzmann cst over proton mass in cgs = gas cst
+  real(kind = x_precision), parameter, public :: kmp     = 8.3144598e7_x_precision !boltzmann cst over proton mass in cgs = gas cst
   real(kind = x_precision), parameter, public :: mu      = 0.62_x_precision
   real(kind = x_precision), parameter, public :: gammag  = 5._x_precision / 3._x_precision 
 
