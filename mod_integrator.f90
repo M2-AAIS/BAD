@@ -16,12 +16,12 @@ contains
     use mod_variables
     use mod_constants
     implicit none
-    
+
     type (state), intent(inout)                   :: states
     type (parameters), intent(in)                 :: param
 
-    real(kind = x_precision)                      :: dt, overdx, overdx2, overdt, dx, B, Rgas, gammag, cv
-    integer                                       :: info
+    real(kind = x_precision)                      :: dt, overdx, overdx2, overdt, dx, B
+    integer                                       :: info, i
 
     real(kind = x_precision), dimension(n_cell)   :: diag, dT_over_dx, S_over_x, dS_over_x_over_dx
     real(kind = x_precision), dimension(n_cell)   :: dS_over_dt, dH_over_dT, f0, f1, dFz_over_dT, prevS
@@ -57,8 +57,6 @@ contains
     end if
 
     ! Compute useful quantities
-    cv = Rgas/mu * ((12._x_precision/states%beta - 12._x_precision) + 1._x_precision/(gammag - 1._x_precision))
-
     dT_over_dx(1:n_cell - 1) = (states%T(2:n_cell) - states%T(1:n_cell - 1)) * overdx
     dT_over_dx(n_cell)       = 0
 
@@ -74,13 +72,13 @@ contains
     
     f0 = 3_x_precision*state_0%v_0**2/state_0%T_0 * states%nu * states%Omega**2 - &
          states%Fz*states%x/states%S &
-         + Rgas/mu * (4._x_precision-3._x_precision*states%beta)/states%beta * states%T/states%S * &
+         + kmp/mu * (4._x_precision-3._x_precision*states%beta)/states%beta * states%T/states%S * &
            ((states%S - prevS)/dt + states%v*dS_over_x_over_dx) &
-         - cv*states%v/states%x * dT_over_dx
+         - states%Cv*states%v/states%x * dT_over_dx
 
     f1 = 3._x_precision*state_0%v_0**2/state_0%T_0 * (2*param%alpha * states%H * dH_over_dT * states%Omega**3) + &
          dFz_over_dT * states%x / states%S + &
-         Rgas/mu * (1._x_precision - 12._x_precision*B*states%T**3 / states%rho) * (dS_over_dt + states%v * dS_over_x_over_dx )
+         kmp/mu * (1._x_precision - 12._x_precision*B*states%T**3 / states%rho) * (dS_over_dt + states%v * dS_over_x_over_dx )
     !              \___________ (4-3beta)/beta * T*/S* ________________________/
 
     ! Solve for T
