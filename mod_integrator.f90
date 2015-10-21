@@ -92,11 +92,11 @@ contains
        print *, "Ooops, something bad happened!"
     end if
     
-    call compute_variables(states%x, states%Omega, T_deriv, states%S, states_deriv)
-    f0 = f(states, dt, dx)
     dtemp = 0.01_x_precision * states%T
     T_deriv = states%T + dtemp
+    call compute_variables(states%x, states%Omega, T_deriv, states%S, states_deriv)
 
+    f0 = f(states, dt, dx)
     f1 = (f(states_deriv, dt, dx) - f(states, dt, dx)) / dtemp
     
     ! Solve for T
