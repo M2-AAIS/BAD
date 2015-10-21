@@ -10,7 +10,7 @@ module mod_variables
   
 contains
   !--------------------------------------------------------------
-  subroutine compute_variables(x, Omega, T, S, state_0, state_out)
+  subroutine compute_variables(x, Omega, T_in, S_in, state_0, state_out)
     use mod_constants
     use mod_read_parameters
     implicit none
@@ -22,53 +22,53 @@ contains
     real (kind = x_precision)                                 :: kappa_e !cgs
     
     real (kind = x_precision), intent(in),  dimension(n_cell) :: x, Omega
-    real (kind = x_precision), intent(in),  dimension(n_cell) :: T, S
+    real (kind = x_precision), intent(in),  dimension(n_cell) :: T_in, S_in
     type(adim_state),          intent(in)                     :: state_0
     type(state),               intent(out)                    :: state_out
 
     call get_parameters(para)
     kappa_e = 0.2 * (1 + para%X)
     !-------------Compute trinome coeff for H----------------
-    a1 = ((Omega**2) * (state_0%Omega_0**2) * S * state_0%S_0) / (2.0 * x)
-    b1 = - (cst_rad * (T**4) * (state_0%T_0**4)) / (3.0)
-    c1 = - (kmp * T * S * state_0%S_0 * state_0%T_0) / (2.0 * mu * x)
+    a1 = ((Omega**2) * (state_0%Omega_0**2) * S_in * state_0%S_0) / (2.0 * x)
+    b1 = - (cst_rad * (T_in**4) * (state_0%T_0**4)) / (3.0)
+    c1 = - (kmp * T_in * S_in * state_0%S_0 * state_0%T_0) / (2.0 * mu * x)
     Delta = b1**2 - (4.0 * a1 * c1)
     !--------------------------------------------------------
     do i=1,n_cell
        state_out%H(i)     = - 0.5d0 * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) 
-       state_out%P_rad(i) = T(i)**4
+       state_out%P_rad(i) = T_in(i)**4
        state_out%cs(i)    = Omega(i) * state_out%H(i)
-       state_out%rho(i)   = S(i) / (state_out%H(i) * x(i))
+       state_out%rho(i)   = S_in(i) / (state_out%H(i) * x(i))
        state_out%nu(i)    = para%alpha * state_out%cs(i) * state_out%H(i)
-       state_out%P_gaz(i) = state_out%rho(i) * (T(i)**4)
+       state_out%P_gaz(i) = state_out%rho(i) * (T_in(i)**4)
 
        !------------limit condition to compute v-------------
        if (i .eq. 1) then
           state_out%v(i)  = 0.
        else if (i .eq. n_cell) then
-          state_out%v(i)  = - 1.0 / S(i) / x(i) 
+          state_out%v(i)  = - 1.0 / S_in(i) / x(i) 
        else
-          state_out%v(i)  = - 1.0 / S(i) / x(i) * ( ((state_out%nu(i) * S(i)) &
-               - (state_out%nu(i-1) * S(i-1))) / (x(i) - x(i-1)) )
+          state_out%v(i)  = - 1.0 / S_in(i) / x(i) * ( ((state_out%nu(i) * S_in(i)) &
+               - (state_out%nu(i-1) * S_in(i-1))) / (x(i) - x(i-1)) )
        endif
        !------------limit condition to compute M-------------
        if (i .eq. n_cell) then
           state_out%M_dot(i) = para%Mdot
        else
-          state_out%M_dot(i) = - state_out%v(i) * S(i) * x(i)
+          state_out%M_dot(i) = - state_out%v(i) * S_in(i) * x(i)
        endif
        !--------------Compute varaibles for Fz---------------
        kappa_ff(i) = 6.13e22 * state_0%rho_0 * state_out%rho(i) * &
-            (state_0%T_0 * T(i))**(-7.0/2.0) 
+            (state_0%T_0 * T_in(i))**(-7.0/2.0) 
        tau(i)      = 0.5 * sqrt(0.2 * (1.0 * para%X) * 6.13e22 * state_0%rho_0 &
-            * state_out%rho(i) * (state_0%T_0 * T(i))**(-7.0/2.0)) * state_0%S_0 &
-            * S(i) / x(i)
+            * state_out%rho(i) * (state_0%T_0 * T_in(i))**(-7.0/2.0)) * state_0%S_0 &
+            * S_in(i) / x(i)
        epsil(i)    = 6.22e20 * (state_0%rho_0 * state_out%rho(i))**2  &
-            * sqrt((state_0%T_0 * T(i))) 
+            * sqrt((state_0%T_0 * T_in(i))) 
 
        if (tau(i) .ge. 1.0) then
           state_out%Fz(i) = (2.0 * cst_rad * c * (state_0%T_0 * state_out%T(i))**4) / &
-               (3.0 * (kappa_ff(i) * kappa_e) * (S(i)/x(i)) * state_0%S_0)
+               (3.0 * (kappa_ff(i) * kappa_e) * (S_in(i)/x(i)) * state_0%S_0)
        else
           state_out%Fz(i) = epsil(i) * state_0%H_0 * state_out%H(i)
        endif
