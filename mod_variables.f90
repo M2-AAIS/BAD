@@ -68,7 +68,7 @@ contains
         state_out%Fz(i) = (4._x_precision * c * c * T_in(i)**4) / (27._x_precision * sqrt(3.0) * &
                           (kappa_ff(i) + kappa_e) * (S_in(i)/x(i) * state_0%S_0)) 
       else
-        state_out%Fz(i) = epsil(i) * state_0%H_0 * state_out%H(i)
+        state_out%Fz(i) = epsil(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
       endif
     enddo
   end subroutine compute_variables
