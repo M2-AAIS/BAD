@@ -6,22 +6,22 @@ module mod_S_curve
   
 contains
   !-------------------------------------------------------------------------
-  ! subroutine to find the result of equation Q+ + Q- = 0
-  ! output : datafile with temperature and surface density
-  ! Range of surface density [Smin, Smax] and temperature [t_min, t_max]
-  ! values can be changed
+  ! Subroutine in order to find the result of the equation Q+ - Q- = 0
+  ! output : datafile with the temperature T and the surface density Sigma
+  ! Range of surface density [Smin, Smax] and temperature [T_min, T_max]
+  ! values should be changed in order to find more coherent results
   !-------------------------------------------------------------------------
   subroutine curve()  
     implicit none
-    integer::i
-    real(kind = x_precision)                               :: temp
-    real(kind = x_precision), parameter                    :: t_min = 1.0d7
-    real(kind = x_precision), parameter                    :: t_max = 1.0d10
-    integer,                  parameter                    :: nb_it = 3
+    integer::i = 0
+    real(kind = x_precision)                               :: temp = 0.0d0
+    real(kind = x_precision), parameter                    :: t_min = 1.0d-3
+    real(kind = x_precision), parameter                    :: t_max = 1.0d0
+    integer,                  parameter                    :: nb_it = 10
     real(kind = x_precision)                               :: sigma = 0.0d0
-    real(kind = x_precision)                               :: Smin = 1.0d7
-    real(kind = x_precision)                               :: Smax = 1.0d10
-    real(kind = x_precision)                               :: eps = 1.0d0
+    real(kind = x_precision)                               :: Smin = 1.0d-3
+    real(kind = x_precision)                               :: Smax = 1.0d0
+    real(kind = x_precision)                               :: eps = 1.0d-5
     real(kind = x_precision)                               :: omega = 0.0d0
     real(kind = x_precision)                               :: r = 0.0d0
     type(parameters)                                       :: param
@@ -39,6 +39,8 @@ contains
     do i           = 1 , nb_it
        temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
        sigma       = dichotomy(Smin, Smax, eps, temp, omega)
+       Smin=1.0e-3
+       Smax=1.0d0
        
        write(18,*)temp," ",sigma
     enddo
@@ -122,7 +124,7 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   end if
 
   select case(optical_depth)
-  case(1:)
+  case(1)
      Fz = 4._x_precision * c**2 * T**4/(27. * sqrt(3._x_precision) * (K_ff + K_e) * Sigma * Sigma_0)
   case default
      Fz = 6.22d20 * 2._x_precision / state_0%Omega_0 * state_0%rho_0 *  H * rho**2 * sqrt(T*state_0%T_0)
@@ -146,7 +148,7 @@ real(kind=x_precision) function f(T, Sigma, Omega)
     use mod_variables
     implicit none
     
-  integer                                                  ::j=0,N=100   
+  integer                                                  ::j=0,N=1e3   
   real(kind=x_precision),intent(inout)                     ::Smin,Smax   
   real(kind=x_precision),intent(in)                        ::eps         
   real(kind=x_precision),intent(in)                        ::T           
@@ -167,8 +169,10 @@ real(kind=x_precision) function f(T, Sigma, Omega)
      iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. N)
         if( f(T,Smin,omega) * f(T,dichotomy,omega) .lt. 0.) then
            Smax         = dichotomy
+           write(*,*)'smin=',smin,' smax=', smax
         else
            Smin         = dichotomy
+           write(*,*)'smin=',smin,' smax=', smax
         endif
         dichotomy       = (Smin+Smax)/2.0d0
         j               = j + 1
