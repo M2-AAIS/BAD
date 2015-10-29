@@ -163,7 +163,8 @@ real(kind=x_precision) function f(T, Sigma, Omega)
      write(*,*)'This function image does not switch its sign in this particular interval.'
   endif
   if( f(T,Smin,omega) * f(T,Smax,omega) .lt. 0.) then
-     iteration:do while ( abs( f(T,dichotomy,omega) ) .ge. eps .and. j .lt. N)
+     !iteration:do while ( dabs( f(T,dichotomy,omega) ) .ge. eps .and. j .lt. N)
+     iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. N)
         if( f(T,Smin,omega) * f(T,dichotomy,omega) .lt. 0.) then
            Smax         = dichotomy
         else
