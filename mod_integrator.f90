@@ -95,7 +95,7 @@ contains
     dtemp = 0.01_x_precision * states%T
     T_deriv = states%T + dtemp
     !call compute_variables(states%x, states%Omega, T_deriv, states%S, states_deriv)
-    !modification of compute_varaible--just enter a state now
+    !modification of compute_varaible--just enter a state now -- FIXME
 
     f0 = f(states, dt, dx)
     f1 = (f(states_deriv, dt, dx) - f(states, dt, dx)) / dtemp
