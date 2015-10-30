@@ -33,46 +33,45 @@ contains
     Delta = b1**2 - (4._x_precision * a1 * c1)
     !--------------------------------------------------------
     do i=1,n_cell
-       state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) &
-            / a1(i) 
-       state_out%P_rad(i) = state_out%T(i)**4
-       state_out%cs(i)    = state_out%Omega(i) * state_out%H(i)
-       state_out%rho(i)   = state_out%S(i) / (state_out%H(i) * state_out%x(i))
-       state_out%nu(i)    = para%alpha * state_out%cs(i) * state_out%H(i)
-       state_out%P_gaz(i) = state_out%rho(i) * (state_out%T(i)**4)
-       state_out%beta(i)  = state_out%P_gaz(i) / (state_out%P_gaz(i) + state_out%P_rad(i))
-       state_out%Cv(i)    = (kmp/mu * state_0%T_0) * ((12._x_precision * gammag -1._x_precision ) &
-            * (1._x_precision - state_out%beta(i)) + state_out%beta(i)) &
-            / ( state_out%beta(i) * (gammag - 1._x_precision))
-       !------------limit condition to compute v-------------
-       if (i .eq. 1) then
-          state_out%v(i)  = 0._x_precision
-       else if (i .eq. n_cell) then
-          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) 
-       else
-          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i+1) &
-               * state_out%S(i+1)) - (state_out%nu(i-1) * state_out%S(i-1))) /  &
-               (2._x_precision * (state_out%x(i+1) - state_out%x(i-1))))
-       endif
-       state_out%M_dot(i) = - state_out%v(i) * state_out%S(i) * state_out%x(i)
-       !--------------Compute varaibles for Fz---------------
-       kappa_ff(i) = 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
-            (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)
-       
-       tau(i)      = 0.5_x_precision * sqrt(0.2_x_precision * (1._x_precision &
-            * para%X) * 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) &
-            * (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)) &
-            * state_0%S_0 * state_out%S(i) / state_out%x(i)
-       
-       epsil(i)    = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2  &
-            * sqrt((state_0%T_0 * state_out%T(i))) 
-       
-       if (tau(i) .ge. 1.0) then
-          state_out%Fz(i) = (4._x_precision * c * c * state_out%T(i)**4) / (27._x_precision &
-               * sqrt(3.0) * (kappa_ff(i) + kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0)) 
-       else
-          state_out%Fz(i) = epsil(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
-       endif
+      state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i)
+      state_out%P_rad(i) = state_out%T(i)**4
+      state_out%cs(i)    = state_out%Omega(i) * state_out%H(i)
+      state_out%rho(i)   = state_out%S(i) / (state_out%H(i) * state_out%x(i))
+      state_out%nu(i)    = para%alpha * state_out%cs(i) * state_out%H(i)
+      state_out%P_gaz(i) = state_out%rho(i) * (state_out%T(i)**4)
+      state_out%beta(i)  = state_out%P_gaz(i) / (state_out%P_gaz(i) + state_out%P_rad(i))
+      state_out%Cv(i)    = (kmp/mu * state_0%T_0) * ((12._x_precision * gammag -1._x_precision ) * &
+                           (1._x_precision - state_out%beta(i)) + state_out%beta(i)) / &
+                           ( state_out%beta(i) * (gammag - 1._x_precision))
+      !------------limit condition to compute v-------------
+      if (i .eq. 1) then
+         state_out%v(i)  = 0._x_precision
+      else if (i .eq. n_cell) then
+         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) 
+      else
+         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i+1) * &
+                           state_out%S(i+1)) - (state_out%nu(i-1) * state_out%S(i-1))) /  &
+                           (2._x_precision * (state_out%x(i+1) - state_out%x(i-1))))
+      endif
+      state_out%M_dot(i) = - state_out%v(i) * state_out%S(i) * state_out%x(i)
+      !--------------Compute varaibles for Fz---------------
+      kappa_ff(i) = 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
+                    (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)
+      
+      tau(i)      = 0.5_x_precision * sqrt(0.2_x_precision * (1._x_precision * &
+                    para%X) * 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
+                    (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)) * &
+                    state_0%S_0 * state_out%S(i) / state_out%x(i)
+      
+      epsil(i)    = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2 * &
+                    sqrt((state_0%T_0 * state_out%T(i))) 
+      
+      if (tau(i) .ge. 1.0) then
+         state_out%Fz(i) = (4._x_precision * c * c * state_out%T(i)**4) / (27._x_precision * &
+                           sqrt(3.0) * (kappa_ff(i) + kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0)) 
+      else
+         state_out%Fz(i) = epsil(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
+      endif
     enddo
   end subroutine compute_variables
   !--------------------------------------------------------------
@@ -136,8 +135,8 @@ contains
     state_0%H_0     = rs
     state_0%M_dot_0 = para%Mdot
     state_0%rho_0   = state_0%S_0 / (2._x_precision*rs)
-    state_0%T_0     = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision &
-         * para%Mdot * c2 / ( pi * rs * rs * stefan ))**0.25_x_precision
+    state_0%T_0     = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * &
+                      para%Mdot * c2 / ( pi * rs * rs * stefan ))**0.25_x_precision
     state_0%Fz_0    = state_0%S_0 / 2._x_precision / state_0%temps_0
     state_0%Cv_0    = 1._x_precision / state_0%T_0
     state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu

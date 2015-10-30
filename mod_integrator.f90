@@ -28,20 +28,24 @@ contains
     overdx2 = overdx**2
     overdt  = 1/dt
 
+    ! Compute dT/dx as the mean spatial derivative (left + right)/2
     dT_over_dx(1)            = 0 ! FIXME
     dT_over_dx(2:n_cell - 1) = (s%T(3:n_cell) - s%T(1:n_cell - 2)) * overdx / 2
     dT_over_dx(n_cell)       = 0
 
+    ! Compute d(S/x)/dx as the mean spatial derivative (left + right)/2
     S_over_x                        = s%S / s%x
     dS_over_x_over_dx(1)            = 0 ! FIXME
     dS_over_x_over_dx(2:n_cell - 1) = (S_over_x(3:n_cell) - S_over_x(1:n_cell - 2)) * overdx / 2
     dS_over_x_over_dx(n_cell)       = 0 ! FIXME
 
+    ! Compute dS/dt using the corresponding equation, with d²(nuS)/dx² as (d(left)+d(right))/2
     nuS = s%nu*s%S
     dS_over_dt(1)          = 0 ! FIXME
     dS_over_dt(2:n_cell-1) = 1/s%x(2:n_cell-1)**2 * (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + nuS(1:n_cell-2)) * overdx2
     dS_over_dt(n_cell)     = 0 ! FIXME 
 
+    ! Second member of the dT/dt equation
     f = (3_x_precision * state_0%v_0**2 * s%nu * s%Omega**2 - &
          s%Fz * s%x / s%S &
          + state_0%T_0 * kmp/mu * (4._x_precision - 3._x_precision * s%beta) / s%beta * s%T / s%S * &
@@ -75,7 +79,7 @@ contains
     overdt  = 1_x_precision/dt
     
     
-    ! Create the diagonals and copy T and S
+    ! Create the diagonals
     diag     =  overdt + 2*overdx2 * states%nu / states%x**2
     diag_up  = -overdx2 * states%nu(2:n_cell) / states%x(1:n_cell-1)**2
     diag_low = -overdx2 * states%nu(1:n_cell-1) / states%x(2:n_cell)**2
@@ -85,7 +89,7 @@ contains
     diag(n_cell)       = states%nu(n_cell)
     diag_low(n_cell-1) = states%nu(n_cell-1)
     
-    ! Solving for S
+    ! Solving for S, this does modify states%S directly
     call dgtsv(n_cell, 1, diag_low, diag, diag_up, states%S, n_cell, info)
     
     if (info /= 0) then
