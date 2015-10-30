@@ -38,6 +38,10 @@ contains
     read(11,fmt=*) bla, initial_param%X
     read(11,fmt=*) bla, Y
 
+    !Compute M and M_dot in cgs
+    initial_param%Mdot = initial_param%Mdot * 1.68e18 * initial_param%M
+    initial_param%M = initial_param%M * 1.98855e33_x_precision
+
     !processing mu
     Z = 1._x_precision-initial_param%X-Y
     initial_param%mu = 1._x_precision / (2._x_precision*initial_param%X + 3._x_precision*Y/4._x_precision + Z/2._x_precision)
