@@ -15,15 +15,15 @@ contains
     implicit none
     integer::i = 0
     real(kind = x_precision)                               :: temp = 0.0d0
-    real(kind = x_precision), parameter                    :: t_min = 1.0d-3
-    real(kind = x_precision), parameter                    :: t_max = 1.0d0
+    real(kind = x_precision), parameter                    :: t_min = 1.0d-6
+    real(kind = x_precision), parameter                    :: t_max = 2.0d-6
     integer,                  parameter                    :: nb_it = 10
     real(kind = x_precision)                               :: sigma = 0.0d0
-    real(kind = x_precision)                               :: Smin = 1.0d-3
-    real(kind = x_precision)                               :: Smax = 1.0d0
-    real(kind = x_precision)                               :: eps = 1.0d-5
+    real(kind = x_precision)                               :: Smin = 0.0d-5
+    real(kind = x_precision)                               :: Smax = 0.0d-2
+    real(kind = x_precision)                               :: eps = 1.0d-4
     real(kind = x_precision)                               :: omega = 0.0d0
-    real(kind = x_precision)                               :: r = 0.0d0
+    real(kind = x_precision)                               :: r = 5.0d0
     type(parameters)                                       :: param
     !----------------------------------------------------------------------
     
@@ -37,10 +37,11 @@ contains
     open(18,file = 'Temperature_Sigma.dat',status='unknown',action='readwrite') 
     write(18,*)"T Sigma"
     do i           = 1 , nb_it
+       Smin=5.0d-4
+       Smax=1.0d-3
        temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
        sigma       = dichotomy(Smin, Smax, eps, temp, omega)
-       Smin=1.0e-3
-       Smax=1.0d0
+
        
        write(18,*)temp," ",sigma
     enddo
@@ -58,7 +59,6 @@ contains
     real(kind=x_precision), intent(in)                     ::coeff_a,coeff_b,coeff_c
     real(kind=x_precision), intent(out)                    ::sol
     real(kind=x_precision)                                 ::delta=0.
-    
     delta          = coeff_b**2 - 4 * coeff_a * coeff_c
     if (delta .lt. 0.) then
       write(*,*)'No solutions in the R field.'
@@ -102,9 +102,7 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   coeff_a              = (Omega**2 * state_0%Omega_0**2 * Sigma * Sigma_0)/2.
   coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * state_0%T_0**4
   coeff_c              = (-1._x_precision * kmp * T * state_0%T_0 * Sigma * Sigma_0)/(2._x_precision * mu)
-
   call quadratic(coeff_a,coeff_b,coeff_c,H)
-
   rho                  = Sigma/H
   cs                   = Omega * H
   nu                   = param%alpha * cs * H
@@ -122,7 +120,7 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   else
      optical_depth     = 0
   end if
-
+write(*,*)'tau',tau_eff
   select case(optical_depth)
   case(1)
      Fz = 4._x_precision * c**2 * T**4/(27. * sqrt(3._x_precision) * (K_ff + K_e) * Sigma * Sigma_0)
@@ -132,8 +130,8 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   Q_minus             = 2._x_precision * Fz /Sigma
   Q_plus              = 9._x_precision /4._x_precision * nu * Omega**2
   f                   = Q_plus - Q_minus
-  write(*,*)'Q_plus = ', Q_plus
-  write(*,*)'Q_minus = ', Q_minus
+!  write(*,*)'Q_plus = ', Q_plus
+!  write(*,*)'Q_minus = ', Q_minus
 
   end function f
 
@@ -148,7 +146,7 @@ real(kind=x_precision) function f(T, Sigma, Omega)
     use mod_variables
     implicit none
     
-  integer                                                  ::j=0,N=1e3   
+  integer                                                  ::j=0   
   real(kind=x_precision),intent(inout)                     ::Smin,Smax   
   real(kind=x_precision),intent(in)                        ::eps         
   real(kind=x_precision),intent(in)                        ::T           
@@ -160,13 +158,16 @@ real(kind=x_precision) function f(T, Sigma, Omega)
   ! T-> Fixed variable
   !-------------------------------------------------------------------------
   dichotomy             = (Smin+Smax)/2.
-
+  write(*,*)f(T,Smin,omega)
+  write(*,*)f(T,Smax,omega)
+  write(*,*)T,Smin,Smax,j
+  j = 0
   if ( f(T,Smin,omega) * f(T,Smax,omega) .gt. 0.) then
      write(*,*)'This function image does not switch its sign in this particular interval.'
   endif
   if( f(T,Smin,omega) * f(T,Smax,omega) .lt. 0.) then
      !iteration:do while ( dabs( f(T,dichotomy,omega) ) .ge. eps .and. j .lt. N)
-     iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. N)
+     iteration:do while ( dabs( Smax - Smin ) .ge. eps)
         if( f(T,Smin,omega) * f(T,dichotomy,omega) .lt. 0.) then
            Smax         = dichotomy
            write(*,*)'smin=',smin,' smax=', smax
