@@ -8,7 +8,7 @@ module mod_variables
   private
 
   public :: compute_variables, dim_adim, init_variable_0, state_0
-  
+
 contains
   !--------------------------------------------------------------
   subroutine compute_variables(state_out)
@@ -21,9 +21,9 @@ contains
     real (kind = x_precision),              dimension(n_cell) :: Delta
     real (kind = x_precision),              dimension(n_cell) :: kappa_ff, tau, epsil
     real (kind = x_precision)                                 :: kappa_e !cgs
-    
+
     type(state),               intent(inout)                    :: state_out
-    
+
     call get_parameters(para)
     kappa_e = 0.2_x_precision * (1._x_precision + para%X)
     !-------------Compute trinome coeff for H----------------
@@ -47,7 +47,7 @@ contains
       if (i .eq. 1) then
          state_out%v(i)  = 0._x_precision
       else if (i .eq. n_cell) then
-         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) 
+         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i)
       else
          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i+1) * &
                            state_out%S(i+1)) - (state_out%nu(i-1) * state_out%S(i-1))) /  &
@@ -57,18 +57,18 @@ contains
       !--------------Compute varaibles for Fz---------------
       kappa_ff(i) = 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
                     (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)
-      
+
       tau(i)      = 0.5_x_precision * sqrt(0.2_x_precision * (1._x_precision * &
                     para%X) * 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
                     (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)) * &
                     state_0%S_0 * state_out%S(i) / state_out%x(i)
-      
+
       epsil(i)    = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2 * &
-                    sqrt((state_0%T_0 * state_out%T(i))) 
-      
+                    sqrt((state_0%T_0 * state_out%T(i)))
+
       if (tau(i) .ge. 1.0) then
          state_out%Fz(i) = (4._x_precision * c * c * state_out%T(i)**4) / (27._x_precision * &
-                           sqrt(3.0) * (kappa_ff(i) + kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0)) 
+                           sqrt(3.0) * (kappa_ff(i) + kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0))
       else
          state_out%Fz(i) = epsil(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
       endif
@@ -79,7 +79,7 @@ contains
     use mod_constants
     use mod_read_parameters
     implicit none
-    !select 0 or 1 to adimension or dimension your state 
+    !select 0 or 1 to adimension or dimension your state
     integer         , intent(in)                 :: mode
     type(state)     , intent(inout)              :: state_in
 
@@ -121,10 +121,10 @@ contains
     type(parameters)                 :: para
 
     c2 = c**2
-    
+
     call get_parameters(para)
     rs = 2._x_precision*G*para%M/c2
-    
+
     state_0%omega_0 = sqrt( G*para%M/(rs)**3 )
     state_0%temps_0 = 2._x_precision / state_0%omega_0
     state_0%x_0     = sqrt(rs)
@@ -142,5 +142,5 @@ contains
     state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu
     state_0%P_rad_0 = 1._x_precision/3._x_precision * cst_rad * (state_0%T_0**4)
   end subroutine init_variable_0
-  
+
 end module mod_variables
