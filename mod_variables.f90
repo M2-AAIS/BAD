@@ -25,7 +25,7 @@ contains
     real (kind = x_precision), intent(in),  dimension(n_cell) :: x, Omega
     real (kind = x_precision), intent(in),  dimension(n_cell) :: T_in, S_in
     type(state),               intent(out)                    :: state_out
-
+    
     call get_parameters(para)
     kappa_e = 0.2_x_precision * (1._x_precision + para%X)
     !-------------Compute trinome coeff for H----------------
