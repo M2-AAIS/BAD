@@ -22,6 +22,10 @@ contains
     real (kind=x_precision)       :: Y,Z           ! chemical composition : x+y+z = 1 
     integer (kind=4)              :: ios           ! i/o variable test 
     character (len=50)            :: bla           ! string reading variable
+    real(kind=x_precision)        :: Ledd
+
+    !Compute pf Ledd
+    Ledd = 4._x_precision * pi * G * mp * c / thomson
 
     !Opening file
 
@@ -39,8 +43,8 @@ contains
     read(11,fmt=*) bla, Y
 
     !Compute M and M_dot in cgs
-    initial_param%Mdot = initial_param%Mdot * 1.68e18 * initial_param%M
-    initial_param%M = initial_param%M * 1.98855e33_x_precision
+    initial_param%Mdot = initial_param%Mdot * ( Ledd * 12._x_precision / c**2) * initial_param%M * M_sol
+    initial_param%M = initial_param%M * M_sol
 
     !processing mu
     Z = 1._x_precision-initial_param%X-Y
