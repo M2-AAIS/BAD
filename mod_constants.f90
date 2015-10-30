@@ -15,7 +15,10 @@ module mod_constants
   real(kind = x_precision), parameter, public :: stefan  = (c * cst_rad) / 4.0_x_precision !stefan cst in cgs
   real(kind = x_precision), parameter, public :: kmp     = 8.3144598e7_x_precision !boltzmann cst over proton mass in cgs = gas cst
   real(kind = x_precision), parameter, public :: mu      = 0.62_x_precision
-  real(kind = x_precision), parameter, public :: gammag  = 5._x_precision / 3._x_precision 
+  real(kind = x_precision), parameter, public :: gammag  = 5._x_precision / 3._x_precision
+  real(kind = x_precision), parameter, public :: kb      = 1.3806488e-23
+  real(kind = x_precision), parameter, public :: mp      = kb / kmp
+  real(kind = x_precision), parameter, public :: thomson = 6.65e-25
 
   type parameters
     real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
