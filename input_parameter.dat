@@ -1,9 +1,13 @@
-BH_Masse= 54.
-r_max= 32.
-M_0_dot= 23.
-alpha= 65.
+BH_Masse= 10.
+r_max= 100. 
+M_dot= 1.e-3
+alpha= 1.
 X= 0.70D0
 Y= 0.28D0
 
 
-parameter file : please be carefull to put one space just after the equal symbole. 
+parameter file : please be carefull to put one space just after the equal symbole.
+
+note : rmax is the report between rmax and rs
+note : BH_Mass in solar mass
+note : M_dot is the report between Mdot and Mdotcrit
