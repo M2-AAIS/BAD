@@ -18,7 +18,7 @@ module mod_constants
   real(kind = x_precision), parameter, public :: gammag  = 5._x_precision / 3._x_precision
   real(kind = x_precision), parameter, public :: kb      = 1.3806488e-23
   real(kind = x_precision), parameter, public :: mp      = kb / kmp
-  real(kind = x_precision), parameter, public :: thomson = 6.65e-25
+  real(kind = x_precision), parameter, public :: thomson = 6.65e-25_x_precision
 
   type parameters
     real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
