@@ -22,7 +22,7 @@ contains
     real (kind=x_precision)       :: Y,Z           ! chemical composition : x+y+z = 1 
     integer (kind=4)              :: ios           ! i/o variable test 
     character (len=50)            :: bla           ! string reading variable
-    real(kind=x_precision)        :: Ledd
+    real(kind=x_precision)        :: Ledd          ! Eddington luminosity
 
     !Compute pf Ledd
     Ledd = 4._x_precision * pi * G * mp * c / thomson
@@ -43,8 +43,8 @@ contains
     read(11,fmt=*) bla, Y
 
     !Compute M and M_dot in cgs
-    initial_param%Mdot = initial_param%Mdot * ( Ledd * 12._x_precision / c**2) * initial_param%M * M_sol
-    initial_param%M = initial_param%M * M_sol
+    initial_param%Mdot = initial_param%Mdot * ( Ledd * 12._x_precision / c**2) * initial_param%M * M_sun
+    initial_param%M = initial_param%M * M_sun
 
     !processing mu
     Z = 1._x_precision-initial_param%X-Y
@@ -63,7 +63,7 @@ contains
   !function parameter
   real (kind=x_precision), intent(out) :: dx !space step
   
-  dx = (10._x_precision - sqrt(3._x_precision)) / n_cell
+  dx = (10._x_precision - sqrt(3._x_precision)) / n_cell ! FIXME 10._x_precision = sqrt(r_max) ?
 
   end subroutine process_dx
   

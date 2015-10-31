@@ -10,15 +10,15 @@ module mod_constants
   real(kind = x_precision), parameter, public :: G       = 6.67408e-8_x_precision !gravitationnal cst in cgs
   real(kind = x_precision), parameter, public :: c       = 2.99792458e10_x_precision !speed of light in cgs
   real(kind = x_precision), parameter, public :: pi      = 4.0_x_precision*atan(1.0_x_precision) 
-  real(kind = x_precision), parameter, public :: M_sol   = 1.98855e33_x_precision !mass of the sun in cgs
+  real(kind = x_precision), parameter, public :: M_sun   = 1.98855e33_x_precision !mass of the sun in cgs
   real(kind = x_precision), parameter, public :: cst_rad = 7.5657308531642009e-17_x_precision !constant of radiation in cgs
-  real(kind = x_precision), parameter, public :: stefan  = (c * cst_rad) / 4.0_x_precision !stefan cst in cgs
-  real(kind = x_precision), parameter, public :: kmp     = 8.3144598e7_x_precision !boltzmann cst over proton mass in cgs = gas cst
+  real(kind = x_precision), parameter, public :: stefan  = (c * cst_rad) / 4.0_x_precision !Stefan cst in cgs
+  real(kind = x_precision), parameter, public :: kmp     = 8.3144598e7_x_precision !Boltzmann cst over proton mass in cgs = gas cst
   real(kind = x_precision), parameter, public :: mu      = 0.62_x_precision
   real(kind = x_precision), parameter, public :: gammag  = 5._x_precision / 3._x_precision
-  real(kind = x_precision), parameter, public :: kb      = 1.3806488e-23
-  real(kind = x_precision), parameter, public :: mp      = kb / kmp
-  real(kind = x_precision), parameter, public :: thomson = 6.65e-25_x_precision
+  real(kind = x_precision), parameter, public :: kb      = 1.3806488e-16_x_precision !Boltzmann cst in cgs
+  real(kind = x_precision), parameter, public :: mp      = kb / kmp !proton mass in cgs
+  real(kind = x_precision), parameter, public :: thomson = 6.6524587158e-25_x_precision !Thomson cross-section in cgs
 
   type parameters
     real(kind = x_precision) :: M, Mdot, X, mu, alpha, rmax
