@@ -160,7 +160,7 @@ contains
    
     coeff_a              = (Omega**2 * state_0%Omega_0**2 * Sigma * Sigma_0)/2.
     coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * state_0%T_0**4
-    coeff_c              = (-1._x_precision * kmp * T * state_0%T_0 * Sigma * Sigma_0)/(2._x_precision * mu)
+    coeff_c              = (-1._x_precision * param%RTM * T * Sigma * Sigma_0)/2._x_precision
   
     call quadratic(coeff_a,coeff_b,coeff_c,H)
   

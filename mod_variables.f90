@@ -29,7 +29,7 @@ contains
     !-------------Compute trinome coeff for H----------------
     a1 = ((state_out%Omega**2) * (state_0%Omega_0**2) * state_out%S * state_0%S_0) / (2._x_precision * state_out%x)
     b1 = - (cst_rad * (state_out%T**4) * (state_0%T_0**4)) / (3._x_precision)
-    c1 = - (kmp * state_out%T * state_out%S * state_0%S_0 * state_0%T_0) / (2._x_precision * mu * state_out%x)
+    c1 = - (para%RTM * state_out%T * state_out%S * state_0%S_0 ) / (2._x_precision * state_out%x)
     Delta = b1**2 - (4._x_precision * a1 * c1)
     !--------------------------------------------------------
     do i=1,n_cell
@@ -40,7 +40,7 @@ contains
       state_out%nu(i)    = para%alpha * state_out%cs(i) * state_out%H(i)
       state_out%P_gaz(i) = state_out%rho(i) * (state_out%T(i)**4)
       state_out%beta(i)  = state_out%P_gaz(i) / (state_out%P_gaz(i) + state_out%P_rad(i))
-      state_out%Cv(i)    = (kmp/mu * state_0%T_0) * ((12._x_precision * gammag -1._x_precision ) * &
+      state_out%Cv(i)    = para%RTM * ((12._x_precision * gammag -1._x_precision ) * &
                            (1._x_precision - state_out%beta(i)) + state_out%beta(i)) / &
                            ( state_out%beta(i) * (gammag - 1._x_precision))
       !------------limit condition to compute v-------------
@@ -139,7 +139,7 @@ contains
                       para%Mdot * c2 / ( pi * rs * rs * stefan ))**0.25_x_precision
     state_0%Fz_0    = state_0%S_0 / 2._x_precision / state_0%temps_0
     state_0%Cv_0    = 1._x_precision / state_0%T_0
-    state_0%P_gaz_0 = state_0%rho_0 * kmp * state_0%T_0 / mu
+    state_0%P_gaz_0 = state_0%rho_0 * para%RTM
     state_0%P_rad_0 = 1._x_precision/3._x_precision * cst_rad * (state_0%T_0**4)
   end subroutine init_variable_0
 
