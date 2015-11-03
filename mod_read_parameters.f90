@@ -47,8 +47,9 @@ contains
     initial_param%Mdot = initial_param%Mdot * ( Ledd * 12._x_precision / c**2) * initial_param%M * M_sun
     initial_param%M = initial_param%M * M_sun
 
-    !Processing r_s and T_0
+    !Processing r_s, rmax and T_0
     rs  = 2._x_precision * G * initial_param%M / (c*c)
+    initial_param%rmax = 100._x_precision * rs
     T_0  = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * &
            initial_param%Mdot * (c*c) / ( pi * rs * rs * stefan ))**0.25_x_precision
 
