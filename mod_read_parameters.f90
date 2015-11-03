@@ -49,7 +49,7 @@ contains
 
     !Processing r_s, rmax and T_0
     rs  = 2._x_precision * G * initial_param%M / (c*c)
-    initial_param%rmax = 100._x_precision * rs
+    initial_param%rmax = initial_param%rmax * rs
     T_0  = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * &
            initial_param%Mdot * (c*c) / ( pi * rs * rs * stefan ))**0.25_x_precision
 
