@@ -17,7 +17,7 @@ contains
     integer                                                :: j     = 0
     real(kind = x_precision)                               :: temp  = 0.0d0
     real(kind = x_precision), parameter                    :: t_min = 8.5d-1
-    real(kind = x_precision), parameter                    :: t_max = 2.3d-0
+    real(kind = x_precision), parameter                    :: t_max = 2.3d0
     integer,                  parameter                    :: nb_it = 20
     real(kind = x_precision)                               :: sigma = 0.0d0
     real(kind = x_precision)                               :: Smin  = 0.0d0
@@ -46,8 +46,8 @@ contains
     real(kind = x_precision)                               :: Omega_0
     real(kind = x_precision)                               :: rho_0
     real(kind = x_precision)                               :: T_0
-    real(kind = x_precision)                               :: temp_reel=0.0d0
-    real(kind = x_precision)                               :: sigma_reel=0.0d0
+    real(kind = x_precision)                               :: temp_real=0.0d0
+    real(kind = x_precision)                               :: sigma_real=0.0d0
     character(len = 8)                                     :: number_of_cell
     character(len = 64)                                    :: fname
     integer                                                :: fid
@@ -82,9 +82,9 @@ contains
           call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
                K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
           
-          temp_reel   = temp * T_0
-          sigma_reel  = sigma * sigma_0
-          write(fid,'(1p,E12.6,4x,1p,E12.6)')temp_reel,sigma_reel
+          temp_real   = temp * T_0
+          sigma_real  = sigma * sigma_0
+          write(fid,'(1p,E12.6,4x,1p,E12.6)')temp_real,sigma_real
        enddo
        close(fid)
     enddo
@@ -209,11 +209,12 @@ contains
     !else
     !   optical_depth     = 0
     !end if
+    
      select case(optical_depth)
-      case(0)
+      case(1)
          Fz = 4._x_precision * c**2 * T**4/(27._x_precision * sqrt(3._x_precision) &
               * (K_ff + K_e) * Sigma * Sigma_0)
-      case (1)
+      case (0)
          !Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
          Fz = 6.22d20 * 2._x_precision / Omega_0 * rho_0 * H * rho**2 * sqrt(T * T_0)
      end select
