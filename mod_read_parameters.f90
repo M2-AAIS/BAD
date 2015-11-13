@@ -13,21 +13,21 @@ module mod_read_parameters
 
 contains
 
-  subroutine get_parameters ()
+  subroutine get_parameters()
     ! Read parameter from the input file: ./input_parameter.dat
 
     implicit none
 
     ! Internal variables
-    real (kind=x_precision) :: Y,Z  ! Chemical composition : X+Y+Z = 1
-    real (kind=x_precision) :: mu   ! Mean molecular mass
-    real (kind=x_precision) :: rmax ! Maximum considered radius (in rs)
-    real (kind=x_precision) :: mp   ! Proton mass in cgs
-    real (kind=x_precision) :: Ledd ! Eddington luminosity
-    real (kind=x_precision) :: rs   ! Schwarzschild radius
-    real (kind=x_precision) :: T_0  ! Order of magnitude for temperature
-    integer (kind=4)        :: ios  ! I/O test variable
-    character (len=50)      :: line ! String reading variable
+    real(kind=x_precision) :: Y,Z  ! Chemical composition : X+Y+Z = 1
+    real(kind=x_precision) :: mu   ! Mean molecular mass
+    real(kind=x_precision) :: rmax ! Maximum considered radius (in rs)
+    real(kind=x_precision) :: mp   ! Proton mass in cgs
+    real(kind=x_precision) :: Ledd ! Eddington luminosity
+    real(kind=x_precision) :: rs   ! Schwarzschild radius
+    real(kind=x_precision) :: T_0  ! Order of magnitude for temperature
+    integer(kind=4)        :: ios  ! I/O test variable
+    character(len=50)      :: line ! String reading variable
 
     ! Open file
     open(unit=11, file="./input_parameter.dat", action="read", status="old", iostat=ios)
