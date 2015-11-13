@@ -12,7 +12,7 @@ module mod_integrator
   
 contains
   ! (T(t+dt) - T(t))/dt = f(s, dt, dx)
-  function f (s, dt, dx)
+  function f (s, dt)
 !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     use mod_constants
     use mod_variables
@@ -20,7 +20,7 @@ contains
     
     type(state), intent(in)                    :: s
     type(parameters)                           :: para
-    real (kind=x_precision), intent(in)        :: dt, dx
+    real (kind=x_precision), intent(in)        :: dt
     real (kind=x_precision), dimension(n_cell) :: f
 
     real (kind=x_precision)                    :: overdx, overdx2, overdt
@@ -28,7 +28,7 @@ contains
 
     call get_parameters(para)
 
-    overdx  = 1/dx
+    overdx  = 1/para%dx
     overdx2 = overdx**2
     overdt  = 1/dt
     nuS = s%nu*s%S
@@ -40,17 +40,17 @@ contains
 
     ! Compute d(S/x)/dx as the mean spatial derivative (left + right)/2
     S_over_x                        = s%S / s%x
-    dS_over_x_over_dx(1)            = -2._x_precision / s%v(1) / s%x(1)**2 * nuS(2) / dx**2
+    dS_over_x_over_dx(1)            = -2._x_precision / s%v(1) / s%x(1)**2 * nuS(2) * overdx2
     dS_over_x_over_dx(2:n_cell - 1) = (S_over_x(3:n_cell) - S_over_x(1:n_cell - 2)) * overdx / 2
-    dS_over_x_over_dx(n_cell)       = -2._x_precision / s%x(n_cell)**2 / s%v(n_cell) / dx**2 * &
-    ( dx + nuS(n_cell-1) - nuS(n_cell) )
+    dS_over_x_over_dx(n_cell)       = -2._x_precision / s%x(n_cell)**2 / s%v(n_cell) * overdx2 * &
+                                      ( para%dx + nuS(n_cell-1) - nuS(n_cell) )
 
     ! Compute dS/dt using the corresponding equation, with d²(nuS)/dx² as (d(left)+d(right))/2
-    dS_over_dt(1)          = 2._x_precision * nuS(2) / s%x(1)**2 / dx**2
-    dS_over_dt(2:n_cell-1) = 1/s%x(2:n_cell-1)**2 * &
-    (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + nuS(1:n_cell-2)) * overdx2
-    dS_over_dt(n_cell)     = 2._x_precision / s%x(n_cell)**2 / dx**2 * &
-    ( dx + nuS(n_cell-1) - nuS(n_cell) )
+    dS_over_dt(1)          = 2._x_precision * nuS(2) / s%x(1)**2 * overdx2
+    dS_over_dt(2:n_cell-1) = 1 / s%x(2:n_cell-1)**2 * (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + &
+                             nuS(1:n_cell-2)) * overdx2
+    dS_over_dt(n_cell)     = 2._x_precision / s%x(n_cell)**2 / para%dx**2 * &
+                             ( para%dx + nuS(n_cell-1) - nuS(n_cell))
 
     ! Second member of the dT/dt equation
     f = (3_x_precision * state_0%v_0**2 * s%nu * s%Omega**2 - &
@@ -69,7 +69,7 @@ contains
     
     type (state), intent(inout)                   :: states
 
-    real(kind = x_precision)                      :: dt, overdx, overdx2, overdt, dx
+    real(kind = x_precision)                      :: dt, overdx, overdx2, overdt
     integer                                       :: info
 
     real(kind = x_precision), dimension(n_cell)   :: dtemp, diag
@@ -78,9 +78,8 @@ contains
     ! Get the timestep and the spacestep
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
     dt=1d-6
-    call process_dx(dx)
 
-    overdx  = 1_x_precision/dx
+    overdx  = 1_x_precision/param%dx
     overdx2 = overdx**2
     overdt  = 1_x_precision/dt
     
@@ -132,7 +131,7 @@ contains
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
     
     f0 = f(states, dt, dx)
-    f1 = (f(states_deriv, dt, dx) - f(states, dt, dx)) / dtemp
+    f1 = (f(states_deriv, dt, param%dx) - f(states, dt, param%dx)) / dtemp
     
     states%T = states%T + dt * f0 * (1_x_precision + dt * f1)
 
