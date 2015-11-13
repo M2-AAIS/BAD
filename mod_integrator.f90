@@ -4,6 +4,7 @@ module mod_integrator
   use mod_constants
   use mod_timestep
   use mod_read_parameters
+  use mod_variables
 
   implicit none 
   private
@@ -13,9 +14,7 @@ module mod_integrator
 contains
   ! (T(t+dt) - T(t))/dt = f(s, dt)
   function f (s, dt)
-!process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
-    use mod_constants
-    use mod_variables
+  !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     implicit none
     
     type(state), intent(in)                    :: s
@@ -60,7 +59,6 @@ contains
          - s%Cv * s%v / s%x * dT_over_dx) / s%Cv
   end function f
 
-
   subroutine do_timestep_S (states)
   !process the temporal evolution of S
     use mod_variables
@@ -76,7 +74,7 @@ contains
     real(kind = x_precision), dimension(n_cell)   :: dtemp, diag
     real(kind = x_precision), dimension(n_cell-1) :: diag_low, diag_up
     
-    ! Get the timestep and the spacestep
+    ! Get the timestep
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
     dt=1d-6
     call get_parameters(para)
@@ -107,8 +105,6 @@ contains
 
   subroutine do_timestep_T(states) 
   !process the temporal evolution of T
-    use mod_variables
-    use mod_constants
     implicit none
     
     type (state), intent(inout)                   :: states
@@ -127,7 +123,6 @@ contains
     states_deriv%T = states%T + dtemp
     
     call compute_variables(states_deriv)
-    !modification of compute_varaible--just enter a state now -- FIXME
 
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
     
