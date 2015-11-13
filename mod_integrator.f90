@@ -115,7 +115,7 @@ contains
     type (state)                                  :: states_deriv
     real(kind = x_precision)                      :: dt, dx
 
-    real(kind = x_precision), dimension(n_cell)   :: dtemp, T_deriv 
+    real(kind = x_precision), dimension(n_cell)   :: dtemp
     real(kind = x_precision), dimension(n_cell)   :: f0, f1
 
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
