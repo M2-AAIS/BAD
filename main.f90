@@ -8,13 +8,13 @@ program black_hole_diffusion
 
   implicit none
 
-  integer     :: iteration, n, ios
-  type(state) :: s
-  real(kind = x_precision) :: delta_S_max, delta_T_max, t
+  integer                                     :: iteration, n, ios
+  type(state)                                 :: s
+  real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, prev_T, S_crit
 
   ! FIXME
-  S_crit = 1e15
+  S_crit = 1.e99_x_precision
   ! FIXME
   delta_S_max = 1e-5
   ! FIXME I love it
@@ -24,8 +24,9 @@ program black_hole_diffusion
   ! Initial time = 0
   t = 0
 
+  ! Read the parameters 
   call get_parameters()
-
+  
   ! Call init variable to create the adim state vector and
   ! generate the state_0
   call init_variable_0()
@@ -35,9 +36,10 @@ program black_hole_diffusion
 
   ! Copy the value of state_0 into state vector s
   do n = 1, n_cell
-     s%Omega(n) = state_0%Omega_0
      s%x(n)     = (n-1) * params%dx + 3_x_precision ! x_min = 3
-     s%T(n)     = state_0%T_0
+     s%Omega(n) = 1_x_precision/s%x(n)**3
+     s%T(n)     = 1e-3_x_precision
+     s%S(n)     = 1e-3_x_precision
   end do
   call compute_variables(s)
 
@@ -48,12 +50,17 @@ program black_hole_diffusion
      stop "Error while opening output file."
   end if
 
+  ! Initialize prev_S and prev_T
+  prev_S = s%S + 2*delta_S_max
+  prev_T = s%T + 2*delta_T_max
+
   call snapshot(s, iteration, t, 13)
   
   ! Start iterating
   do iteration = 1, n_iterations
      ! Check that S is at a fixed point
      do while (maxval(abs(prev_S - s%S)) > delta_S_max)
+        write(13, *) "While prev_S/s%S", iteration
         ! Check here that S < S_crit
         if (maxval(s%S - S_crit) > 0) then
            ! Switch to explicit scheme
@@ -63,11 +70,15 @@ program black_hole_diffusion
 
            ! Integrate S
            call do_timestep_S(s)
+
+           write(13, *) "After S timestep"
+           call snapshot(s, iteration, t, 13)
+           
            ! Recompute variables
            call compute_variables(s)
 
            ! FIXME : increment time
-
+ 
            ! Iterate while T hasn't converged
            do while (maxval(abs(prev_T - s%T)) > delta_T_max)
               ! Check here that T < T_crit
@@ -77,10 +88,13 @@ program black_hole_diffusion
               call do_timestep_T(s)
               ! Recompute variables
               call compute_variables(s)
+              write(13, *) "After integration of T integration"
+              call snapshot(s, iteration, t, 13)
 
               ! FIXME : increment time
            end do
            ! Output things here
+           write(13, *) "YOLO DUDE"
            call snapshot(s, iteration, t, 13)
         end if
      end do
