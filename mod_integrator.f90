@@ -18,16 +18,13 @@ contains
     implicit none
     
     type(state), intent(in)                    :: s
-    type(parameters)                           :: para
     real (kind=x_precision), intent(in)        :: dt
     real (kind=x_precision), dimension(n_cell) :: f
 
     real (kind=x_precision)                    :: overdx, overdx2, overdt
     real (kind=x_precision), dimension(n_cell) :: dS_over_dt, dS_over_x_over_dx, S_over_x, dT_over_dx, nuS
 
-    call get_parameters(para)
-
-    overdx  = 1/para%dx
+    overdx  = 1/params%dx
     overdx2 = overdx**2
     overdt  = 1/dt
     nuS = s%nu*s%S
@@ -42,33 +39,30 @@ contains
     dS_over_x_over_dx(1)            = -2._x_precision / s%v(1) / s%x(1)**2 * nuS(2) * overdx2
     dS_over_x_over_dx(2:n_cell - 1) = (S_over_x(3:n_cell) - S_over_x(1:n_cell - 2)) * overdx / 2
     dS_over_x_over_dx(n_cell)       = -2._x_precision / s%x(n_cell)**2 / s%v(n_cell) * overdx2 * &
-                                      ( para%dx + nuS(n_cell-1) - nuS(n_cell) )
+                                      ( params%dx + nuS(n_cell-1) - nuS(n_cell) )
 
     ! Compute dS/dt using the corresponding equation, with d²(nuS)/dx² as (d(left)+d(right))/2
     dS_over_dt(1)          = 2._x_precision * nuS(2) / s%x(1)**2 * overdx2
     dS_over_dt(2:n_cell-1) = 1 / s%x(2:n_cell-1)**2 * (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + &
                              nuS(1:n_cell-2)) * overdx2
-    dS_over_dt(n_cell)     = 2._x_precision / s%x(n_cell)**2 / para%dx**2 * &
-                             ( para%dx + nuS(n_cell-1) - nuS(n_cell))
+    dS_over_dt(n_cell)     = 2._x_precision / s%x(n_cell)**2 / params%dx**2 * &
+                             ( params%dx + nuS(n_cell-1) - nuS(n_cell))
 
     ! Second member of the dT/dt equation
     f = (3_x_precision * state_0%v_0**2 * s%nu * s%Omega**2 - &
          s%Fz * s%x / s%S &
-         + para%RTM * (4._x_precision - 3._x_precision * s%beta) / s%beta * s%T / s%S * &
+         + params%RTM * (4._x_precision - 3._x_precision * s%beta) / s%beta * s%T / s%S * &
          (dS_over_dt + s%v * dS_over_x_over_dx) &
          - s%Cv * s%v / s%x * dT_over_dx) / s%Cv
   end function f
 
   subroutine do_timestep_S (states)
   !process the temporal evolution of S
-    use mod_variables
-    use mod_constants
     implicit none
     
     type (state), intent(inout)                   :: states
 
     real(kind = x_precision)                      :: dt, overdx, overdx2, overdt
-    type(parameters)                              :: para
     integer                                       :: info
 
     real(kind = x_precision), dimension(n_cell)   :: dtemp, diag
@@ -77,9 +71,8 @@ contains
     ! Get the timestep
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
     dt=1d-6
-    call get_parameters(para)
 
-    overdx  = 1_x_precision/para%dx
+    overdx  = 1_x_precision/params%dx
     overdx2 = overdx**2
     overdt  = 1_x_precision/dt
     

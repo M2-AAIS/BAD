@@ -3,21 +3,17 @@ module mod_variables
   use mod_constants
   use mod_read_parameters
   implicit none
-  type(adim_state)               :: state_0
-  type(parameters)               :: params
+  type(adim_state) :: state_0
 
   private
 
-  public :: compute_variables, dim_adim, init_variable_0, state_0, params
+  public :: compute_variables, dim_adim, init_variable_0, state_0
 
 contains
   !--------------------------------------------------------------
   subroutine compute_variables(state_out)
-    use mod_constants
-    use mod_read_parameters
     implicit none
     integer                                                   :: i
-    type(parameters)                                          :: para
     real (kind = x_precision),              dimension(n_cell) :: a1, b1, c1
     real (kind = x_precision),              dimension(n_cell) :: Delta
     real (kind = x_precision),              dimension(n_cell) :: kappa_ff, tau, epsil
@@ -25,12 +21,11 @@ contains
 
     type(state),               intent(inout)                  :: state_out
 
-    call get_parameters(para)
-    kappa_e = 0.2_x_precision * (1._x_precision + para%X)
+    kappa_e = 0.2_x_precision * (1._x_precision + params%X)
     !-------------Compute trinome coeff for H----------------
     a1 = ((state_out%Omega**2) * (state_0%Omega_0**2) * state_out%S * state_0%S_0) / (2._x_precision * state_out%x)
     b1 = - (cst_rad * (state_out%T**4) * (state_0%T_0**4)) / (3._x_precision)
-    c1 = - (para%RTM * state_out%T * state_out%S * state_0%S_0 ) / (2._x_precision * state_out%x)
+    c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0 ) / (2._x_precision * state_out%x)
     Delta = b1**2 - (4._x_precision * a1 * c1)
     !--------------------------------------------------------
     do i=1,n_cell
@@ -38,10 +33,10 @@ contains
       state_out%P_rad(i) = state_out%T(i)**4
       state_out%cs(i)    = state_out%Omega(i) * state_out%H(i)
       state_out%rho(i)   = state_out%S(i) / (state_out%H(i) * state_out%x(i))
-      state_out%nu(i)    = para%alpha * state_out%cs(i) * state_out%H(i)
+      state_out%nu(i)    = params%alpha * state_out%cs(i) * state_out%H(i)
       state_out%P_gaz(i) = state_out%rho(i) * state_out%T(i)
       state_out%beta(i)  = state_out%P_gaz(i) / (state_out%P_gaz(i) + state_out%P_rad(i))
-      state_out%Cv(i)    = para%RTM * ((12._x_precision * gammag -1._x_precision ) * &
+      state_out%Cv(i)    = params%RTM * ((12._x_precision * gammag -1._x_precision ) * &
                            (1._x_precision - state_out%beta(i)) + state_out%beta(i)) / &
                            ( state_out%beta(i) * (gammag - 1._x_precision))
       !------------limit condition to compute v-------------
@@ -60,7 +55,7 @@ contains
                     (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)
 
      ! tau(i)      = 0.5_x_precision * sqrt(0.2_x_precision * (1._x_precision * &
-     !               para%X) * 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
+     !               params%X) * 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
      !               (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)) * &
      !               state_0%S_0 * state_out%S(i) / state_out%x(i)
       tau(i)      = 0.5_x_precision * sqrt(kappa_e * kappa_ff(i)) * (state_out%S(i)/state_out%x(i) * state_0%S_0)
@@ -78,8 +73,6 @@ contains
   end subroutine compute_variables
   !--------------------------------------------------------------
   subroutine dim_adim(mode,state_in)
-    use mod_constants
-    use mod_read_parameters
     implicit none
     !select 0 or 1 to adimension or dimension your state
     integer         , intent(in)                 :: mode
@@ -116,14 +109,10 @@ contains
   end subroutine dim_adim
  !--------------------------------------------------------------
   subroutine init_variable_0()
-    use mod_constants
-    use mod_read_parameters
     !Compute the initial adimention parameters
     real(kind = x_precision)         :: rs, c2
 
     c2 = c**2
-
-    call get_parameters(params)
     rs = 2._x_precision*G*params%M/c2
 
     state_0%omega_0 = sqrt( G*params%M/(rs)**3 )

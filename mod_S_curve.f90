@@ -51,9 +51,7 @@ contains
     character(len = 8)                                     :: number_of_cell
     character(len = 64)                                    :: fname
     integer                                                :: fid
-    type(parameters)                                       :: param
     !------------------------------------------------------------------------
-    call get_parameters(param)
     call display_parameters()
     call initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
     call display_initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
@@ -62,9 +60,9 @@ contains
     !-------------------------------------------------------------------------
     do j              = 1 , 1
        !do j              = 1 , n_cell
-       !  r = param%dx*(j-1) + rmin
-       r              = 10._x_precision*G*param%M/(c**2)     
-       omega          = sqrt(G*param%M/r**3) / Omega_0 
+       !  r = params%dx*(j-1) + rmin
+       r              = 10._x_precision*G*params%M/(c**2)     
+       omega          = sqrt(G*params%M/r**3) / Omega_0 
        write(number_of_cell,'(I5.5)') j
        fid = 20 + j
        fname = 'Temperature_Sigma_'//trim(number_of_cell)//'.dat'
@@ -139,15 +137,12 @@ contains
     real(kind=x_precision),intent(out)                      :: Omega_0
     real(kind=x_precision),intent(out)                      :: T_0
     real(kind=x_precision),intent(out)                      :: rho_0
-
-    type(parameters)                                        :: param
     !------------------------------------------------------------------------
 
-    call get_parameters(param)
-    rs                 = 2._x_precision * G * param%M/(c**2)
+    rs                 = 2._x_precision * G * params%M/(c**2)
     rmin               = 3._x_precision * rs
-    Mdot_0             = param%Mdot
-    Omega_0            = sqrt(G * param%M / rs**3 )
+    Mdot_0             = params%Mdot
+    Omega_0            = sqrt(G * params%M / rs**3 )
     Sigma_0            = Mdot_0 /(Omega_0 * rs**2 * 2_x_precision * pi)
     write(*,*)'Mdot_0',Mdot_0
     T_0                = (Mdot_0 * c**2 / (48._x_precision * pi * rs**2 * stefan * &
@@ -166,7 +161,6 @@ contains
        K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0)
     implicit none
  
-    type(parameters)                                         :: param
     real(kind = x_precision),intent(in)                      :: T,Sigma,Omega
     real(kind = x_precision)                                 :: coeff_a=0.,coeff_b=0.,coeff_c=0.
     real(kind = x_precision),intent(out)                     :: H     
@@ -193,11 +187,10 @@ contains
     integer                                                  :: optical_depth = 0
     !------------------------------------------------------------------------
 
-    call get_parameters(param)
    
     coeff_a              = (Omega**2 * Omega_0**2 * Sigma * Sigma_0)/2._x_precision
     coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * T_0**4 / rs
-    coeff_c              = (-1._x_precision * param%RTM * T  *  Sigma * Sigma_0)/(2._x_precision * rs**2)
+    coeff_c              = (-1._x_precision * params%RTM * T  *  Sigma * Sigma_0)/(2._x_precision * rs**2)
 
     call quadratic(coeff_a , coeff_b , coeff_c , H)
 
@@ -205,9 +198,9 @@ contains
     P_rad                = T**4
     P_gaz                = rho * T
     cs                   = Omega * H
-    nu                   = param%alpha * cs * H
+    nu                   = params%alpha * cs * H
     K_ff                 = 6.13d22 * rho_0 * rho * (T_0 * T)**(-3.5_x_precision)
-    K_e                  = 0.2_x_precision * (1._x_precision + param%X)
+    K_e                  = 0.2_x_precision * (1._x_precision + params%X)
     E_ff                 = 6.22d20 * (rho_0 * rho)**2 * sqrt(T_0 * T)
     tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0
     nu_0                 = 2._x_precision * rs**2 * Omega_0/3._x_precision
@@ -339,14 +332,12 @@ contains
   !Subroutine in order to display parameters
   !-------------------------------------------------------------------------
   subroutine display_parameters()
-    type(parameters)                            :: param
-    call get_parameters(param)
     write(*,*)'           Input Parameters             '
     write(*,*)'****************************************'
-    write(*,"(' BH_mass     =',1p,E12.4)") param%M
-    write(*,"(' Mdot        =',1p,E12.4)") param%Mdot
-    write(*,"(' alpha       =',1p,E12.4)") param%alpha
-    write(*,"(' X           =',1p,E12.4)") param%X
+    write(*,"(' BH_mass     =',1p,E12.4)") params%M
+    write(*,"(' Mdot        =',1p,E12.4)") params%Mdot
+    write(*,"(' alpha       =',1p,E12.4)") params%alpha
+    write(*,"(' X           =',1p,E12.4)") params%X
     write(*,*)'****************************************'
     read(*,*)
   end subroutine display_parameters
@@ -366,8 +357,6 @@ contains
     real(kind = x_precision), intent(in)                     :: T_0
     real(kind = x_precision), intent(in)                     :: rho_0
 
-    Type(parameters)                                         :: param
-    call get_parameters(param)
     !-----------------------------------------------------------------------
 
     write(*,*)'           Initial Variables            '
@@ -375,7 +364,7 @@ contains
     write(*,"(' Temp_0      =',1p,E12.4)") T_0
     write(*,"(' Sigma_0     =',1p,E12.4)") Sigma_0
     write(*,"(' Omega_0     =',1p,E12.4)") Omega_0
-    write(*,"(' Omega_max   =',1p,E12.4)") sqrt(G*param%M / rmin**3)
+    write(*,"(' Omega_max   =',1p,E12.4)") sqrt(G*params%M / rmin**3)
     write(*,"(' H_0         =',1p,E12.4)") rs
     write(*,"(' Mdot_0      =',1p,E12.4)") Mdot_0
     write(*,"(' rho_0       =',1p,E12.4)") rho_0

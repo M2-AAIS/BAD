@@ -5,7 +5,8 @@ program black_hole_diffusion
   use mod_S_curve
 
   implicit none
-  
+
+  call get_parameters() 
   call init_variable_0()
   call curve()
   
