@@ -5,7 +5,7 @@ module mod_read_parameters
   implicit none
   private
 
-  public :: get_parameters, process_dx
+  public :: get_parameters
 
 contains
 

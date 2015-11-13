@@ -11,7 +11,7 @@ module mod_integrator
   public :: do_timestep_T, do_timestep_S
   
 contains
-  ! (T(t+dt) - T(t))/dt = f(s, dt, dx)
+  ! (T(t+dt) - T(t))/dt = f(s, dt)
   function f (s, dt)
 !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     use mod_constants
@@ -70,6 +70,7 @@ contains
     type (state), intent(inout)                   :: states
 
     real(kind = x_precision)                      :: dt, overdx, overdx2, overdt
+    type(parameters)                              :: para
     integer                                       :: info
 
     real(kind = x_precision), dimension(n_cell)   :: dtemp, diag
@@ -78,8 +79,9 @@ contains
     ! Get the timestep and the spacestep
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
     dt=1d-6
+    call get_parameters(para)
 
-    overdx  = 1_x_precision/param%dx
+    overdx  = 1_x_precision/para%dx
     overdx2 = overdx**2
     overdt  = 1_x_precision/dt
     
@@ -112,13 +114,12 @@ contains
     type (state), intent(inout)                   :: states
 
     type (state)                                  :: states_deriv
-    real(kind = x_precision)                      :: dt, dx
+    real(kind = x_precision)                      :: dt
 
     real(kind = x_precision), dimension(n_cell)   :: dtemp
     real(kind = x_precision), dimension(n_cell)   :: f0, f1
 
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
-    call process_dx(dx)
     dt=1d-6
 
     dtemp = 0.01_x_precision * states%T
@@ -130,8 +131,8 @@ contains
 
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
     
-    f0 = f(states, dt, dx)
-    f1 = (f(states_deriv, dt, param%dx) - f(states, dt, param%dx)) / dtemp
+    f0 = f(states, dt)
+    f1 = (f(states_deriv, dt) - f(states, dt)) / dtemp
     
     states%T = states%T + dt * f0 * (1_x_precision + dt * f1)
 
