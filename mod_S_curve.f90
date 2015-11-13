@@ -62,7 +62,7 @@ contains
     !-------------------------------------------------------------------------
     do j              = 1 , 1
        !do j              = 1 , n_cell
-       !  r = (param%rmax-rmin)/(n_cell-1)*(j-1) + rmin
+       !  r = param%dx*(j-1) + rmin
        r              = 10._x_precision*G*param%M/(c**2)     
        omega          = sqrt(G*param%M/r**3) / Omega_0 
        write(number_of_cell,'(I5.5)') j
@@ -345,7 +345,6 @@ contains
     write(*,*)'****************************************'
     write(*,"(' BH_mass     =',1p,E12.4)") param%M
     write(*,"(' Mdot        =',1p,E12.4)") param%Mdot
-    write(*,"(' rmax        =',1p,E12.4)") param%rmax
     write(*,"(' alpha       =',1p,E12.4)") param%alpha
     write(*,"(' X           =',1p,E12.4)") param%X
     write(*,*)'****************************************'
