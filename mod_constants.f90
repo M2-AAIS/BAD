@@ -3,13 +3,13 @@
 module mod_constants
   implicit none
 
-  integer, parameter, public :: x_precision  = selected_real_kind(15)
-  integer, parameter, public :: n_cell       = 256
-  integer, parameter, public :: n_iterations = 1000
+  integer, parameter, public :: x_precision  = selected_real_kind(15) ! Numerical precision
+  integer, parameter, public :: n_cell       = 256                    ! Number of cells along the disk radius
+  integer, parameter, public :: n_iterations = 1000                   ! Number of iterations to run
 
   real(kind = x_precision), parameter, public :: G       = 6.67408e-8_x_precision ! Gravitationnal cst in cgs
   real(kind = x_precision), parameter, public :: c       = 2.99792458e10_x_precision ! Speed of light in cgs
-  real(kind = x_precision), parameter, public :: pi      = 4.0_x_precision*atan(1.0_x_precision) 
+  real(kind = x_precision), parameter, public :: pi      = 4.0_x_precision*atan(1.0_x_precision)
   real(kind = x_precision), parameter, public :: M_sun   = 1.98855e33_x_precision ! Mass of the sun in cgs
   real(kind = x_precision), parameter, public :: cst_rad = 7.5657308531642009e-17_x_precision ! Radiation cst in cgs
   real(kind = x_precision), parameter, public :: stefan  = (c * cst_rad) / 4.0_x_precision ! Stefan cst in cgs
@@ -21,38 +21,39 @@ module mod_constants
 
   type parameters
     real(kind = x_precision) :: M, Mdot, X, RTM, alpha, dx
-    !M     : Black hole Mass
-    !Mdot  : Acretion rate at rmax
-    !X     : Chemical composition in H
-    !RTM   : Gas constant × T_0 ÷ μ
-    !alpha : Viscosity parameter
-    !dx    : Adimensionned spacestep
+    ! M     : Black hole Mass
+    ! Mdot  : Acretion rate at rmax
+    ! X     : Chemical composition in H
+    ! RTM   : Gas constant × T_0 ÷ μ
+    ! alpha : Viscosity parameter
+    ! dx    : Dimensionless spacestep
   end type parameters
 
   type state
     real(kind = x_precision), dimension(n_cell) :: x, Omega, nu, v, T, P_rad, P_gaz, beta, cs, H, rho, S, Fz, M_dot, Cv
-    !Omega : Angular velocity
-    !x     : Space variable
-    !nu    : Viscosity
-    !v     : Local, radial accretion speed
-    !T     : Temperature
-    !P_rad : Radiative pressure
-    !P_gaz : Gaz pressure
-    !beta  : Pressure indicator
-    !cs    : Speed of sound
-    !H     : Disk half-height
-    !rho   : Volume density
-    !S     : Variable of density
-    !Fz    : Radiative flux
-    !M_dot : Accretion rate
-    !Cv    : Heat capacity at constant volume
+    ! x     : Space variable
+    ! Omega : Angular velocity
+    ! nu    : Viscosity
+    ! v     : Local, radial accretion speed
+    ! T     : Temperature
+    ! P_rad : Radiative pressure
+    ! P_gaz : Gaz pressure
+    ! beta  : Pressure indicator
+    ! cs    : Speed of sound
+    ! H     : Disk half-height
+    ! rho   : Volume density
+    ! S     : Variable of density
+    ! Fz    : Radiative flux
+    ! M_dot : Accretion rate
+    ! Cv    : Heat capacity at constant volume
   end type state
 
   type adim_state
     real(kind= x_precision) :: temps_0, x_0, Omega_0, nu_0, v_0, T_0, P_rad_0, P_gaz_0, cs_0, H_0, rho_0, S_0, Fz_0, M_dot_0, Cv_0
+    ! Usefull quantities to get the dimensionless ones
   end type adim_state
-  
+
 contains
-    
+
 end module mod_constants
 
