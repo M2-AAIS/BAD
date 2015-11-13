@@ -22,6 +22,7 @@ contains
     real (kind=x_precision) :: Y,Z  ! Chemical composition : X+Y+Z = 1
     real (kind=x_precision) :: mu   ! Mean molecular mass
     real (kind=x_precision) :: rmax ! Maximum considered radius (in rs)
+    real (kind=x_precision) :: mp   ! Proton mass in cgs
     real (kind=x_precision) :: Ledd ! Eddington luminosity
     real (kind=x_precision) :: rs   ! Schwarzschild radius
     real (kind=x_precision) :: T_0  ! Order of magnitude for temperature
@@ -43,6 +44,9 @@ contains
     ! Close the file
     close(11)
 
+    ! Compute mp
+    mp = kb / R
+
     ! Compute Ledd
     Ledd = 4._x_precision * pi * G * mp * c / thomson
 
@@ -60,7 +64,7 @@ contains
     mu = 1._x_precision / (2._x_precision*params%X + 3._x_precision*Y/4._x_precision + Z/2._x_precision)
 
     ! Process RTM
-    params%RTM = kmp * T_0 / mu
+    params%RTM = R * T_0 / mu
 
     ! Process dx, rmin = 3rs
     params%dx = (sqrt(rmax) - sqrt(3._x_precision)) / (n_cell - 1._x_precision)
