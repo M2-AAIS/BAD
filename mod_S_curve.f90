@@ -16,13 +16,13 @@ contains
     integer                                                :: i     = 0
     integer                                                :: j     = 0
     real(kind = x_precision)                               :: temp  = 0.0d0
-    real(kind = x_precision), parameter                    :: t_min = 9.715d-6
-    real(kind = x_precision), parameter                    :: t_max = 9.715d-4
-    integer,                  parameter                    :: nb_it = 50
+    real(kind = x_precision), parameter                    :: t_min = 5.715d-4
+    real(kind = x_precision), parameter                    :: t_max = 1.815d-6
+    integer,                  parameter                    :: nb_it = 200
     real(kind = x_precision)                               :: sigma = 0.0d0
     real(kind = x_precision)                               :: Smin  = 0.0d0
     real(kind = x_precision)                               :: Smax  = 0.0d0
-    real(kind = x_precision)                               :: eps   = 1.0d-15
+    real(kind = x_precision)                               :: eps   = 1.0d-10
     real(kind = x_precision)                               :: omega = 0.0d0
     real(kind = x_precision)                               :: r     = 0.0d0
     real(kind = x_precision)                               :: H     = 0.0d0    
@@ -62,17 +62,18 @@ contains
     !-------------------------------------------------------------------------
     do j              = 1 , 1
        !do j              = 1 , n_cell
-       !  r = param%dx*(j-1) + rmin
+       !  r = (param%rmax-rmin)/(n_cell-1)*(j-1) + rmin
        r              = 10._x_precision*G*param%M/(c**2)     
        omega          = sqrt(G*param%M/r**3) / Omega_0 
        write(number_of_cell,'(I5.5)') j
        fid = 20 + j
        fname = 'Temperature_Sigma_'//trim(number_of_cell)//'.dat'
        open(fid,file  = fname, status='unknown',action='readwrite') 
-       !  write(fid,*)"T              Sigma"
+       !  write(fid,*)"T     &         Sigma"
         do i          = 1 , nb_it
-          Smin        = 1.0d-50
-          Smax        = 1.0d50
+          Smin        = 5.0d-13
+          Smax        = 3.0d13
+          
           temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0)
           
@@ -148,6 +149,7 @@ contains
     Mdot_0             = param%Mdot
     Omega_0            = sqrt(G * param%M / rs**3 )
     Sigma_0            = Mdot_0 /(Omega_0 * rs**2 * 2_x_precision * pi)
+    write(*,*)'Mdot_0',Mdot_0
     T_0                = (Mdot_0 * c**2 / (48._x_precision * pi * rs**2 * stefan * &
                          sqrt(27._x_precision) ) )**(1._x_precision/4._x_precision)
     rho_0              = Sigma_0 / (2._x_precision * rs)
@@ -185,6 +187,8 @@ contains
     real(kind = x_precision),intent(in)                      :: T_0
     real(kind = x_precision),intent(in)                      :: rho_0
     real(kind = x_precision),intent(in)                      :: rs
+    real(kind = x_precision)                                 :: nu_0
+
     real(kind = x_precision),intent(out)                     :: f 
     integer                                                  :: optical_depth = 0
     !------------------------------------------------------------------------
@@ -192,12 +196,11 @@ contains
     call get_parameters(param)
    
     coeff_a              = (Omega**2 * Omega_0**2 * Sigma * Sigma_0)/2._x_precision
-    coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * T_0**4 /rs
+    coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * T_0**4 / rs
     coeff_c              = (-1._x_precision * param%RTM * T  *  Sigma * Sigma_0)/(2._x_precision * rs**2)
 
     call quadratic(coeff_a , coeff_b , coeff_c , H)
 
-  !  H                    = H / rs
     rho                  = Sigma / H
     P_rad                = T**4
     P_gaz                = rho * T
@@ -206,14 +209,15 @@ contains
     K_ff                 = 6.13d22 * rho_0 * rho * (T_0 * T)**(-3.5_x_precision)
     K_e                  = 0.2_x_precision * (1._x_precision + param%X)
     E_ff                 = 6.22d20 * (rho_0 * rho)**2 * sqrt(T_0 * T)
-    tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0    
+    tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0
+    nu_0                 = 2._x_precision * rs**2 * Omega_0/3._x_precision
     
     
     !-------------------------------------------------------------------------
     !Select the case for the opticaly depth to compute Fz
     !-------------------------------------------------------------------------
 
-    optical_depth        = 0
+    optical_depth        = 1
 
   !  if (tau_eff .ge. 1.)  then
   !     optical_depth     = 1
@@ -222,15 +226,17 @@ contains
   !  end if
     select case(optical_depth)
     case(1)
-       Fz = 4._x_precision * c**2 * T**4/(27._x_precision * sqrt(3._x_precision) &
+       Fz = 4._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
             * (K_ff + K_e) * Sigma * Sigma_0)
     case (0)
+    !   Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
+
        Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
-       ! Fz =  E_ff * H 
-       ! Fz = 6.22d20 * 2._x_precision / Omega_0 * rho_0 * H * rho**2 * sqrt(T * T_0)
     end select
-    Q_minus             = 2._x_precision * Fz / Sigma
-    Q_plus              = 9._x_precision / 4._x_precision * nu * Omega**2
+    Q_plus              = 3._x_precision  * rs**2 * nu * Omega**2 * Omega_0**2
+    !  Q_minus             = Fz  / Sigma * (1 / (3._x_precision * nu_0) * Omega_0 * rs**2)
+    Q_minus             = Fz  / Sigma 
+
     f                   = Q_plus - Q_minus
     
   end subroutine variables
@@ -281,7 +287,6 @@ contains
     !-------------------------------------------------------------------------
     dichotomy             = (Smin+Smax)/2.
     j = 0
-
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
          tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0)
     
@@ -301,6 +306,11 @@ contains
     if( f_max * f_min .lt. 0.) then
        iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. 1000)
           if(f_min * f_dichotomy .lt. 0.) then
+
+ !   write(*,*)'fmin = ',f_min
+ !   write(*,*)'fmax = ',f_max
+ !   write(*,*)' '
+
              Smax         = dichotomy
              
              call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
@@ -313,7 +323,7 @@ contains
                   tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0, rho_0)
           endif
           
-          dichotomy       = (Smin + Smax) / 2._x_precision
+          dichotomy       = (Smin + Smax) * 1.0 / 2._x_precision
 
           call variables(T, dichotomy, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
                K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f_dichotomy,Sigma_0, Omega_0,rs,T_0, rho_0)
@@ -335,6 +345,7 @@ contains
     write(*,*)'****************************************'
     write(*,"(' BH_mass     =',1p,E12.4)") param%M
     write(*,"(' Mdot        =',1p,E12.4)") param%Mdot
+    write(*,"(' rmax        =',1p,E12.4)") param%rmax
     write(*,"(' alpha       =',1p,E12.4)") param%alpha
     write(*,"(' X           =',1p,E12.4)") param%X
     write(*,*)'****************************************'
