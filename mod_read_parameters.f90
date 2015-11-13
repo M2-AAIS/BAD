@@ -21,9 +21,11 @@ contains
     ! internal variable
     real (kind=x_precision)       :: Y,Z           ! chemical composition : x+y+z = 1
     real (kind=x_precision)       :: mu            ! mean molecular mass
+    real (kind=x_precision)       :: Ledd          ! Eddington luminosity
+    real (kind=x_precision)       :: rs            ! Schwarzschild radius
+    real (kind=x_precision)       :: T_0           ! Temperature order of magnitude
     integer (kind=4)              :: ios           ! i/o variable test
     character (len=50)            :: bla           ! string reading variable
-    real(kind=x_precision)        :: Ledd,rs,T_0  ! Eddington luminosity, Schwarzschild radius, temperature adm
 
     !Compute of Ledd
     Ledd = 4._x_precision * pi * G * mp * c / thomson
