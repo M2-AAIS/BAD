@@ -52,7 +52,6 @@ contains
     character(len = 64)                                    :: fname
     integer                                                :: fid
     !------------------------------------------------------------------------
-    call display_parameters()
     call initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
     call display_initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
     !-------------------------------------------------------------------------
@@ -121,8 +120,6 @@ contains
     !end if
   end subroutine quadratic
 
-
-  
   !-------------------------------------------------------------------------
   !Subroutine in order to compute initial variables rs, rmin, Mdot_0,
   !Sigma_0
@@ -144,7 +141,6 @@ contains
     Mdot_0             = params%Mdot
     Omega_0            = sqrt(G * params%M / rs**3 )
     Sigma_0            = Mdot_0 /(Omega_0 * rs**2 * 2_x_precision * pi)
-    write(*,*)'Mdot_0',Mdot_0
     T_0                = (Mdot_0 * c**2 / (48._x_precision * pi * rs**2 * stefan * &
                          sqrt(27._x_precision) ) )**(1._x_precision/4._x_precision)
     rho_0              = Sigma_0 / (2._x_precision * rs)
@@ -327,21 +323,6 @@ contains
   
   end function dichotomy
   
-  
-  !-------------------------------------------------------------------------
-  !Subroutine in order to display parameters
-  !-------------------------------------------------------------------------
-  subroutine display_parameters()
-    write(*,*)'           Input Parameters             '
-    write(*,*)'****************************************'
-    write(*,"(' BH_mass     =',1p,E12.4)") params%M
-    write(*,"(' Mdot        =',1p,E12.4)") params%Mdot
-    write(*,"(' alpha       =',1p,E12.4)") params%alpha
-    write(*,"(' X           =',1p,E12.4)") params%X
-    write(*,*)'****************************************'
-    read(*,*)
-  end subroutine display_parameters
-
   
   !-------------------------------------------------------------------------
   !Subroutine in order to display initial variables

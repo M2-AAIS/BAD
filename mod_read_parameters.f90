@@ -6,7 +6,7 @@ module mod_read_parameters
   implicit none
 
   type(parameters) :: params ! Contains the initial parameters of the black hole accretion disk (see mod_constants.f90 for details)
-  
+
   private
 
   public           :: get_parameters, params
@@ -68,6 +68,18 @@ contains
 
     ! Process dx, rmin = 3rs
     params%dx = (sqrt(rmax) - sqrt(3._x_precision)) / (n_cell - 1._x_precision)
+
+    ! Display parameters
+    write(*,*)'           Input Parameters             '
+    write(*,*)'****************************************'
+    write(*,"(' BH_mass     =',1p,E12.4)") params%M
+    write(*,"(' rmax        =',1p,E12.4)") rmax
+    write(*,"(' Mdot        =',1p,E12.4)") params%Mdot
+    write(*,"(' alpha       =',1p,E12.4)") params%alpha
+    write(*,"(' X           =',1p,E12.4)") params%X
+    write(*,"(' Y           =',1p,E12.4)") Y
+    write(*,*)'****************************************'
+    read(*,*)
 
   end subroutine get_parameters
 
