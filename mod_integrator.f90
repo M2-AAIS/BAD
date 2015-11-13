@@ -108,7 +108,7 @@ contains
     real(kind = x_precision), dimension(n_cell)   :: f0, f1
 
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
-    dt=1
+    dt=1e-3
 
     dtemp = 0.01_x_precision * states%T
     states_deriv = states
@@ -127,4 +127,3 @@ contains
   end subroutine do_timestep_T
   
 end module mod_integrator
-
