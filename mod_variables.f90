@@ -68,7 +68,7 @@ contains
                     sqrt((state_0%T_0 * state_out%T(i)))
 
       if (tau(i) .ge. 1.0) then
-         state_out%Fz(i) = (4._x_precision * c * c * state_out%T(i)**4) / (27._x_precision * &
+         state_out%Fz(i) = (2._x_precision * c * c * state_out%T(i)**4) / (27._x_precision * &
                            sqrt(3.0) * (kappa_ff(i) + kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0))
       else
          state_out%Fz(i) = epsil(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
