@@ -49,9 +49,9 @@ contains
       else if (i .eq. n_cell) then
          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i)
       else
-         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i+1) * &
-                           state_out%S(i+1)) - (state_out%nu(i-1) * state_out%S(i-1))) /  &
-                           (2._x_precision * (state_out%x(i+1) - state_out%x(i-1))))
+         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i) * &
+                           state_out%S(i)) - (state_out%nu(i-1) * state_out%S(i-1))) /  &
+                           ( (state_out%x(i) - state_out%x(i-1))))
       endif
       state_out%M_dot(i) = - state_out%v(i) * state_out%S(i) * state_out%x(i)
       !--------------Compute varaibles for Fz---------------
