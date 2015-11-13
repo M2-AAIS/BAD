@@ -48,9 +48,9 @@ contains
                            ( state_out%beta(i) * (gammag - 1._x_precision))
 
       ! Compute v while taking care of limit conditions
-      if (i .eq. 1) then
+      if (i = 1) then
          state_out%v(i)  = 0._x_precision
-      else if (i .eq. n_cell) then
+      else if (i = n_cell) then
          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i)
       else
          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i) * &
@@ -74,7 +74,7 @@ contains
                     sqrt((state_0%T_0 * state_out%T(i)))
 
       ! Compute Fz depending on optical thickness
-      if (tau(i) .ge. 1.0) then
+      if (tau(i) >= 1.0) then
          state_out%Fz(i) = (2._x_precision * c * c * state_out%T(i)**4) / (27._x_precision * &
                            sqrt(3.0) * (kappa_ff(i) + kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0))
       else

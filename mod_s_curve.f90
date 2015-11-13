@@ -105,13 +105,13 @@ contains
     real(kind=x_precision)                                 :: delta = 0.0d0
     !------------------------------------------------------------------------
     delta          = coeff_b**2 - 4_x_precision * coeff_a * coeff_c
-    if (delta .lt. 0.) then
+    if (delta < 0.) then
       write(*,*)'No solutions in the R field.'
    else
       sol_1=(-1.*coeff_b+sqrt(delta))/(2.*coeff_a)
       sol_2=(-1.*coeff_b-sqrt(delta))/(2.*coeff_a)
    end if
-   if (sol_1 .gt. 0. ) then
+   if (sol_1 > 0. ) then
       sol=sol_1
    else
       sol=sol_2
@@ -208,7 +208,7 @@ contains
 
     optical_depth        = 1
 
-  !  if (tau_eff .ge. 1.)  then
+  !  if (tau_eff >= 1.)  then
   !     optical_depth     = 1
   !  else
   !     optical_depth     = 0
@@ -288,13 +288,13 @@ contains
     write(*,*)'fmin = ',f_min
     write(*,*)'fmax = ',f_max
     
-    if ( f_max * f_min .gt. 0.) then
+    if ( f_max * f_min > 0.) then
        write(*,*)'This function image does not switch its sign in this particular interval.'
     endif
 
-    if( f_max * f_min .lt. 0.) then
-       iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. 1000)
-          if(f_min * f_dichotomy .lt. 0.) then
+    if( f_max * f_min < 0.) then
+       iteration:do while ( dabs( Smax - Smin ) >= eps .and. j < 1000)
+          if(f_min * f_dichotomy < 0.) then
 
  !   write(*,*)'fmin = ',f_min
  !   write(*,*)'fmax = ',f_max

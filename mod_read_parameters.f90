@@ -30,7 +30,7 @@ contains
 
     ! Open file
     open(unit=11, file="./input_parameter.dat", action="read", status="old", iostat=ios)
-    if (ios .ne. 0) stop "OPENING input_parameter.dat ERROR"
+    if (ios /= 0) stop "OPENING input_parameter.dat ERROR"
 
     ! Read parameters
     read(11,fmt=*) line, params%M
