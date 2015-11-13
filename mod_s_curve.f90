@@ -1,4 +1,4 @@
-module mod_S_curve
+module mod_s_curve
   use mod_read_parameters
   use mod_constants
   use mod_variables
@@ -407,4 +407,4 @@ contains
   end subroutine display_variables
   
 
-end module mod_S_curve
+end module mod_s_curve
