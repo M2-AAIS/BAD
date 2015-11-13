@@ -83,6 +83,7 @@ contains
     enddo
   end subroutine compute_variables
 
+  ! Transform dimensions of variables
   subroutine dim_adim(mode,state_in)
     implicit none
 
@@ -121,6 +122,8 @@ contains
 
   ! Compute the initial parameters needed for dimensionless variables
   subroutine init_variable_0()
+    implicit none
+
     real(kind = x_precision)         :: rs, c2
 
     c2 = c**2

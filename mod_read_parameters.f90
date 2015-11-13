@@ -15,7 +15,6 @@ contains
 
   ! Read parameter from the input file: ./input_parameter.dat
   subroutine get_parameters()
-
     implicit none
 
     ! Internal variables
@@ -80,7 +79,6 @@ contains
     write(*,"(' Y           =',1p,E12.4)") Y
     write(*,*)'****************************************'
     read(*,*)
-
   end subroutine get_parameters
 
 end module mod_read_parameters
