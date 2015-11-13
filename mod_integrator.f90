@@ -11,7 +11,7 @@ module mod_integrator
   public :: do_timestep_T, do_timestep_S
   
 contains
-
+  ! (T(t+dt) - T(t))/dt = f(s, dt, dx)
   function f (s, dt, dx)
 !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     use mod_constants
@@ -72,7 +72,7 @@ contains
     real(kind = x_precision)                      :: dt, overdx, overdx2, overdt, dx
     integer                                       :: info
 
-    real(kind = x_precision), dimension(n_cell)   :: diag
+    real(kind = x_precision), dimension(n_cell)   :: dtemp, diag
     real(kind = x_precision), dimension(n_cell-1) :: diag_low, diag_up
     
     ! Get the timestep and the spacestep
@@ -123,15 +123,18 @@ contains
     dt=1d-6
 
     dtemp = 0.01_x_precision * states%T
-    T_deriv = states%T + dtemp
-    !call compute_variables(states%x, states%Omega, T_deriv, states%S, states_deriv)
+    states_deriv = states
+    states_deriv%T = states%T + dtemp
+    
+    call compute_variables(states_deriv)
     !modification of compute_varaible--just enter a state now -- FIXME
 
+    ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
+    
     f0 = f(states, dt, dx)
     f1 = (f(states_deriv, dt, dx) - f(states, dt, dx)) / dtemp
     
-    ! Solve for T
-    states%T = states%T + f0 / (1_x_precision / dt - f1)
+    states%T = states%T + dt * f0 * (1_x_precision + dt * f1)
 
     ! Copy the result
   end subroutine do_timestep_T
