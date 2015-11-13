@@ -1,13 +1,10 @@
 BH_Masse= 10.
 r_max= 100. 
-f_dot= 1.e-3
+M_dot= 1.e-3
 alpha= 1.
 X= 0.70D0
 Y= 0.28D0
 
-
-parameter file : please be carefull to put one space just after the equal symbole.
-
-note : rmax is the report between rmax and rs
-note : BH_Mass in solar mass
-note : f_dot is the report between Mdot and Mdotcrit
+Note: rmax is expected to be in rs
+Note: BH_Mass is expected to be in solar mass
+Note: M_dot is expected to be expressed as a fraction of M_dot_crit
