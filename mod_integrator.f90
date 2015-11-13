@@ -8,11 +8,12 @@ module mod_integrator
   implicit none 
   private
 
-  public :: do_timestep
+  public :: do_timestep_T, do_timestep_S
   
 contains
 
   function f (s, dt, dx)
+!process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     use mod_constants
     use mod_variables
     implicit none
@@ -60,24 +61,23 @@ contains
   end function f
 
 
-  subroutine do_timestep (states, param)
+  subroutine do_timestep_S (states)
+  !process the temporal evolution of S
     use mod_variables
     use mod_constants
     implicit none
     
     type (state), intent(inout)                   :: states
-    type (parameters), intent(in)                 :: param
 
-    type (state)                                  :: states_deriv
     real(kind = x_precision)                      :: dt, overdx, overdx2, overdt, dx
     integer                                       :: info
 
-    real(kind = x_precision), dimension(n_cell)   :: dtemp, T_deriv, diag
+    real(kind = x_precision), dimension(n_cell)   :: diag
     real(kind = x_precision), dimension(n_cell-1) :: diag_low, diag_up
-    real(kind = x_precision), dimension(n_cell)   :: f0, f1
     
     ! Get the timestep and the spacestep
-    call timestep(states, dt)
+    !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
+    dt=1d-6
     call process_dx(dx)
 
     overdx  = 1_x_precision/dx
@@ -99,9 +99,29 @@ contains
     call dgtsv(n_cell, 1, diag_low, diag, diag_up, states%S, n_cell, info)
     
     if (info /= 0) then
-       print *, "Ooops, something bad happened!"
+      stop "error in DGTSV call in subroutine do_timestep_S"
     end if
+  end subroutine do_timestep_S 
+
+
+  subroutine do_timestep_T(states) 
+  !process the temporal evolution of T
+    use mod_variables
+    use mod_constants
+    implicit none
     
+    type (state), intent(inout)                   :: states
+
+    type (state)                                  :: states_deriv
+    real(kind = x_precision)                      :: dt, dx
+
+    real(kind = x_precision), dimension(n_cell)   :: dtemp, T_deriv 
+    real(kind = x_precision), dimension(n_cell)   :: f0, f1
+
+    !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
+    call process_dx(dx)
+    dt=1d-6
+
     dtemp = 0.01_x_precision * states%T
     T_deriv = states%T + dtemp
     !call compute_variables(states%x, states%Omega, T_deriv, states%S, states_deriv)
@@ -114,7 +134,7 @@ contains
     states%T = states%T + f0 / (1_x_precision / dt - f1)
 
     ! Copy the result
-  end subroutine do_timestep
+  end subroutine do_timestep_T
   
 end module mod_integrator
 
