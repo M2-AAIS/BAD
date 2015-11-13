@@ -48,9 +48,9 @@ contains
                            ( state_out%beta(i) * (gammag - 1._x_precision))
 
       ! Compute v while taking care of limit conditions
-      if (i = 1) then
+      if (i == 1) then
          state_out%v(i)  = 0._x_precision
-      else if (i = n_cell) then
+      else if (i == n_cell) then
          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i)
       else
          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i) * &
