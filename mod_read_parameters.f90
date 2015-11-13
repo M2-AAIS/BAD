@@ -13,8 +13,8 @@ module mod_read_parameters
 
 contains
 
+  ! Read parameter from the input file: ./input_parameter.dat
   subroutine get_parameters()
-    ! Read parameter from the input file: ./input_parameter.dat
 
     implicit none
 
