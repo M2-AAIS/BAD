@@ -196,7 +196,7 @@ contains
     cs                   = Omega * H
     nu                   = params%alpha * cs * H
     K_ff                 = 6.13d22 * rho_0 * rho * (T_0 * T)**(-3.5_x_precision)
-    K_e                  = 0.2_x_precision * (1._x_precision + params%X)
+    K_e                  = params%kappa_e
     E_ff                 = 6.22d20 * (rho_0 * rho)**2 * sqrt(T_0 * T)
     tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0
     nu_0                 = 2._x_precision * rs**2 * Omega_0/3._x_precision

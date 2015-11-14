@@ -26,8 +26,6 @@ contains
 
     type(state), intent(inout)                  :: state_out
 
-    kappa_e = 0.2_x_precision * (1._x_precision + params%X)
-
     ! Compute trinomial coefficients for H
     a1 = ((state_out%Omega**2) * (state_0%Omega_0**2) * state_out%S * state_0%S_0) / (2._x_precision * state_out%x)
     b1 = - (cst_rad * (state_out%T**4) * (state_0%T_0**4)) / (3._x_precision)
@@ -64,14 +62,9 @@ contains
       kappa_ff(i) = 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
                     (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)
 
-     ! tau(i)      = 0.5_x_precision * sqrt(0.2_x_precision * (1._x_precision * &
-     !               params%X) * 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
-     !               (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)) * &
-     !               state_0%S_0 * state_out%S(i) / state_out%x(i)
-      tau(i)      = 0.5_x_precision * sqrt(kappa_e * kappa_ff(i)) * (state_out%S(i)/state_out%x(i) * state_0%S_0)
+      tau(i)      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff(i)) * (state_out%S(i)/state_out%x(i) * state_0%S_0)
 
-      epsilo(i)   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2 * &
-                    sqrt((state_0%T_0 * state_out%T(i)))
+      epsilo(i)   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2 * sqrt((state_0%T_0 * state_out%T(i)))
 
       ! Compute Fz depending on optical thickness
       if (tau(i) >= 1.0) then

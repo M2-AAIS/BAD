@@ -18,15 +18,15 @@ contains
     implicit none
 
     ! Internal variables
-    real(kind=x_precision) :: Y,Z  ! Chemical composition : X+Y+Z = 1
-    real(kind=x_precision) :: mu   ! Mean molecular mass
-    real(kind=x_precision) :: rmax ! Maximum considered radius (in rs)
-    real(kind=x_precision) :: mp   ! Proton mass in cgs
-    real(kind=x_precision) :: Ledd ! Eddington luminosity
-    real(kind=x_precision) :: rs   ! Schwarzschild radius
-    real(kind=x_precision) :: T_0  ! Order of magnitude for temperature
-    integer(kind=4)        :: ios  ! I/O test variable
-    character(len=50)      :: line ! String reading variable
+    real(kind=x_precision) :: X,Y,Z ! Chemical composition : X+Y+Z = 1
+    real(kind=x_precision) :: mu    ! Mean molecular mass
+    real(kind=x_precision) :: rmax  ! Maximum considered radius (in rs)
+    real(kind=x_precision) :: mp    ! Proton mass in cgs
+    real(kind=x_precision) :: Ledd  ! Eddington luminosity
+    real(kind=x_precision) :: rs    ! Schwarzschild radius
+    real(kind=x_precision) :: T_0   ! Order of magnitude for temperature
+    integer(kind=4)        :: ios   ! I/O test variable
+    character(len=50)      :: line  ! String reading variable
 
     ! Open file
     open(unit=11, file="./input_parameter.dat", action="read", status="old", iostat=ios)
@@ -37,7 +37,7 @@ contains
     read(11,fmt=*) line, rmax
     read(11,fmt=*) line, params%Mdot
     read(11,fmt=*) line, params%alpha
-    read(11,fmt=*) line, params%X
+    read(11,fmt=*) line, X
     read(11,fmt=*) line, Y
 
     ! Close the file
@@ -59,14 +59,17 @@ contains
            params%Mdot * (c*c) / ( pi * rs * rs * stefan ))**0.25_x_precision
 
     ! Compute mu
-    Z  = 1._x_precision - params%X - Y
-    mu = 1._x_precision / (2._x_precision*params%X + 3._x_precision*Y/4._x_precision + Z/2._x_precision)
+    Z  = 1._x_precision - X - Y
+    mu = 1._x_precision / (2._x_precision*X + 3._x_precision*Y/4._x_precision + Z/2._x_precision)
 
     ! Process RTM
     params%RTM = R * T_0 / mu
 
     ! Process dx, rmin = 3rs
     params%dx = (sqrt(rmax) - sqrt(3._x_precision)) / (n_cell - 1._x_precision)
+
+    ! Process kappa_e
+    params%kappa_e = 0.2_x_precision * (1._x_precision + X)
 
     ! Display parameters
     write(*,*)'           Input Parameters             '
@@ -75,7 +78,7 @@ contains
     write(*,"(' rmax        =',1p,E12.4)") rmax
     write(*,"(' Mdot        =',1p,E12.4)") params%Mdot
     write(*,"(' alpha       =',1p,E12.4)") params%alpha
-    write(*,"(' X           =',1p,E12.4)") params%X
+    write(*,"(' X           =',1p,E12.4)") X
     write(*,"(' Y           =',1p,E12.4)") Y
     write(*,*)'****************************************'
     read(*,*)

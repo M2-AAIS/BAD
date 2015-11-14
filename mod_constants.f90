@@ -19,13 +19,13 @@ module mod_constants
   real(kind = x_precision), parameter, public :: thomson = 6.6524587158e-25_x_precision ! Thomson cross-section in cgs
 
   type parameters
-    real(kind = x_precision) :: M, Mdot, X, RTM, alpha, dx
-    ! M     : Black hole Mass
-    ! Mdot  : Acretion rate at rmax
-    ! X     : Chemical composition in H
-    ! RTM   : Gas constant × T_0 ÷ μ
-    ! alpha : Viscosity parameter
-    ! dx    : Dimensionless spacestep
+    real(kind = x_precision) :: M, Mdot, kappa_e, RTM, alpha, dx
+    ! M       : Black hole Mass
+    ! Mdot    : Acretion rate at rmax
+    ! kappa_e : Thomson scattering thickness
+    ! RTM     : Gas constant × T_0 ÷ μ
+    ! alpha   : Viscosity parameter
+    ! dx      : Dimensionless spacestep
   end type parameters
 
   type state
