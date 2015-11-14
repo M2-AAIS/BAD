@@ -118,26 +118,25 @@ contains
   subroutine init_variable_0()
     implicit none
 
-    real(kind = x_precision)         :: rs, c2
+    real(kind = x_precision) :: rs, c2
 
     c2 = c**2
     rs = 2._x_precision*G*params%M/c2
 
-    state_0%omega_0 = sqrt( G*params%M/(rs)**3 )
+    state_0%omega_0 = sqrt(G * params%M / rs**3)
     state_0%temps_0 = 2._x_precision / state_0%omega_0
-    state_0%nu_0    = 2._x_precision/3._x_precision * state_0%omega_0 * rs**2
+    state_0%nu_0    = 2._x_precision * state_0%omega_0 * rs**2 / 3._x_precision
     state_0%v_0     = state_0%omega_0 * rs
     state_0%cs_0    = state_0%v_0
-    state_0%S_0     = params%Mdot / (3._x_precision * pi * state_0%nu_0 )
+    state_0%S_0     = params%Mdot / (3._x_precision * pi * state_0%nu_0)
     state_0%H_0     = rs
     state_0%M_dot_0 = params%Mdot
-    state_0%rho_0   = state_0%S_0 / (2._x_precision*rs)
-    state_0%T_0     = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * &
-                      params%Mdot * c2 / ( pi * rs * rs * stefan ))**0.25_x_precision
-    state_0%Fz_0    = state_0%S_0 / 2._x_precision / state_0%temps_0
+    state_0%rho_0   = state_0%S_0 / (2._x_precision * rs)
+    state_0%T_0     = (params%Mdot * c2 / (sqrt(27.0) * 48._x_precision * pi * rs**2 * stefan))**0.25_x_precision
+    state_0%Fz_0    = state_0%S_0 / (2._x_precision * state_0%temps_0)
     state_0%Cv_0    = 1._x_precision / state_0%T_0
     state_0%P_gaz_0 = state_0%rho_0 * params%RTM
-    state_0%P_rad_0 = 1._x_precision/3._x_precision * cst_rad * (state_0%T_0**4)
+    state_0%P_rad_0 = cst_rad * state_0%T_0**4 / 3._x_precision
   end subroutine init_variable_0
 
 end module mod_variables
