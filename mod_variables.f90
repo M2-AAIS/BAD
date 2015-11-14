@@ -27,10 +27,10 @@ contains
     type(state), intent(inout)                  :: state_out
 
     ! Compute trinomial coefficients for H
-    a1 = ((state_out%Omega**2) * (state_0%Omega_0**2) * state_out%S * state_0%S_0) / (2._x_precision * state_out%x)
-    b1 = - (cst_rad * (state_out%T**4) * (state_0%T_0**4)) / (3._x_precision)
-    c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0 ) / (2._x_precision * state_out%x)
-    Delta = b1**2 - (4._x_precision * a1 * c1)
+    a1 = (state_out%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
+    b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * state_out%x / 3._x_precision
+    c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
+    Delta = b1**2 - 4._x_precision * a1 * c1
 
     ! Loop over all cells to update variables
     do i=1,n_cell
