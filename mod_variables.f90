@@ -101,6 +101,7 @@ contains
       state_in%rho   = state_in%rho   / state_0%rho_0
       state_in%T     = state_in%T     / state_0%T_0
       state_in%Fz    = state_in%Fz    / state_0%Fz_0
+      state_in%Cv    = state_in%Cv    / state_0%Cv_0
       state_in%P_gaz = state_in%P_gaz / state_0%P_gaz_0
       state_in%P_rad = state_in%P_rad / state_0%P_rad_0
     case(1)
@@ -113,6 +114,7 @@ contains
       state_in%rho   = state_in%rho   * state_0%rho_0
       state_in%T     = state_in%T     * state_0%T_0
       state_in%Fz    = state_in%Fz    * state_0%Fz_0
+      state_in%Cv    = state_in%Cv    * state_0%Cv_0
       state_in%P_gaz = state_in%P_gaz * state_0%P_gaz_0
       state_in%P_rad = state_in%P_rad * state_0%P_rad_0
     case default
