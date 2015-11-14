@@ -26,14 +26,18 @@ contains
     type(state), intent(inout)                  :: state_out
 
     ! Compute trinomial coefficients for H
-    a1 = (state_out%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
-    b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * state_out%x / 3._x_precision
-    c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
+    !a1 = (state_out%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
+    !b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * state_out%x / 3._x_precision
+    !c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
+    a1 = (state_out%Omega)**2 * state_0%Omega_0 * state_0%M_dot_0 * (state_out%S * state_0%S_0)
+    b1 = - 4._x_precision * pi * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * state_out%x / 3._x_precision
+    c1 = - 2._x_precision * pi * (params%RTM * state_out%T * state_out%S * state_0%S_0)
     Delta = b1**2 - 4._x_precision * a1 * c1
 
     ! Loop over all cells to update variables
     do i=1,n_cell
-      state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) / state_0%H_0
+      !state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) / state_0%H_0
+      state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i)
       state_out%P_rad(i) = state_out%T(i)**4
       state_out%cs(i)    = state_out%Omega(i) * state_out%H(i)
       state_out%rho(i)   = state_out%S(i) / (state_out%H(i) * state_out%x(i))
