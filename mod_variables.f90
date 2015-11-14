@@ -92,29 +92,29 @@ contains
 
     select case(mode)
     case(0)
-      state_in%H     = state_in%H     / state_0%H_0
+      state_in%nu    = state_in%nu    / state_0%nu_0
       state_in%v     = state_in%v     / state_0%v_0
       state_in%cs    = state_in%cs    / state_0%cs_0
       state_in%S     = state_in%S     / state_0%S_0
-      state_in%T     = state_in%T     / state_0%T_0
-      state_in%rho   = state_in%rho   / state_0%rho_0
-      state_in%nu    = state_in%nu    / state_0%nu_0
+      state_in%H     = state_in%H     / state_0%H_0
       state_in%M_dot = state_in%M_dot / state_0%M_dot_0
-      state_in%P_rad = state_in%P_rad / state_0%P_rad_0
-      state_in%P_gaz = state_in%P_gaz / state_0%P_gaz_0
+      state_in%rho   = state_in%rho   / state_0%rho_0
+      state_in%T     = state_in%T     / state_0%T_0
       state_in%Fz    = state_in%Fz    / state_0%Fz_0
+      state_in%P_gaz = state_in%P_gaz / state_0%P_gaz_0
+      state_in%P_rad = state_in%P_rad / state_0%P_rad_0
     case(1)
-      state_in%H     = state_in%H     * state_0%H_0
+      state_in%nu    = state_in%nu    * state_0%nu_0
       state_in%v     = state_in%v     * state_0%v_0
       state_in%cs    = state_in%cs    * state_0%cs_0
       state_in%S     = state_in%S     * state_0%S_0
-      state_in%T     = state_in%T     * state_0%T_0
-      state_in%rho   = state_in%rho   * state_0%rho_0
-      state_in%nu    = state_in%nu    * state_0%nu_0
+      state_in%H     = state_in%H     * state_0%H_0
       state_in%M_dot = state_in%M_dot * state_0%M_dot_0
-      state_in%P_rad = state_in%P_rad * state_0%P_rad_0
-      state_in%P_gaz = state_in%P_gaz * state_0%P_gaz_0
+      state_in%rho   = state_in%rho   * state_0%rho_0
+      state_in%T     = state_in%T     * state_0%T_0
       state_in%Fz    = state_in%Fz    * state_0%Fz_0
+      state_in%P_gaz = state_in%P_gaz * state_0%P_gaz_0
+      state_in%P_rad = state_in%P_rad * state_0%P_rad_0
     case default
        stop
     end select

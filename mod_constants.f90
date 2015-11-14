@@ -29,26 +29,26 @@ module mod_constants
   end type parameters
 
   type state
-    real(kind = x_precision), dimension(n_cell) :: x, Omega, nu, v, T, P_rad, P_gaz, beta, cs, H, rho, S, Fz, M_dot, Cv
+    real(kind = x_precision), dimension(n_cell) :: x, Omega, nu, v, cs, S, H, M_dot, rho, T, Fz, Cv, P_gaz, P_rad, beta
     ! x     : Space variable
     ! Omega : Angular velocity
     ! nu    : Viscosity
     ! v     : Local, radial accretion speed
-    ! T     : Temperature
-    ! P_rad : Radiative pressure
-    ! P_gaz : Gaz pressure
-    ! beta  : Pressure indicator
     ! cs    : Speed of sound
-    ! H     : Disk half-height
-    ! rho   : Volume density
     ! S     : Variable of density
-    ! Fz    : Radiative flux
+    ! H     : Disk half-height
     ! M_dot : Accretion rate
+    ! rho   : Volume density
+    ! T     : Temperature
+    ! Fz    : Radiative flux
     ! Cv    : Heat capacity at constant volume
+    ! P_gaz : Gaz pressure
+    ! P_rad : Radiative pressure
+    ! beta  : Pressure indicator
   end type state
 
   type adim_state
-    real(kind= x_precision) :: temps_0, Omega_0, nu_0, v_0, T_0, P_rad_0, P_gaz_0, cs_0, H_0, rho_0, S_0, Fz_0, M_dot_0, Cv_0
+    real(kind= x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, M_dot_0, rho_0, T_0, Fz_0, Cv_0, P_gaz_0, P_rad_0
     ! Usefull quantities to get the dimensionless ones
   end type adim_state
 
