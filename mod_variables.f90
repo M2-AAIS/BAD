@@ -34,41 +34,37 @@ contains
     c1 = - 2._x_precision * pi * (params%RTM * state_out%T * state_out%S * state_0%S_0)
     Delta = b1**2 - 4._x_precision * a1 * c1
 
-    ! Loop over all cells to update variables
+    ! Start computing variables
+    !state_out%H     = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1 / state_0%H_0
+    state_out%H     = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1
+    state_out%P_rad = state_out%T**4
+    state_out%cs    = state_out%Omega * state_out%H
+    state_out%rho   = state_out%S / (state_out%H * state_out%x)
+    state_out%nu    = params%alpha * state_out%cs * state_out%H
+    state_out%P_gaz = state_out%rho * state_out%T
+    state_out%beta  = state_out%P_gaz / (state_out%P_gaz + state_out%P_rad)
+    state_out%Cv    = params%RTM * ((12._x_precision * gammag - 1._x_precision) * &
+                      (1._x_precision - state_out%beta) + state_out%beta) / &
+                      (state_out%beta * (gammag - 1._x_precision))
+
+    ! Compute v while taking care of limit conditions
+    state_out%v(1:n_cell-1) = - 1._x_precision / (state_out%S(1:n_cell-1) * state_out%x(1:n_cell-1)) * &
+                              (state_out%nu(2:n_cell) * state_out%S(2:n_cell) - &
+                               state_out%nu(1:n_cell-1) * state_out%S(1:n_cell-1)) / params%dx
+    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * state_out%x(n_cell))
+
+    state_out%M_dot = - state_out%v * state_out%S * state_out%x
+
+    ! Compute variables needed for Fz
+    kappa_ff = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
+               (state_0%T_0 * state_out%T)**(-7._x_precision/2._x_precision)
+
+    tau      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * (state_0%S_0 * state_out%S / state_out%x)
+
+    epsilo   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho)**2 * sqrt(state_0%T_0 * state_out%T)
+
+    ! Loop over all cells to update Fz
     do i=1,n_cell
-      !state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i) / state_0%H_0
-      state_out%H(i)     = - 0.5_x_precision * (b1(i) + sign(sqrt(Delta(i)),b1(i))) / a1(i)
-      state_out%P_rad(i) = state_out%T(i)**4
-      state_out%cs(i)    = state_out%Omega(i) * state_out%H(i)
-      state_out%rho(i)   = state_out%S(i) / (state_out%H(i) * state_out%x(i))
-      state_out%nu(i)    = params%alpha * state_out%cs(i) * state_out%H(i)
-      state_out%P_gaz(i) = state_out%rho(i) * state_out%T(i)
-      state_out%beta(i)  = state_out%P_gaz(i) / (state_out%P_gaz(i) + state_out%P_rad(i))
-      state_out%Cv(i)    = params%RTM * ((12._x_precision * gammag - 1._x_precision) * &
-                           (1._x_precision - state_out%beta(i)) + state_out%beta(i)) / &
-                           (state_out%beta(i) * (gammag - 1._x_precision))
-
-      ! Compute v while taking care of limit conditions
-      if (i == 1) then
-         state_out%v(i)  = 0._x_precision
-      else if (i == n_cell) then
-         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i)
-      else
-         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * (((state_out%nu(i) * &
-                           state_out%S(i)) - (state_out%nu(i-1) * state_out%S(i-1))) /  &
-                           ((state_out%x(i) - state_out%x(i-1))))
-      endif
-
-      state_out%M_dot(i) = - state_out%v(i) * state_out%S(i) * state_out%x(i)
-
-      ! Compute variables needed for Fz
-      kappa_ff(i) = 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
-                    (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)
-
-      tau(i)      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff(i)) * (state_0%S_0 * state_out%S(i) / state_out%x(i))
-
-      epsilo(i)   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2 * sqrt(state_0%T_0 * state_out%T(i))
-
       ! Compute Fz depending on optical thickness
       if (tau(i) >= 1.0) then
          state_out%Fz(i) = (2._x_precision * c * c * state_out%T(i)**4) / (27._x_precision * &
