@@ -44,9 +44,9 @@ contains
       state_out%nu(i)    = params%alpha * state_out%cs(i) * state_out%H(i)
       state_out%P_gaz(i) = state_out%rho(i) * state_out%T(i)
       state_out%beta(i)  = state_out%P_gaz(i) / (state_out%P_gaz(i) + state_out%P_rad(i))
-      state_out%Cv(i)    = params%RTM * ((12._x_precision * gammag - 1._x_precision ) * &
+      state_out%Cv(i)    = params%RTM * ((12._x_precision * gammag - 1._x_precision) * &
                            (1._x_precision - state_out%beta(i)) + state_out%beta(i)) / &
-                           ( state_out%beta(i) * (gammag - 1._x_precision))
+                           (state_out%beta(i) * (gammag - 1._x_precision))
 
       ! Compute v while taking care of limit conditions
       if (i == 1) then
@@ -54,9 +54,9 @@ contains
       else if (i == n_cell) then
          state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i)
       else
-         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * ( ((state_out%nu(i) * &
+         state_out%v(i)  = - 1._x_precision / state_out%S(i) / state_out%x(i) * (((state_out%nu(i) * &
                            state_out%S(i)) - (state_out%nu(i-1) * state_out%S(i-1))) /  &
-                           ( (state_out%x(i) - state_out%x(i-1))))
+                           ((state_out%x(i) - state_out%x(i-1))))
       endif
 
       state_out%M_dot(i) = - state_out%v(i) * state_out%S(i) * state_out%x(i)
@@ -65,9 +65,9 @@ contains
       kappa_ff(i) = 6.13e22_x_precision * state_0%rho_0 * state_out%rho(i) * &
                     (state_0%T_0 * state_out%T(i))**(-7._x_precision/2._x_precision)
 
-      tau(i)      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff(i)) * (state_out%S(i)/state_out%x(i) * state_0%S_0)
+      tau(i)      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff(i)) * (state_0%S_0 * state_out%S(i) / state_out%x(i))
 
-      epsilo(i)   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2 * sqrt((state_0%T_0 * state_out%T(i)))
+      epsilo(i)   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho(i))**2 * sqrt(state_0%T_0 * state_out%T(i))
 
       ! Compute Fz depending on optical thickness
       if (tau(i) >= 1.0) then
