@@ -131,7 +131,6 @@ contains
 
     state_0%omega_0 = sqrt( G*params%M/(rs)**3 )
     state_0%temps_0 = 2._x_precision / state_0%omega_0
-    state_0%x_0     = sqrt(rs)
     state_0%nu_0    = 2._x_precision/3._x_precision * state_0%omega_0 * rs**2
     state_0%v_0     = state_0%omega_0 * rs
     state_0%cs_0    = state_0%v_0
