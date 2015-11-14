@@ -22,7 +22,6 @@ contains
     real(kind = x_precision), dimension(n_cell) :: a1, b1, c1
     real(kind = x_precision), dimension(n_cell) :: Delta
     real(kind = x_precision), dimension(n_cell) :: kappa_ff, tau, epsilo
-    real(kind = x_precision)                    :: kappa_e !cgs
 
     type(state), intent(inout)                  :: state_out
 
@@ -69,7 +68,7 @@ contains
       ! Compute Fz depending on optical thickness
       if (tau(i) >= 1.0) then
          state_out%Fz(i) = (2._x_precision * c * c * state_out%T(i)**4) / (27._x_precision * &
-                           sqrt(3.0) * (kappa_ff(i) + kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0))
+                           sqrt(3.0) * (kappa_ff(i) + params%kappa_e) * (state_out%S(i)/state_out%x(i) * state_0%S_0))
       else
          state_out%Fz(i) = epsilo(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
       endif
