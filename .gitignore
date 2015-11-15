@@ -1,37 +1,8 @@
 # Compiled Object files
 *.o
-*.ko
-*.obj
-*.elf
-*.slo
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Static Libraries
-*.lib
-*.a
-*.la
-*.lo
-*.lai
-
-# Compiled Dynamic Libraries/Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
 
 # Fortran module files
 *.mod
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
+# Data files
+*.dat
