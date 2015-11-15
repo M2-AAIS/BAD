@@ -47,10 +47,10 @@ module mod_constants
     ! beta  : Pressure indicator
   end type state
 
-  type adim_state
+  type state_zero
     real(kind= x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, M_dot_0, rho_0, T_0, Fz_0, Cv_0, P_gaz_0, P_rad_0
     ! Usefull quantities to get the dimensionless ones
-  end type adim_state
+  end type state_zero
 
 contains
 
