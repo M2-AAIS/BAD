@@ -26,11 +26,11 @@ contains
     type(state), intent(inout)                  :: state_out
 
     ! Compute trinomial coefficients for H
-    !a1 = (state_out%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
-    !b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * state_out%x / 3._x_precision
+    !a1 = r_state%Omega_r**2 * (state_out%S * state_0%S_0)
+    !b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * x_state%x / 3._x_precision
     !c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
-    a1 = (state_out%Omega)**2 * state_0%Omega_0 * state_0%M_dot_0 * (state_out%S * state_0%S_0)
-    b1 = - 4._x_precision * pi * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * state_out%x / 3._x_precision
+    a1 = x_state%Omega**2 * state_0%Omega_0 * state_0%M_dot_0 * (state_out%S * state_0%S_0)
+    b1 = - 4._x_precision * pi * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
     c1 = - 2._x_precision * pi * (params%RTM * state_out%T * state_out%S * state_0%S_0)
     Delta = b1**2 - 4._x_precision * a1 * c1
 
@@ -38,8 +38,8 @@ contains
     !state_out%H     = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1 / state_0%H_0
     state_out%H     = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1
     state_out%P_rad = state_out%T**4
-    state_out%cs    = state_out%Omega * state_out%H
-    state_out%rho   = state_out%S / (state_out%H * state_out%x)
+    state_out%cs    = x_state%Omega * state_out%H
+    state_out%rho   = state_out%S / (state_out%H * x_state%x)
     state_out%nu    = params%alpha * state_out%cs * state_out%H
     state_out%P_gaz = state_out%rho * state_out%T
     state_out%beta  = state_out%P_gaz / (state_out%P_gaz + state_out%P_rad)
@@ -48,23 +48,23 @@ contains
                       (state_out%beta * (gammag - 1._x_precision))
 
     ! Compute v while taking care of limit conditions
-    state_out%v(1:n_cell-1) = - 1._x_precision / (state_out%S(1:n_cell-1) * state_out%x(1:n_cell-1)) * &
+    state_out%v(1:n_cell-1) = - 1._x_precision / (state_out%S(1:n_cell-1) * x_state%x(1:n_cell-1)) * &
                               (state_out%nu(2:n_cell) * state_out%S(2:n_cell) - &
                                state_out%nu(1:n_cell-1) * state_out%S(1:n_cell-1)) / params%dx
-    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * state_out%x(n_cell))
+    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * x_state%x(n_cell))
 
-    state_out%M_dot = - state_out%v * state_out%S * state_out%x
+    state_out%M_dot = - state_out%v * state_out%S * x_state%x
 
     ! Compute variables needed for Fz
     kappa_ff = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
                (state_0%T_0 * state_out%T)**(-7._x_precision/2._x_precision)
 
-    tau      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * (state_0%S_0 * state_out%S / state_out%x)
+    tau      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * (state_0%S_0 * state_out%S / x_state%x)
 
     epsilo   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho)**2 * sqrt(state_0%T_0 * state_out%T)
 
     ! Compute Fz depending on optical thickness
-    where (tau >= 1.0) state_out%Fz = (2._x_precision * c**2 * state_out%x * state_out%T**4) / (27._x_precision * &
+    where (tau >= 1.0) state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
                                        sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
 
     where (tau <  1.0) state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
@@ -73,7 +73,7 @@ contains
     !do i=1,n_cell
     !  ! Compute Fz depending on optical thickness
     !  if (tau(i) >= 1.0) then
-    !     state_out%Fz(i) = (2._x_precision * c**2 * state_out%x(i) * state_out%T(i)**4) / (27._x_precision * &
+    !     state_out%Fz(i) = (2._x_precision * c**2 * x_state%x(i) * state_out%T(i)**4) / (27._x_precision * &
     !                       sqrt(3._x_precision) * (kappa_ff(i) + params%kappa_e) * state_out%S(i) * state_0%S_0)
     !  else
     !     state_out%Fz(i) = epsilo(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0

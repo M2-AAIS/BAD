@@ -29,9 +29,7 @@ module mod_constants
   end type parameters
 
   type state
-    real(kind = x_precision), dimension(n_cell) :: x, Omega, nu, v, cs, S, H, M_dot, rho, T, Fz, Cv, P_gaz, P_rad, beta
-    ! x     : Space variable
-    ! Omega : Angular velocity
+    real(kind = x_precision), dimension(n_cell) :: nu, v, cs, S, H, M_dot, rho, T, Fz, Cv, P_gaz, P_rad, beta
     ! nu    : Viscosity
     ! v     : Local, radial accretion speed
     ! cs    : Speed of sound
@@ -47,8 +45,20 @@ module mod_constants
     ! beta  : Pressure indicator
   end type state
 
+  type dim_state
+    real(kind = x_precision), dimension(n_cell) :: r, Omega_r
+    ! r       : Space variable
+    ! Omega_r : Angular velocity
+  end type dim_state
+
+  type adim_state
+    real(kind = x_precision), dimension(n_cell) :: x, Omega
+    ! x     : Space variable
+    ! Omega : Angular velocity
+  end type adim_state
+
   type state_zero
-    real(kind= x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, M_dot_0, rho_0, T_0, Fz_0, Cv_0, P_gaz_0, P_rad_0
+    real(kind = x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, M_dot_0, rho_0, T_0, Fz_0, Cv_0, P_gaz_0, P_rad_0
     ! Usefull quantities to get the dimensionless ones
   end type state_zero
 

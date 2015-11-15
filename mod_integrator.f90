@@ -35,25 +35,25 @@ contains
     dT_over_dx(n_cell)       = 0
 
     ! Compute d(S/x)/dx as the mean spatial derivative (left + right)/2
-    S_over_x                        = s%S / s%x
-    dS_over_x_over_dx(1)            = -2._x_precision / s%v(1) / s%x(1)**2 * nuS(2) * overdx2
+    S_over_x                        = s%S / x_state%x
+    dS_over_x_over_dx(1)            = -2._x_precision / s%v(1) / x_state%x(1)**2 * nuS(2) * overdx2
     dS_over_x_over_dx(2:n_cell - 1) = (S_over_x(3:n_cell) - S_over_x(1:n_cell - 2)) * overdx / 2
-    dS_over_x_over_dx(n_cell)       = -2._x_precision / s%x(n_cell)**2 / s%v(n_cell) * overdx2 * &
+    dS_over_x_over_dx(n_cell)       = -2._x_precision / x_state%x(n_cell)**2 / s%v(n_cell) * overdx2 * &
                                       ( params%dx + nuS(n_cell-1) - nuS(n_cell) )
 
     ! Compute dS/dt using the corresponding equation, with d²(nuS)/dx² as (d(left)+d(right))/2
-    dS_over_dt(1)          = 2._x_precision * nuS(2) / s%x(1)**2 * overdx2
-    dS_over_dt(2:n_cell-1) = 1 / s%x(2:n_cell-1)**2 * (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + &
+    dS_over_dt(1)          = 2._x_precision * nuS(2) / x_state%x(1)**2 * overdx2
+    dS_over_dt(2:n_cell-1) = 1 / x_state%x(2:n_cell-1)**2 * (nuS(3:n_cell) - 2_x_precision*nuS(2:n_cell-1) + &
                              nuS(1:n_cell-2)) * overdx2
-    dS_over_dt(n_cell)     = 2._x_precision / s%x(n_cell)**2 / params%dx**2 * &
+    dS_over_dt(n_cell)     = 2._x_precision / x_state%x(n_cell)**2 / params%dx**2 * &
                              ( params%dx + nuS(n_cell-1) - nuS(n_cell))
 
     ! Second member of the dT/dt equation
-    f = (3_x_precision * state_0%v_0**2 * s%nu * s%Omega**2 - &
-         s%Fz * s%x / s%S &
+    f = (3_x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
+         s%Fz * x_state%x / s%S &
          + params%RTM * (4._x_precision - 3._x_precision * s%beta) / s%beta * s%T / s%S * &
          (dS_over_dt + s%v * dS_over_x_over_dx) &
-         - s%Cv * s%v / s%x * dT_over_dx) / s%Cv
+         - s%Cv * s%v / x_state%x * dT_over_dx) / s%Cv
   end function f
 
   subroutine do_timestep_S (states)
@@ -78,9 +78,9 @@ contains
     
     
     ! Create the diagonals
-    diag     =  overdt + 2*overdx2 * states%nu / states%x**2
-    diag_up  = -overdx2 * states%nu(2:n_cell) / states%x(1:n_cell-1)**2
-    diag_low = -overdx2 * states%nu(1:n_cell-1) / states%x(2:n_cell)**2
+    diag     =  overdt + 2*overdx2 * states%nu / x_state%x**2
+    diag_up  = -overdx2 * states%nu(2:n_cell) / x_state%x(1:n_cell-1)**2
+    diag_low = -overdx2 * states%nu(1:n_cell-1) / x_state%x(2:n_cell)**2
 
     diag(1)            = 1_x_precision
     diag_up(1)         = 0

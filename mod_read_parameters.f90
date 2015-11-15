@@ -5,11 +5,13 @@ module mod_read_parameters
 
   implicit none
 
-  type(parameters) :: params ! Contains the initial parameters of the black hole accretion disk (see mod_constants.f90 for details)
+  type(parameters) :: params  ! Contains the initial parameters of the black hole accretion disk (see mod_constants.f90 for details)
+  type(adim_state) :: x_state ! Contains the x and Omega tables
+  type(dim_state)  :: r_state ! Contains the r and Omega_r tables
 
   private
 
-  public           :: get_parameters, params
+  public           :: get_parameters, params, x_state, r_state
 
 contains
 
@@ -18,15 +20,19 @@ contains
     implicit none
 
     ! Internal variables
-    real(kind=x_precision) :: X,Y,Z ! Chemical composition : X+Y+Z = 1
-    real(kind=x_precision) :: mu    ! Mean molecular mass
-    real(kind=x_precision) :: rmax  ! Maximum considered radius (in rs)
-    real(kind=x_precision) :: mp    ! Proton mass in cgs
-    real(kind=x_precision) :: Ledd  ! Eddington luminosity
-    real(kind=x_precision) :: rs    ! Schwarzschild radius
-    real(kind=x_precision) :: T_0   ! Order of magnitude for temperature
-    integer(kind=4)        :: ios   ! I/O test variable
-    character(len=50)      :: line  ! String reading variable
+    real(kind=x_precision) :: X,Y,Z   ! Chemical composition : X+Y+Z = 1
+    real(kind=x_precision) :: mu      ! Mean molecular mass
+    real(kind=x_precision) :: rmax    ! Maximum considered radius (in rs)
+    real(kind=x_precision) :: rmin    ! Minimal radius (in rs)
+    real(kind=x_precision) :: mp      ! Proton mass in cgs
+    real(kind=x_precision) :: Ledd    ! Eddington luminosity
+    real(kind=x_precision) :: c2      ! Light speed to the square
+    real(kind=x_precision) :: rs      ! Schwarzschild radius
+    real(kind=x_precision) :: T_0     ! Order of magnitude for temperature
+    real(kind=x_precision) :: Omega_0 ! Order of magnitude for angular velocity
+    integer(kind=4)        :: ios     ! I/O test variable
+    integer                :: i       ! Cells iteration variable
+    character(len=50)      :: line    ! String reading variable
 
     ! Open file
     open(unit=11, file="./input_parameter.dat", action="read", status="old", iostat=ios)
@@ -53,10 +59,11 @@ contains
     params%M    = params%M * M_sun
     params%Mdot = params%Mdot * ( Ledd * 12._x_precision / c**2) * params%M
 
-    ! Compute r_s and T_0
-    rs  = 2._x_precision * G * params%M / (c*c)
-    T_0 = (1._x_precision/sqrt(27.0) * 1._x_precision/48._x_precision * &
-           params%Mdot * (c*c) / ( pi * rs * rs * stefan ))**0.25_x_precision
+    ! Compute c2, rs, T_0 and Omega_0
+    c2      = c**2
+    rs      = 2._x_precision * G * params%M / c2
+    T_0     = (params%Mdot * c2 / (sqrt(27.0) * 48._x_precision * pi * rs**2 * stefan))**0.25_x_precision
+    Omega_0 = sqrt(G * params%M / rs**3)
 
     ! Compute mu
     Z  = 1._x_precision - X - Y
@@ -65,8 +72,17 @@ contains
     ! Process RTM
     params%RTM = R * T_0 / mu
 
-    ! Process dx, rmin = 3rs
-    params%dx = (sqrt(rmax) - sqrt(3._x_precision)) / (n_cell - 1._x_precision)
+    ! Process dx
+    rmin      = 3._x_precision
+    params%dx = (sqrt(rmax) - sqrt(rmin)) / (n_cell - 1._x_precision)
+
+    ! Process x_state, r_state
+    do i = 1, n_cell
+      x_state%x(i)       = sqrt(rmin) + (i - 1) * params%dx
+      r_state%r(i)       = x_state%x(i)**2 * rs
+      x_state%Omega(i)   = 1._x_precision / x_state%x(i)**3
+      r_state%Omega_r(i) = x_state%Omega(i) * Omega_0
+    end do
 
     ! Process kappa_e
     params%kappa_e = 0.2_x_precision * (1._x_precision + X)
