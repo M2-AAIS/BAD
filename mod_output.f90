@@ -2,16 +2,18 @@
 
 module mod_output
   use mod_constants
+
   implicit none
 
   private
 
   public :: snapshot
+
 contains
 
   ! Save a snapshot of state (s) at iteration, time in filename 
   subroutine snapshot (s, iteration, time, unit)
-    use mod_constants
+
     implicit none
     
     type (state), intent(in), dimension(:) :: s
