@@ -65,7 +65,7 @@ contains
     real(kind = x_precision)                      :: dt, overdx, overdx2, overdt
     integer                                       :: info
 
-    real(kind = x_precision), dimension(n_cell)   :: dtemp, diag
+    real(kind = x_precision), dimension(n_cell)   :: diag
     real(kind = x_precision), dimension(n_cell-1) :: diag_low, diag_up
     
     ! Get the timestep
