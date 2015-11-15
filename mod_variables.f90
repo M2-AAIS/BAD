@@ -18,7 +18,7 @@ contains
   subroutine compute_variables(state_out)
     implicit none
 
-    integer                                     :: i
+    !integer                                     :: i
     real(kind = x_precision), dimension(n_cell) :: a1, b1, c1
     real(kind = x_precision), dimension(n_cell) :: Delta
     real(kind = x_precision), dimension(n_cell) :: kappa_ff, tau, epsilo
@@ -63,16 +63,22 @@ contains
 
     epsilo   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho)**2 * sqrt(state_0%T_0 * state_out%T)
 
+    ! Compute Fz depending on optical thickness
+    where (tau >= 1.0) state_out%Fz = (2._x_precision * c**2 * state_out%x * state_out%T**4) / (27._x_precision * &
+                                       sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
+
+    where (tau <  1.0) state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
+
     ! Loop over all cells to update Fz
-    do i=1,n_cell
-      ! Compute Fz depending on optical thickness
-      if (tau(i) >= 1.0) then
-         state_out%Fz(i) = (2._x_precision * c**2 * state_out%x(i) * state_out%T(i)**4) / (27._x_precision * &
-                           sqrt(3._x_precision) * (kappa_ff(i) + params%kappa_e) * state_out%S(i) * state_0%S_0)
-      else
-         state_out%Fz(i) = epsilo(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
-      endif
-    enddo
+    !do i=1,n_cell
+    !  ! Compute Fz depending on optical thickness
+    !  if (tau(i) >= 1.0) then
+    !     state_out%Fz(i) = (2._x_precision * c**2 * state_out%x(i) * state_out%T(i)**4) / (27._x_precision * &
+    !                       sqrt(3._x_precision) * (kappa_ff(i) + params%kappa_e) * state_out%S(i) * state_0%S_0)
+    !  else
+    !     state_out%Fz(i) = epsilo(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
+    !  endif
+    !enddo
   end subroutine compute_variables
 
   ! Transform dimensions of variables
