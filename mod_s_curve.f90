@@ -108,16 +108,19 @@ contains
     if (delta < 0.) then
       write(*,*)'No solutions in the R field.'
    else
-      sol_1=(-1.*coeff_b+sqrt(delta))/(2.*coeff_a)
-      sol_2=(-1.*coeff_b-sqrt(delta))/(2.*coeff_a)
-   end if
-   if (sol_1 > 0. ) then
-      sol=sol_1
-   else
-      sol=sol_2
-   end if
-      !sol          = -0.5_x_precision *(coeff_b + sign(sqrt(delta),coeff_b))/coeff_a
-    !end if
+      sol_1         = -0.5_x_precision *(coeff_b + sign(sqrt(delta),coeff_b))/coeff_a
+      !if (sol_1 == 0._x_precision) then
+      !  write(*,*)'Problem'
+      !  stop
+      !endif
+      sol_2 = (coeff_c / coeff_a * sol_1)
+      sol = max(sol_1,sol_2)
+      
+    end if
+  end subroutine quadratic
+
+
+   
   end subroutine quadratic
 
   !-------------------------------------------------------------------------
@@ -218,12 +221,10 @@ contains
        Fz = 4._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
             * (K_ff + K_e) * Sigma * Sigma_0)
     case (0)
-    !   Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
 
        Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
     end select
     Q_plus              = 3._x_precision  * rs**2 * nu * Omega**2 * Omega_0**2
-    !  Q_minus             = Fz  / Sigma * (1 / (3._x_precision * nu_0) * Omega_0 * rs**2)
     Q_minus             = Fz  / Sigma 
 
     f                   = Q_plus - Q_minus
@@ -312,7 +313,7 @@ contains
                   tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0, rho_0)
           endif
           
-          dichotomy       = (Smin + Smax) * 1.0 / 2._x_precision
+          dichotomy       = (Smin + Smax) * 1._x_precision / 2._x_precision
 
           call variables(T, dichotomy, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
                K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f_dichotomy,Sigma_0, Omega_0,rs,T_0, rho_0)
