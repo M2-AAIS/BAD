@@ -113,7 +113,7 @@ contains
       !  write(*,*)'Problem'
       !  stop
       !endif
-      sol_2 = (coeff_c / coeff_a * sol_1)
+      sol_2 = (coeff_c / (coeff_a * sol_1))
       sol = max(sol_1,sol_2)
       
     end if
