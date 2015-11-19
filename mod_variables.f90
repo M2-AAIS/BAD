@@ -143,6 +143,27 @@ contains
     state_0%Cv_0    = 1._x_precision / state_0%T_0
     state_0%P_gaz_0 = state_0%rho_0 * params%RTM
     state_0%P_rad_0 = cst_rad * state_0%T_0**4 / 3._x_precision
+
+    write(*,*)'           Initial Variables            '
+    write(*,*)'****************************************'
+    write(*,"(' Omega_0     =',1p,E12.4)") state_0%Omega_0
+    write(*,"(' t_0         =',1p,E12.4)") state_0%temps_0
+    write(*,"(' nu_0        =',1p,E12.4)") state_0%nu_0
+    write(*,"(' v_0         =',1p,E12.4)") state_0%v_0
+    write(*,"(' cs_0        =',1p,E12.4)") state_0%cs_0
+    write(*,"(' Sigma_0     =',1p,E12.4)") state_0%S_0
+    write(*,"(' H_0         =',1p,E12.4)") state_0%H_0
+    write(*,"(' Mdot_0      =',1p,E12.4)") state_0%M_dot_0
+    write(*,"(' rho_0       =',1p,E12.4)") state_0%rho_0
+    write(*,"(' T_0         =',1p,E12.4)") state_0%T_0
+    write(*,"(' Fz_0        =',1p,E12.4)") state_0%Fz_0
+    write(*,"(' Cv_0        =',1p,E12.4)") state_0%Cv_0
+    write(*,"(' P_gaz_0     =',1p,E12.4)") state_0%P_gaz_0
+    write(*,"(' P_rad_0     =',1p,E12.4)") state_0%P_rad_0
+    write(*,*)'****************************************'
+
+    read(*,*)
+
   end subroutine init_variable_0
 
 end module mod_variables

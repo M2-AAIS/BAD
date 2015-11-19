@@ -30,8 +30,8 @@ contains
     real(kind = x_precision)                               :: sigma = 0.0d0
     real(kind = x_precision)                               :: Smin  = 0.0d0
     real(kind = x_precision)                               :: Smax  = 0.0d0
-    real(kind = x_precision)                               :: omega = 0.0d0
     real(kind = x_precision)                               :: r     = 0.0d0
+    real(kind = x_precision)                               :: omega = 0.0d0
     real(kind = x_precision)                               :: H     = 0.0d0
     real(kind = x_precision)                               :: rho   = 0.0d0
     real(kind = x_precision)                               :: cs    = 0.0d0
@@ -47,14 +47,6 @@ contains
     real(kind = x_precision)                               :: E_ff   = 0.0d0
     real(kind = x_precision)                               :: Fz     = 0.0d0
     integer                                                :: optical_depth =0
-
-    real(kind = x_precision)                               :: rs
-    real(kind = x_precision)                               :: rmin
-    real(kind = x_precision)                               :: Mdot_0
-    real(kind = x_precision)                               :: Sigma_0
-    real(kind = x_precision)                               :: Omega_0
-    real(kind = x_precision)                               :: rho_0
-    real(kind = x_precision)                               :: T_0
 
     real(kind = x_precision),dimension(nb_it)              :: temp_real_1 =0.0d0
     real(kind = x_precision),dimension(nb_it)              :: sigma_real_1=0.0d0
@@ -84,16 +76,13 @@ contains
     
     !------------------------------------------------------------------------
 
-    call display_parameters()
-    call initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
-    call display_initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
     !-------------------------------------------------------------------------
     ! Test for 1 value of r
     !-------------------------------------------------------------------------
      do k              = 1 , n_cell
-         !r = (rmax-rmin)/(n_cell-1)*(k-1) + rmin
+         !omega          = x_state%Omega(k)
          r              = 10._x_precision*G*params%M/(c**2)
-         omega          = sqrt(G*params%M/r**3) / Omega_0
+         omega          = sqrt(G*params%M/r**3) / state_0%Omega_0
 
          write(number_of_cell,'(I5.5)') k
          fid = 20 + k
@@ -116,36 +105,36 @@ contains
 
           optical_depth = 1
 
-          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+          sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
           
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-              K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+              K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f, optical_depth)
 
         !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
-        !      K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
+        !      K_ff, K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f)
 
-          temp_real_1(i)   = log10(temp * T_0)
-          sigma_real_1(i)  = log10(sigma * sigma_0)
+          temp_real_1(i)   = log10(temp * state_0%T_0)
+          sigma_real_1(i)  = log10(sigma * state_0%S_0)
 
           do j          = 1, nb_it
-             write(fid_2,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(j),temp_real_1(j)
+             write(fid_2,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') sigma_real_1(j), temp_real_1(j)
           enddo
 
                     optical_depth = 0
 
-          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+          sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
           
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-              K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+              K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f, optical_depth)
 
-        !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
-        !      K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
+        !  call display_variables(temp, Omega, r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
+        !      K_ff, K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f)
 
-          temp_real_0(i)   = log10(temp * T_0)
-          sigma_real_0(i)  = log10(sigma * sigma_0)
+          temp_real_0(i)   = log10(temp * state_0%T_0)
+          sigma_real_0(i)  = log10(sigma * state_0%S_0)
 
           do l          = 1, nb_it
-             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(l),temp_real_0(l)
+             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') sigma_real_0(l), temp_real_0(l)
           enddo
           
        enddo
@@ -160,7 +149,7 @@ contains
 
 
           do l          = 1, nb_it
-             write(fid_3,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real(l),temp_real(l)
+             write(fid_3,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') sigma_real(l), temp_real(l)
           enddo
        
        
@@ -337,16 +326,10 @@ contains
   !K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz for T, Sigma and Omega given
   !------------------------------------------------------------------------
   subroutine variables(T, Sigma, Omega, H, rho, cs, nu, Q_plus, Q_minus,&
-       K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0,&
-     Omega_0,rs, T_0, rho_0, optical_depth)
+       K_ff, K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f, optical_depth)
     implicit none
 
     real(kind = x_precision),intent(in)                      :: T,Sigma,Omega
-    real(kind = x_precision),intent(in)                      :: Sigma_0
-    real(kind = x_precision),intent(in)                      :: Omega_0
-    real(kind = x_precision),intent(in)                      :: T_0
-    real(kind = x_precision),intent(in)                      :: rho_0
-    real(kind = x_precision),intent(in)                      :: rs
     integer, intent(in)                                      :: optical_depth
     real(kind = x_precision)                                 :: coeff_a=0.,coeff_b=0.,coeff_c=0.
 
@@ -366,9 +349,9 @@ contains
     real(kind = x_precision),intent(out)                     :: f
     !------------------------------------------------------------------------
 
-    coeff_a              = (Omega**2 * Omega_0**2 * Sigma * Sigma_0)/2._x_precision
-    coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * T_0**4 / rs
-    coeff_c              = (-1._x_precision * params%RTM * T  *  Sigma * Sigma_0)/(2._x_precision * rs**2)
+    coeff_a              = (Omega**2 * state_0%Omega_0**2 * Sigma * state_0%S_0)/2._x_precision
+    coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * state_0%T_0**4 / state_0%H_0
+    coeff_c              = (-1._x_precision * params%RTM * T  *  Sigma * state_0%S_0)/(2._x_precision * state_0%H_0**2)
 
     call quadratic(coeff_a , coeff_b , coeff_c , H)
 
@@ -377,10 +360,10 @@ contains
     P_gaz                = rho * T
     cs                   = Omega * H
     nu                   = params%alpha * cs * H
-    K_ff                 = 6.13d22 * rho_0 * rho * (T_0 * T)**(-3.5_x_precision)
+    K_ff                 = 6.13d22 * state_0%rho_0 * rho * (state_0%T_0 * T)**(-3.5_x_precision)
     K_e                  = params%kappa_e
-    E_ff                 = 6.22d20 * (rho_0 * rho)**2 * sqrt(T_0 * T)
-    tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0
+    E_ff                 = 6.22d20 * (state_0%rho_0 * rho)**2 * sqrt(state_0%T_0 * T)
+    tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * state_0%S_0
 
 
     !-------------------------------------------------------------------------
@@ -398,14 +381,14 @@ contains
     case(1)
 
        Fz = 4._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
-            * (K_ff + K_e) * Sigma * Sigma_0)
+            * (K_ff + K_e) * Sigma * state_0%S_0)
     case (0)
 
-       Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
+       Fz = 4._x_precision * state_0%H_0 * E_ff * H / (state_0%Omega_0 * state_0%S_0)
 
     end select
 
-    Q_plus              = 3._x_precision  * rs**2 * nu * Omega**2 * Omega_0**2
+    Q_plus              = 3._x_precision  * state_0%H_0**2 * nu * Omega**2 * state_0%Omega_0**2
     Q_minus             = Fz  / Sigma
 
     f                   = Q_plus - Q_minus
@@ -417,7 +400,7 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+  real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, optical_depth)
     use mod_read_parameters
     use mod_constants
     use mod_variables
@@ -427,11 +410,6 @@ contains
     real(kind=x_precision),intent(in)                        :: eps
     real(kind=x_precision),intent(in)                        :: T
     real(kind=x_precision),intent(in)                        :: omega
-    real(kind=x_precision),intent(in)                        :: Sigma_0
-    real(kind=x_precision),intent(in)                        :: Omega_0
-    real(kind=x_precision),intent(in)                        :: T_0
-    real(kind=x_precision),intent(in)                        :: rho_0
-    real(kind=x_precision),intent(in)                        :: rs
     integer,intent(in)                                       :: optical_depth
 
     real(kind=x_precision)                                   :: H
@@ -463,10 +441,10 @@ contains
     dichotomy             = (Smin+Smax)/2.
     j = 0
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0,optical_depth)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,optical_depth)
 
     call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max, optical_depth)
 
   !   write(*,*)'fmin = ',f_min
   !   write(*,*)'fmax = ',f_max
@@ -480,13 +458,13 @@ contains
 
 
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0, optical_depth)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min, optical_depth)
 
     call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max, optical_depth)
 
     call variables(T, S_center, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-         K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f_center,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
+         K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f_center, optical_depth)
 
 
           if(f_min * f_center .gt. 0.) then
@@ -510,59 +488,6 @@ contains
   end function dichotomy
 
 
-  !-------------------------------------------------------------------------
-  !Subroutine in order to display parameters
-  !-------------------------------------------------------------------------
-  subroutine display_parameters()
-
-    write(*,*)'           Input Parameters             '
-    write(*,*)'****************************************'
-    write(*,"(' BH_mass     =',1p,E12.4)") params%M
-    write(*,"(' Mdot        =',1p,E12.4)") params%Mdot
-    ! write(*,"(' rmax        =',1p,E12.4)") rmax
-    write(*,"(' alpha       =',1p,E12.4)") params%alpha
-    ! write(*,"(' X           =',1p,E12.4)") X
-    write(*,*)'****************************************'
-    read(*,*)
-
-  end subroutine display_parameters
-
-
-  !-------------------------------------------------------------------------
-  !Subroutine in order to display initial variables
-  !-------------------------------------------------------------------------
-  subroutine display_initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
-    implicit none
-
-    real(kind = x_precision), intent(in)                     :: rs
-    real(kind = x_precision), intent(in)                     :: rmin
-    real(kind = x_precision), intent(in)                     :: Mdot_0
-    real(kind = x_precision), intent(in)                     :: Sigma_0
-    real(kind = x_precision), intent(in)                     :: Omega_0
-    real(kind = x_precision), intent(in)                     :: T_0
-    real(kind = x_precision), intent(in)                     :: rho_0
-
-    !-----------------------------------------------------------------------
-
-    write(*,*)'           Initial Variables            '
-    write(*,*)'****************************************'
-    write(*,"(' Temp_0      =',1p,E12.4)") T_0
-    write(*,"(' Sigma_0     =',1p,E12.4)") Sigma_0
-    write(*,"(' Omega_0     =',1p,E12.4)") Omega_0
-    write(*,"(' Omega_max   =',1p,E12.4)") sqrt(G*params%M / rmin**3)
-    write(*,"(' H_0         =',1p,E12.4)") rs
-    write(*,"(' Mdot_0      =',1p,E12.4)") Mdot_0
-    write(*,"(' rho_0       =',1p,E12.4)") rho_0
-    write(*,"(' rmin        =',1p,E12.4)") rmin
-    write(*,"(' rs          =',1p,E12.4)") rs
-    write(*,*)'****************************************'
-
-    read(*,*)
-
-  end subroutine display_initial_variables
-
-
-  !-------------------------------------------------------------------------
   !Subroutine in order to display variables
   !-------------------------------------------------------------------------
   subroutine display_variables(temp,Omega,r,sigma, H, rho, cs, nu, Q_plus, &
