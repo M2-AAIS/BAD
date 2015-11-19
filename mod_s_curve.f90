@@ -16,13 +16,15 @@ contains
     integer                                                :: i     = 0
     integer                                                :: j     = 0
     integer                                                :: k     = 0
-    real(kind = x_precision)                               :: temp  = 0.0d0
-    real(kind = x_precision), parameter                    :: t_min = 0.0d0
-    real(kind = x_precision), parameter                    :: t_max = 0.0d0
+    integer                                                :: l     = 0
 
+    real(kind = x_precision)                               :: temp  = 0.0d0
+    real(kind = x_precision), parameter                    :: t_min = 2.0d0
+    real(kind = x_precision), parameter                    :: t_max = 5.49d0
 
     integer,                  parameter                    :: nb_it = 200
     real(kind = x_precision)                               :: eps   = 1.0d-4
+    real(kind = x_precision)                               :: eps2   = 1.0d1
 
 
     real(kind = x_precision)                               :: sigma = 0.0d0
@@ -78,19 +80,18 @@ contains
 
          write(number_of_cell,'(I5.5)') k
          fid = 20 + k
-         fid = 21 + k
 
 !********For the optically thin medium********
         do i          = 1, nb_it
-          Smin        = 1d-2
-          Smax        = 1d51
-          t_min       = 2.d0
-          t_max       = 5.49d0
+          Smin        = 1d-1
+          Smax        = 1d5
 
           temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
-          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0)
 
           optical_depth = 0
+
+          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+
 
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
               K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
@@ -100,22 +101,6 @@ contains
 
           temp_real_0(i)   = log10(temp * T_0)
           sigma_real_0(i)  = log10(sigma * sigma_0)
-
-       enddo
-
-
-       temp = 0.0d0
-       sigma = 0.0d0
-
-!********For the optically thick medium********
-        do i          = 1, nb_it
-          Smin        = 1d-2
-          Smax        = 1d51
-          t_min       = 3.d-1
-          t_max       = 2.49d0
-
-          temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
-          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0)
 
           optical_depth = 1
 
@@ -130,25 +115,23 @@ contains
 
     !Saving all the data
     fname = 'Temperature_Sigma_'//trim(number_of_cell)//'_r.dat'
-       open(fid,file  = fname, status='unknown',action='readwrite')
+    open(fid,file  = fname, status='unknown',action='readwrite')
        !  write(fid,*)"T     &         Sigma"
-       do i          = 1, nb_it
-          do j          = 1, nb_it
-             do while( abs( temp_real_1(i) - temp_real_0(j) ) .gt. eps .AND. &
-                        abs( sigma_real_1(i) - sigma_real_0(j) ) .gt. eps) then
+    do i          = 1, nb_it
+       do j          = 1, nb_it
+          do while( abs( sigma_real_1(i) - sigma_real_0(j) ) .gt. eps2)
+             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(i),temp_real_1(i)
+             l = j
+          enddo
+       enddo
+    enddo
 
-                write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(i),temp_real_1(i)
+    do i          = l, nb_it
 
-              enddo
-           enddo
-        enddo
+       write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(i),temp_real_0(i)
 
-        do i          = j, nb_it
-
-             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(i),temp_real_0(i)
-
-        enddo
-       close(fid)
+    enddo
+    close(fid)
 
     enddo
 
@@ -308,7 +291,7 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, sigma_0, Omega_0,rs, T_0, rho_0)
+  real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
     use mod_read_parameters
     use mod_constants
     use mod_variables
@@ -323,6 +306,7 @@ contains
     real(kind=x_precision),intent(in)                        :: T_0
     real(kind=x_precision),intent(in)                        :: rho_0
     real(kind=x_precision),intent(in)                        :: rs
+    integer,intent(in)                                       :: optical_depth
 
     real(kind=x_precision)                                   :: H
     real(kind=x_precision)                                   :: rho
@@ -353,10 +337,10 @@ contains
     dichotomy             = (Smin+Smax)/2.
     j = 0
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0,optical_depth)
 
     call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
 
     ! write(*,*)'fmin = ',f_min
     ! write(*,*)'fmax = ',f_max
@@ -370,13 +354,13 @@ contains
 
 
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0, optical_depth)
 
     call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0)
+         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
 
     call variables(T, S_center, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-         K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f_center,Sigma_0, Omega_0,rs,T_0, rho_0)
+         K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f_center,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
 
 
           if(f_min * f_center .gt. 0.) then
