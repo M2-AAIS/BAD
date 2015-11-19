@@ -288,39 +288,6 @@ contains
   end subroutine quadratic
 
 
-
-  !-------------------------------------------------------------------------
-  !Subroutine in order to compute initial variables rs, rmin, Mdot_0,
-  !Sigma_0
-  !-------------------------------------------------------------------------
-  subroutine initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
-    implicit none
-
-    real(kind=x_precision),intent(out)                      :: rs
-    real(kind=x_precision),intent(out)                      :: rmin
-    real(kind=x_precision),intent(out)                      :: Mdot_0
-    real(kind=x_precision),intent(out)                      :: Sigma_0
-    real(kind=x_precision),intent(out)                      :: Omega_0
-    real(kind=x_precision),intent(out)                      :: T_0
-    real(kind=x_precision),intent(out)                      :: rho_0
-    real(kind=x_precision)                                  :: nu_0
-
-    !------------------------------------------------------------------------
-
-    rs                 = 2._x_precision * G * params%M/(c**2)
-    rmin               = 3._x_precision * rs
-    Mdot_0             = params%Mdot
-    Omega_0            = sqrt(G * params%M / rs**3 )
-    Sigma_0            = Mdot_0 /(Omega_0 * rs**2 * 2_x_precision * pi)
-    T_0                = (Mdot_0 * c**2 / (48._x_precision * pi * rs**2 * stefan * &
-                         sqrt(27._x_precision) ) )**(1._x_precision/4._x_precision)
-    rho_0              = Sigma_0 / (2._x_precision * rs)
-    nu_0                 = 2._x_precision * rs**2 * Omega_0 / 3._x_precision
-
-  end subroutine initial_variables
-
-
-
   !-------------------------------------------------------------------------
   !Subroutine in order to compute variables H, rho, cs, nu, Q_plus, Q_minus,
   !K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz for T, Sigma and Omega given
