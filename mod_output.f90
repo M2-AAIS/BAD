@@ -29,8 +29,8 @@ contains
 
     do i = 1, n_cell
        write(unit, fmt='(15(e16.8e2))') x_state%x(i), x_state%Omega(i), s%nu(i), s%v(i),&
-            s%T(i), s%P_rad(i), s%P_gaz(i), s%beta(i), s%cs(i),&
-            s%H(i), s%rho(i), S%S(i), S%Fz(i), S%M_dot(i), S%Cv(i)
+            s%T(i), s%Prad(i), s%Pgaz(i), s%beta(i), s%cs(i),&
+            s%H(i), s%rho(i), S%S(i), S%Fz(i), S%Mdot(i), S%Cv(i)
     end do
   end subroutine snapshot
   

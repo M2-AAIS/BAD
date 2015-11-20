@@ -32,21 +32,21 @@ contains
     a1 = x_state%Omega**2 * state_0%Omega_0**2 * (state_out%S * state_0%S_0) * state_0%H_0**2
     b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
     c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
-    !a1 = x_state%Omega**2 * state_0%Omega_0 * state_0%M_dot_0 * (state_out%S * state_0%S_0)
+    !a1 = x_state%Omega**2 * state_0%Omega_0 * state_0%Mdot_0 * (state_out%S * state_0%S_0)
     !b1 = - 4._x_precision * pi * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
     !c1 = - 2._x_precision * pi * (params%RTM * state_out%T * state_out%S * state_0%S_0)
     Delta = b1**2 - 4._x_precision * a1 * c1
 
     ! Start computing variables
-    !state_out%H     = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1 / state_0%H_0
-    state_out%H     = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1
-    state_out%P_rad = state_out%T**4
-    state_out%cs    = x_state%Omega * state_out%H
-    state_out%rho   = state_out%S / (state_out%H * x_state%x)
-    state_out%nu    = params%alpha * state_out%cs * state_out%H
-    state_out%P_gaz = state_out%rho * state_out%T
-    state_out%beta  = state_out%P_gaz / (state_out%P_gaz + state_out%P_rad)
-    state_out%Cv    = params%RTM * ((12._x_precision * gammag - 1._x_precision) * &
+    !state_out%H    = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1 / state_0%H_0
+    state_out%H    = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1
+    state_out%Prad = state_out%T**4
+    state_out%cs   = x_state%Omega * state_out%H
+    state_out%rho  = state_out%S / (state_out%H * x_state%x)
+    state_out%nu   = params%alpha * state_out%cs * state_out%H
+    state_out%Pgaz = state_out%rho * state_out%T
+    state_out%beta = 1._x_precision / (1 + state_0%beta_0 * state_out%Prad / state_out%Pgaz)
+    state_out%Cv   = params%RTM * ((12._x_precision * gammag - 1._x_precision) * &
                       (1._x_precision - state_out%beta) + state_out%beta) / &
                       (state_out%beta * (gammag - 1._x_precision))
 
@@ -56,7 +56,7 @@ contains
                                state_out%nu(1:n_cell-1) * state_out%S(1:n_cell-1)) / params%dx
     state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * x_state%x(n_cell))
 
-    state_out%M_dot = - state_out%v * state_out%S * x_state%x
+    state_out%Mdot = - state_out%v * state_out%S * x_state%x
 
     ! Compute variables needed for Fz
     kappa_ff = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
@@ -93,31 +93,31 @@ contains
 
     select case(mode)
     case(0)
-      state_in%nu    = state_in%nu    / state_0%nu_0
-      state_in%v     = state_in%v     / state_0%v_0
-      state_in%cs    = state_in%cs    / state_0%cs_0
-      state_in%S     = state_in%S     / state_0%S_0
-      state_in%H     = state_in%H     / state_0%H_0
-      state_in%M_dot = state_in%M_dot / state_0%M_dot_0
-      state_in%rho   = state_in%rho   / state_0%rho_0
-      state_in%T     = state_in%T     / state_0%T_0
-      state_in%Fz    = state_in%Fz    / state_0%Fz_0
-      state_in%Cv    = state_in%Cv    / state_0%Cv_0
-      state_in%P_gaz = state_in%P_gaz / state_0%P_gaz_0
-      state_in%P_rad = state_in%P_rad / state_0%P_rad_0
+      state_in%nu   = state_in%nu   / state_0%nu_0
+      state_in%v    = state_in%v    / state_0%v_0
+      state_in%cs   = state_in%cs   / state_0%cs_0
+      state_in%S    = state_in%S    / state_0%S_0
+      state_in%H    = state_in%H    / state_0%H_0
+      state_in%Mdot = state_in%Mdot / state_0%Mdot_0
+      state_in%rho  = state_in%rho  / state_0%rho_0
+      state_in%T    = state_in%T    / state_0%T_0
+      state_in%Fz   = state_in%Fz   / state_0%Fz_0
+      state_in%Cv   = state_in%Cv   / state_0%Cv_0
+      state_in%Pgaz = state_in%Pgaz / state_0%Pgaz_0
+      state_in%Prad = state_in%Prad / state_0%Prad_0
     case(1)
-      state_in%nu    = state_in%nu    * state_0%nu_0
-      state_in%v     = state_in%v     * state_0%v_0
-      state_in%cs    = state_in%cs    * state_0%cs_0
-      state_in%S     = state_in%S     * state_0%S_0
-      state_in%H     = state_in%H     * state_0%H_0
-      state_in%M_dot = state_in%M_dot * state_0%M_dot_0
-      state_in%rho   = state_in%rho   * state_0%rho_0
-      state_in%T     = state_in%T     * state_0%T_0
-      state_in%Fz    = state_in%Fz    * state_0%Fz_0
-      state_in%Cv    = state_in%Cv    * state_0%Cv_0
-      state_in%P_gaz = state_in%P_gaz * state_0%P_gaz_0
-      state_in%P_rad = state_in%P_rad * state_0%P_rad_0
+      state_in%nu   = state_in%nu   * state_0%nu_0
+      state_in%v    = state_in%v    * state_0%v_0
+      state_in%cs   = state_in%cs   * state_0%cs_0
+      state_in%S    = state_in%S    * state_0%S_0
+      state_in%H    = state_in%H    * state_0%H_0
+      state_in%Mdot = state_in%Mdot * state_0%Mdot_0
+      state_in%rho  = state_in%rho  * state_0%rho_0
+      state_in%T    = state_in%T    * state_0%T_0
+      state_in%Fz   = state_in%Fz   * state_0%Fz_0
+      state_in%Cv   = state_in%Cv   * state_0%Cv_0
+      state_in%Pgaz = state_in%Pgaz * state_0%Pgaz_0
+      state_in%Prad = state_in%Prad * state_0%Prad_0
     case default
        stop
     end select
@@ -139,13 +139,14 @@ contains
     state_0%cs_0    = state_0%v_0
     state_0%S_0     = params%Mdot / (3._x_precision * pi * state_0%nu_0)
     state_0%H_0     = rs
-    state_0%M_dot_0 = params%Mdot
+    state_0%Mdot_0  = params%Mdot
     state_0%rho_0   = state_0%S_0 / (2._x_precision * rs)
     state_0%T_0     = (params%Mdot * c2 / (sqrt(27.0) * 48._x_precision * pi * rs**2 * stefan))**0.25_x_precision
     state_0%Fz_0    = state_0%S_0 * state_0%Omega_0 / 4._x_precision
     state_0%Cv_0    = 1._x_precision / state_0%T_0
-    state_0%P_gaz_0 = state_0%rho_0 * params%RTM
-    state_0%P_rad_0 = cst_rad * state_0%T_0**4 / 3._x_precision
+    state_0%Pgaz_0  = state_0%rho_0 * params%RTM
+    state_0%Prad_0  = cst_rad * state_0%T_0**4 / 3._x_precision
+    state_0%beta_0  = state_0%Prad_0 / state_0%Pgaz_0
 
     write(*,*)'           Initial Variables            '
     write(*,*)'****************************************'
@@ -156,13 +157,13 @@ contains
     write(*,"(' cs_0        =',1p,E12.4)") state_0%cs_0
     write(*,"(' Sigma_0     =',1p,E12.4)") state_0%S_0
     write(*,"(' H_0         =',1p,E12.4)") state_0%H_0
-    write(*,"(' Mdot_0      =',1p,E12.4)") state_0%M_dot_0
+    write(*,"(' Mdot_0      =',1p,E12.4)") state_0%Mdot_0
     write(*,"(' rho_0       =',1p,E12.4)") state_0%rho_0
     write(*,"(' T_0         =',1p,E12.4)") state_0%T_0
     write(*,"(' Fz_0        =',1p,E12.4)") state_0%Fz_0
     write(*,"(' Cv_0        =',1p,E12.4)") state_0%Cv_0
-    write(*,"(' P_gaz_0     =',1p,E12.4)") state_0%P_gaz_0
-    write(*,"(' P_rad_0     =',1p,E12.4)") state_0%P_rad_0
+    write(*,"(' P_gaz_0     =',1p,E12.4)") state_0%Pgaz_0
+    write(*,"(' P_rad_0     =',1p,E12.4)") state_0%Prad_0
     write(*,*)'****************************************'
 
     read(*,*)
