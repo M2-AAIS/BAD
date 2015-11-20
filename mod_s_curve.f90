@@ -444,7 +444,7 @@ contains
     case(1)
 
        Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
-            * (K_ff + K_e) * Sigma * Sigma_0)
+            * (K_ff + K_e) * Sigma * Sigma_0 * Omega**(1._x_precision / 3._x_precision))
     case (0)
 
        Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
