@@ -6,8 +6,6 @@ program black_hole_s_curve
 
   implicit none
 
-  call get_parameters() 
-  call init_variable_0()
     integer                                                 :: i
 
     real(kind = x_precision),dimension(n_cell)              :: temperature
