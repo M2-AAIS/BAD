@@ -29,9 +29,12 @@ contains
     !a1 = r_state%Omega_r**2 * (state_out%S * state_0%S_0)
     !b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * x_state%x / 3._x_precision
     !c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
-    a1 = x_state%Omega**2 * state_0%Omega_0 * state_0%M_dot_0 * (state_out%S * state_0%S_0)
-    b1 = - 4._x_precision * pi * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
-    c1 = - 2._x_precision * pi * (params%RTM * state_out%T * state_out%S * state_0%S_0)
+    a1 = x_state%Omega**2 * state_0%Omega_0**2 * (state_out%S * state_0%S_0) * state_0%H_0**2
+    b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
+    c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
+    !a1 = x_state%Omega**2 * state_0%Omega_0 * state_0%Mdot_0 * (state_out%S * state_0%S_0)
+    !b1 = - 4._x_precision * pi * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
+    !c1 = - 2._x_precision * pi * (params%RTM * state_out%T * state_out%S * state_0%S_0)
     Delta = b1**2 - 4._x_precision * a1 * c1
 
     ! Start computing variables
@@ -127,7 +130,7 @@ contains
     real(kind = x_precision) :: rs, c2
 
     c2 = c**2
-    rs = 2._x_precision*G*params%M/c2
+    rs = 2._x_precision * G * params%M / c2
 
     state_0%Omega_0 = sqrt(G * params%M / rs**3)
     state_0%temps_0 = 2._x_precision / state_0%Omega_0
@@ -139,7 +142,7 @@ contains
     state_0%Mdot_0  = params%Mdot
     state_0%rho_0   = state_0%S_0 / (2._x_precision * rs)
     state_0%T_0     = (params%Mdot * c2 / (sqrt(27.0) * 48._x_precision * pi * rs**2 * stefan))**0.25_x_precision
-    state_0%Fz_0    = state_0%S_0 / (2._x_precision * state_0%temps_0)
+    state_0%Fz_0    = state_0%S_0 * state_0%Omega_0 / 4._x_precision
     state_0%Cv_0    = 1._x_precision / state_0%T_0
     state_0%P_gaz_0 = state_0%rho_0 * params%RTM
     state_0%P_rad_0 = cst_rad * state_0%T_0**4 / 3._x_precision
