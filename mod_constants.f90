@@ -19,17 +19,21 @@ module mod_constants
   real(kind = x_precision), parameter, public :: thomson = 6.6524587158e-25_x_precision ! Thomson cross-section in cgs
 
   type parameters
-    real(kind = x_precision) :: M, Mdot, kappa_e, RTM, alpha, dx
+    real(kind = x_precision) :: M, Mdot, Mdot_crit, kappa_e, RTM, alpha, dx,t_v,t_T
     ! M       : Black hole Mass
     ! Mdot    : Acretion rate at rmax
+    ! Mdot_crit : Acretion rate critic
     ! kappa_e : Thomson scattering thickness
     ! RTM     : Gas constant × T_0 ÷ μ
     ! alpha   : Viscosity parameter
     ! dx      : Dimensionless spacestep
+    ! t_v      : viscosity time
+    ! t_T      : thermic time
+
   end type parameters
 
   type state
-    real(kind = x_precision), dimension(n_cell) :: nu, v, cs, S, H, Mdot, rho, T, Fz, Cv, Pgaz, Prad, beta
+    real(kind = x_precision), dimension(n_cell) :: nu, v, cs, S, H, M_dot, rho, T, Fz, Cv, P_gaz, P_rad, beta
     ! nu    : Viscosity
     ! v     : Local, radial accretion speed
     ! cs    : Speed of sound
@@ -58,7 +62,7 @@ module mod_constants
   end type adim_state
 
   type state_zero
-    real(kind = x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, Mdot_0, rho_0, T_0, Fz_0, Cv_0, Pgaz_0, Prad_0, beta_0
+    real(kind = x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, M_dot_0, rho_0, T_0, Fz_0, Cv_0, P_gaz_0, P_rad_0
     ! Usefull quantities to get the dimensionless ones
   end type state_zero
 
