@@ -37,8 +37,8 @@ program black_hole_diffusion
 
   ! Copy the value of state_0 into state vector s
   do n = 1, n_cell
-     s%T(n)       = 1e-3_x_precision
-     s%S(n)       = 1e-3_x_precision
+     s%T(n)       = 0.52_x_precision
+     s%S(n)       = 1200._x_precision
   end do
   call compute_variables(s)
 
@@ -51,16 +51,14 @@ program black_hole_diffusion
 
   ! Initialize prev_S and prev_T
   ! we add initially 2*delta to prevent the code from thinking it converged
-  prev_S = s%S + 2*delta_S_max
-  prev_T = s%T + 2*delta_T_max
+  prev_S = 1.2*s%S
+  prev_T = 1.2*s%T
   
   ! FIXME
   t_V = 1.3e4_x_precision / state_0%temps_0 
   t_T = 0.72_x_precision / state_0%temps_0
-  dt_V = t_V / 100._x_precision
-  dt_T = t_T / 100._x_precision
-
-  print *, dt_V, dt_T
+  dt_V = t_V / 10000._x_precision
+  dt_T = t_T / 1000000._x_precision
 
   call snapshot(s, iteration, t, 13)
   
