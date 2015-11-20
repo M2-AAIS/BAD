@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
+from numpy import array, log
 import sys
 
 x = []
@@ -16,9 +17,11 @@ for line in infile:
     x.append(float(data[0]))
     y.append(float(data[1]))
 
+#x = array(x)
+#y = array(y)
+
 figManager = plt.get_current_fig_manager()
 figManager.window.showMaximized()
-plt.xscale('log')
-plt.yscale('log')
+#plt.plot(log(x),log(y))
 plt.plot(x,y)
 plt.show()
