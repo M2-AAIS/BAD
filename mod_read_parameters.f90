@@ -85,8 +85,8 @@ contains
       r_state%Omega_r(i) = x_state%Omega(i) * Omega_0
     end do
 
-    ! Process t_v
-    params%t_v = 0.28 * params%alpha**(-4._x_precision / 5._x_precision) * (params%Mdot/params%Mdot_crit)**&
+    ! Process t_nu
+    params%t_nu = 0.28 * params%alpha**(-4._x_precision / 5._x_precision) * (params%Mdot/params%Mdot_crit)**&
          (-3._x_precision/10._x_precision)*(params%M/M_sun)**(6._x_precision/5._x_precision)*&
          (r_state%r(n_cell)/(3*rs))**(5._x_precision / 4._x_precision)*( 1 - (r_state%r(n_cell)/(3 * rs))**&
          (-1._x_precision/2._x_precision))**(-6._x_precision / 5._x_precision)
