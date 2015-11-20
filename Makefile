@@ -2,16 +2,19 @@ GC=gfortran
 GFLAGS= -Wall -Wextra -pedantic -std=f2008 -g
 CFLAGS=-llapack -g
 OUT=simul
-OUTS=courbeS
+OUTS=s_curve
 
 
 all: mod_constants.o mod_read_parameters.o mod_variables.o mod_output.o mod_timestep.o mod_integrator.o mod_s_curve.o mod_critical.o main.o 
 	$(GC) $^ $(CFLAGS) -o $(OUT)
 
-courbeS: mod_read_parameters.o mod_constants.o mod_variables.o mod_s_curve.o mod_critical.o main.o
+s_curve: mod_constants.o mod_read_parameters.o mod_variables.o mod_s_curve.o mod_critical.o main_curve.o
 	$(GC) $^ $(CFLAGS) -o $(OUTS)
 
 main.o: main.f90
+	$(GC) $(GFLAGS) -c $^
+
+main_curve.o: main_curve.f90
 	$(GC) $(GFLAGS) -c $^
 
 mod_read_parameters.o: mod_read_parameters.f90
