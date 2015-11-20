@@ -87,17 +87,15 @@ contains
     end do
 
     ! Process t_nu
-    params%t_nu = 0.28 * params%alpha**(-4._x_precision / 5._x_precision) * (params%Mdot/params%Mdot_crit)**&
-         (-3._x_precision/10._x_precision)*(params%M/M_sun)**(6._x_precision/5._x_precision)*&
-         (r_state%r(n_cell)/(3*rs))**(5._x_precision / 4._x_precision)*( 1 - (r_state%r(n_cell)/(3 * rs))**&
-         (-1._x_precision/2._x_precision))**(-6._x_precision / 5._x_precision)
+    params%t_nu = 0.28 * params%alpha**(-0.8_x_precision) * (params%Mdot / params%Mdot_crit)**(-.3_x_precision) * &
+                  (params%M / M_sun)**1.2_x_precision * (r_state%r(n_cell) / (3*rs))**1.25_x_precision * &
+                  (1 - (r_state%r(n_cell)/(3 * rs))**(-0.5_x_precision))**(-1.2_x_precision)
 
     ! Process t_dyn
-    t_dyn = 7.2 * 10**(-5._x_precision)*(params%M/M_sun)&
-         *(r_state%r(n_cell) / (3 * rs))**(3._x_precision/2._x_precision)
+    t_dyn       = 7.2 * 10**(-5._x_precision) * (params%M / M_sun) * (r_state%r(n_cell) / (3 * rs))**1.5_x_precision
     
     ! Process t_T
-    params%t_T = t_dyn / params%alpha
+    params%t_T  = t_dyn / params%alpha
 
     
     ! Process kappa_e
