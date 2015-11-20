@@ -19,12 +19,12 @@ contains
     integer                                                :: l     = 0
 
     real(kind = x_precision)                               :: temp  = 0.0d0
-    real(kind = x_precision), parameter                    :: t_min = 2.0d0
-    real(kind = x_precision), parameter                    :: t_max = 5.49d0
+    real(kind = x_precision), parameter                    :: t_min = 5.0d-1
+    real(kind = x_precision), parameter                    :: t_max = 4.49d0
 
-    integer,                  parameter                    :: nb_it = 200
+    integer,                  parameter                    :: nb_it = 100
     real(kind = x_precision)                               :: eps   = 1.0d-4
-    real(kind = x_precision)                               :: eps2   = 1.0d1
+    real(kind = x_precision)                               :: eps2   = 5.0d-1
 
 
     real(kind = x_precision)                               :: sigma = 0.0d0
@@ -60,11 +60,28 @@ contains
     real(kind = x_precision),dimension(nb_it)              :: sigma_real_1=0.0d0
     real(kind = x_precision),dimension(nb_it)              :: temp_real_0 =0.0d0
     real(kind = x_precision),dimension(nb_it)              :: sigma_real_0=0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: temp_real =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: sigma_real=0.0d0
 
     character(len = 8)                                     :: number_of_cell
     character(len = 64)                                    :: fname
+    character(len = 64)                                    :: fname_2
+    character(len = 64)                                    :: fname_3
+
     integer                                                :: fid
+    integer                                                :: fid_2
+    integer                                                :: fid_3
+
     integer                                                :: n_cell = 1
+
+
+    integer                                                :: index_fcp
+    real(kind = x_precision)                               :: sigma_c_thick
+    real(kind = x_precision)                               :: temp_c_thick
+    integer                                                :: index_scp
+    real(kind = x_precision)                               :: sigma_c_thin
+    real(kind = x_precision)                               :: temp_c_thin
+    
     !------------------------------------------------------------------------
 
     call display_parameters()
@@ -80,19 +97,44 @@ contains
 
          write(number_of_cell,'(I5.5)') k
          fid = 20 + k
+         fid_2 = 21 + k
+         fid_3 = 22 + k
 
-!********For the optically thin medium********
-        do i          = 1, nb_it
-          Smin        = 1d-1
-          Smax        = 1d5
+         fname = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_1.dat'
+         fname_2 = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_0.dat'
+         fname_3 = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_tot.dat'
+
+         open(fid,file  = fname, status='unknown',action='readwrite')
+         open(fid_2,file  = fname_2, status='unknown',action='readwrite')
+         open(fid_3,file  = fname_3, status='unknown',action='readwrite')
+
+         do i          = 1, nb_it
+          Smin        = 1d-2
+          Smax        = 1d54
 
           temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
 
-          optical_depth = 0
+          optical_depth = 1
 
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+          
+          call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
+              K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
 
+        !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
+        !      K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
 
+          temp_real_1(i)   = log10(temp * T_0)
+          sigma_real_1(i)  = log10(sigma * sigma_0)
+
+          do j          = 1, nb_it
+             write(fid_2,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(j),temp_real_1(j)
+          enddo
+
+                    optical_depth = 0
+
+          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+          
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
               K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
 
@@ -102,42 +144,130 @@ contains
           temp_real_0(i)   = log10(temp * T_0)
           sigma_real_0(i)  = log10(sigma * sigma_0)
 
-          optical_depth = 1
-
-          call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-              K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
-
-          temp_real_1(i)   = log10(temp * T_0)
-          sigma_real_1(i)  = log10(sigma * sigma_0)
-
-       enddo
-
-
-    !Saving all the data
-    fname = 'Temperature_Sigma_'//trim(number_of_cell)//'_r.dat'
-    open(fid,file  = fname, status='unknown',action='readwrite')
-       !  write(fid,*)"T     &         Sigma"
-    do i          = 1, nb_it
-       do j          = 1, nb_it
-          do while( abs( sigma_real_1(i) - sigma_real_0(j) ) .gt. eps2)
-             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(i),temp_real_1(i)
-             l = j
+          do l          = 1, nb_it
+             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(l),temp_real_0(l)
           enddo
+          
        enddo
-    enddo
 
-    do i          = l, nb_it
 
-       write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(i),temp_real_0(i)
+       call first_critical_point(sigma_real_1, temp_real_1, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
 
-    enddo
-    close(fid)
+       call second_critical_point(sigma_real_1, sigma_real_0, temp_real_1,&
+         index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it, eps2)
+
+       call build_s_curve(sigma_real_1, sigma_real_0, temp_real_1,nb_it, index_scp, sigma_real, temp_real)
+
+
+          do l          = 1, nb_it
+             write(fid_3,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real(l),temp_real(l)
+          enddo
+       
+       
+       close(fid)
+       close(fid_2)
+       close(fid_3)
 
     enddo
 
   end subroutine curve
 
 
+  
+  !-------------------------------------------------------------------------
+  ! Subroutine in order to find the first critical point
+  !-------------------------------------------------------------------------
+  subroutine first_critical_point(sigma_real_1,temp_real_1, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
+    implicit none
+    integer,intent(in)                                   :: nb_it
+
+    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_1
+    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
+
+    integer                                  ,intent(out):: index_fcp
+    real(kind = x_precision)                 ,intent(out):: sigma_c_thick
+    real(kind = x_precision)                 ,intent(out):: temp_c_thick
+    integer                                              :: i
+    i = 1
+    do while (sigma_real_1(i) .le. sigma_real_1(i+1) .and. i .lt. nb_it - 1)
+       index_fcp = i
+       sigma_c_thick = sigma_real_1(i)
+       temp_c_thick = temp_real_1(i)
+       i = i + 1
+    enddo
+
+    endsubroutine first_critical_point
+
+
+
+
+
+ !-------------------------------------------------------------------------
+  ! Subroutine in order to find the second critical point
+  !-------------------------------------------------------------------------
+    subroutine second_critical_point(sigma_real_1, sigma_real_0, temp_real_1,&
+         index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it, eps2)
+    implicit none
+    integer,intent(in)                                   :: nb_it
+
+    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_1
+    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
+    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_0
+
+    integer                                  ,intent(in) :: index_fcp
+    integer                                  ,intent(out):: index_scp
+    real(kind = x_precision)                 ,intent(in):: eps2
+
+    real(kind = x_precision)                 ,intent(out):: sigma_c_thin
+    real(kind = x_precision)                 ,intent(out):: temp_c_thin
+    integer                                              :: i = 0
+            ! write(*,*)index_fcp
+
+    do i = index_fcp, nb_it
+      ! write(*,*)sigma_real_0(i), sigma_real_1(i)
+     !  write(*,*)(dabs(sigma_real_1(i) - sigma_real_0(i+1)))
+    end do
+    
+        do i = index_fcp, nb_it - 1
+
+           if(dabs(sigma_real_1(i) - sigma_real_0(i+1)) .lt. eps2)then
+           index_scp = i
+            sigma_c_thin = (sigma_real_1(i) + sigma_real_0(i+1))/2._x_precision
+           
+           temp_c_thin = temp_real_1(i)
+           end if
+        enddo
+
+    endsubroutine second_critical_point
+
+
+    
+    subroutine build_s_curve(sigma_real_1, sigma_real_0, temp_real_1,nb_it, index_scp, sigma_real, temp_real)
+      implicit none
+      integer,intent(in)                                   :: nb_it
+      
+      real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_1
+      real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_0
+      real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
+      integer                                  ,intent(in) :: index_scp
+      !real(kind = x_precision),dimension(:),allocatable,intent(out) :: sigma_real
+      !real(kind = x_precision),dimension(:),allocatable,intent(out) :: temp_real
+      real(kind = x_precision),dimension(nb_it),intent(out) :: sigma_real
+      real(kind = x_precision),dimension(nb_it),intent(out) :: temp_real
+      integer::i = 0
+
+      do i = 1,index_scp
+         sigma_real(i) = sigma_real_1(i)
+         temp_real(i) = temp_real_1(i)
+      enddo
+      do i = index_scp + 1, nb_it
+         sigma_real(i) = sigma_real_0(i)
+         temp_real(i) = temp_real_1(i)
+      enddo
+      
+    end subroutine build_s_curve
+
+    
   !-------------------------------------------------------------------------
   !Subroutine for resolving a quadratic equation as long as the solutions are
   !a set of real numbers
@@ -218,8 +348,6 @@ contains
     real(kind = x_precision),intent(in)                      :: rho_0
     real(kind = x_precision),intent(in)                      :: rs
     integer, intent(in)                                      :: optical_depth
-
-
     real(kind = x_precision)                                 :: coeff_a=0.,coeff_b=0.,coeff_c=0.
 
     real(kind = x_precision),intent(out)                     :: H
@@ -235,9 +363,7 @@ contains
     real(kind = x_precision),intent(out)                     :: Q_minus
     real(kind = x_precision),intent(out)                     :: P_rad
     real(kind = x_precision),intent(out)                     :: P_gaz
-
     real(kind = x_precision),intent(out)                     :: f
-
     !------------------------------------------------------------------------
 
     coeff_a              = (Omega**2 * Omega_0**2 * Sigma * Sigma_0)/2._x_precision
@@ -252,7 +378,7 @@ contains
     cs                   = Omega * H
     nu                   = params%alpha * cs * H
     K_ff                 = 6.13d22 * rho_0 * rho * (T_0 * T)**(-3.5_x_precision)
-    K_e                  =  params%kappa_e
+    K_e                  = params%kappa_e
     E_ff                 = 6.22d20 * (rho_0 * rho)**2 * sqrt(T_0 * T)
     tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0
 
@@ -342,14 +468,14 @@ contains
     call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
          tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
 
-    ! write(*,*)'fmin = ',f_min
-    ! write(*,*)'fmax = ',f_max
+  !   write(*,*)'fmin = ',f_min
+  !   write(*,*)'fmax = ',f_max
 
     if ( f_max * f_min .gt. 0.) then
-       write(*,*)'This function image does not switch its sign in this particular interval.'
-    endif
+   !    write(*,*)'This function image does not switch its sign in this particular interval.'
+       dichotomy = 0
 
-    if( f_max * f_min .lt. 0.) then
+    else if( f_max * f_min .lt. 0.) then
        iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. 10000)
 
 
@@ -376,9 +502,10 @@ contains
           j               = j + 1
 
        end do iteration
+         dichotomy = S_center
+
     endif
 
-  dichotomy = S_center
 
   end function dichotomy
 
