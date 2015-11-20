@@ -36,10 +36,8 @@ program black_hole_diffusion
 
   ! Copy the value of state_0 into state vector s
   do n = 1, n_cell
-     s%x(n)     = (n-1) * params%dx + 3_x_precision ! x_min = 3
-     s%Omega(n) = 1_x_precision/s%x(n)**3
-     s%T(n)     = 1e-3_x_precision
-     s%S(n)     = 1e-3_x_precision
+     s%T(n)       = 1e-3_x_precision
+     s%S(n)       = 1e-3_x_precision
   end do
   call compute_variables(s)
 
