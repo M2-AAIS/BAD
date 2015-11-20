@@ -35,17 +35,15 @@ contains
 
     ! Compute d(S/x)/dx as the mean spatial derivative (left + right)/2
     S_over_x                        = s%S / x_state%x
-    ! dS_over_x_over_dx(1)            = -2._x_precision / s%v(1) / s%x(1)**2 * nuS(2) * overdx2
-    dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell - 1)) * overdx 
-    dS_over_x_over_dx(n_cell)       = ( params%dx + nuS(n_cell)*(params%dx - 2._x_precision) &
-    + nuS(n_cell-1) )/ x_state%x(n_cell)**2 / s%v(n_cell) &
-    / params%dx**2 
+    dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell - 1)) * overdx
+    dS_over_x_over_dx(n_cell)       = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
+                                      ( x_state%x(n_cell)**2 * s%v(n_cell) * params%dx**2 )
 
     ! Compute dS/dt using the corresponding equation, with d²(nuS)/dx² as (d(left)+d(right))/2
     dS_over_dt(1:n_cell-1) = 1 / x_state%x(1:n_cell-1)**2 * (nuS(2:n_cell) - 2._x_precision*nuS(1:n_cell-1) + &
                              nuS(1:n_cell-1)) * overdx2
-    dS_over_dt(n_cell)     = ( params%dx + nuS(n_cell)*(params%dx - 2._x_precision) + nuS(n_cell-1) ) &
-    / params%dx**2 / x_state%x(n_cell)**2
+    dS_over_dt(n_cell)     = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
+                             ( x_state%x(n_cell)**2 * params%dx**2 )
 
     ! Second member of the dT/dt equation
     f = (3_x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
