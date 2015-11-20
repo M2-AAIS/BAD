@@ -107,8 +107,8 @@ contains
 
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
           
-          call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-              K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f, optical_depth)
+        !  call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
+        !      K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f, optical_depth)
 
         !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
         !      K_ff, K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f)
@@ -120,12 +120,12 @@ contains
              write(fid_2,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') sigma_real_1(j), temp_real_1(j)
           enddo
 
-                    optical_depth = 0
+          optical_depth = 0
 
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
           
-          call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-              K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f, optical_depth)
+        !  call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
+        !      K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f, optical_depth)
 
         !  call display_variables(temp, Omega, r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
         !      K_ff, K_e, tau_eff, P_rad, P_gaz, E_ff, Fz, f)
