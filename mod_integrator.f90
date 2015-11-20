@@ -55,22 +55,19 @@ contains
          - s%Cv * s%v / x_state%x * dT_over_dx) / s%Cv
   end function f
 
-  subroutine do_timestep_S (states)
+  subroutine do_timestep_S (states, dt)
   !process the temporal evolution of S
     implicit none
     
     type (state), intent(inout)                   :: states
 
-    real(kind = x_precision)                      :: dt, overdx, overdx2, overdt
+    real(kind = x_precision)                      :: overdx, overdx2, overdt
+    real(kind = x_precision), intent(in)          :: dt
     integer                                       :: info
 
     real(kind = x_precision), dimension(n_cell)   :: diag
     real(kind = x_precision), dimension(n_cell-1) :: diag_low, diag_up
     
-    ! Get the timestep
-    !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
-    dt=100
-
     overdx  = 1_x_precision/params%dx
     overdx2 = overdx**2
     overdt  = 1_x_precision/dt
@@ -95,21 +92,19 @@ contains
   end subroutine do_timestep_S 
 
 
-  subroutine do_timestep_T(states) 
+  subroutine do_timestep_T(states, dt) 
   !process the temporal evolution of T
     implicit none
     
     type (state), intent(inout)                   :: states
 
     type (state)                                  :: states_deriv
-    real(kind = x_precision)                      :: dt
+    real(kind = x_precision), intent(in)          :: dt
 
     real(kind = x_precision), dimension(n_cell)   :: dtemp
     real(kind = x_precision), dimension(n_cell)   :: f0, f1
 
     !call timestep(states, dt) !FIXME call of function to process the viscosity timestep
-    dt=1e-3
-
     dtemp = 0.01_x_precision * states%T
     states_deriv = states
     states_deriv%T = states%T + dtemp
