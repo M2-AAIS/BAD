@@ -11,10 +11,13 @@ contains
   ! Range of surface density [Smin, Smax] and temperature [T_min, T_max]
   ! values should be changed in order to find more coherent results
   !-------------------------------------------------------------------------
-  subroutine curve()
+  subroutine curve( temperature, s)
     implicit none
+
+    real(kind = x_precision),dimension(n_cell),intent(out)  :: temperature
+    real(kind = x_precision),dimension(n_cell),intent(out)  :: s
+
     integer                                                :: i     = 0
-    !integer                                                :: j     = 0
     integer                                                :: k     = 0
     integer                                                :: l     = 0
 
@@ -22,7 +25,8 @@ contains
     real(kind = x_precision), parameter                    :: t_min = 5.0d-1
     real(kind = x_precision), parameter                    :: t_max = 4.49d0
 
-    integer,                  parameter                    :: nb_it = 100
+    integer, parameter                                     :: nb_it = 100
+
     real(kind = x_precision)                               :: eps   = 1.0d-4
     real(kind = x_precision)                               :: eps2   = 5.0d-1
 
@@ -56,21 +60,21 @@ contains
     real(kind = x_precision)                               :: rho_0
     real(kind = x_precision)                               :: T_0
 
-    real(kind = x_precision),dimension(nb_it)              :: temp_real_1 =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: sigma_real_1=0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: temp_real_0 =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: sigma_real_0=0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: temp_t_1  =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: sigma_t_1 =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: temp_t_0  =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: sigma_t_0 =0.0d0
     real(kind = x_precision),dimension(nb_it)              :: temp_real =0.0d0
     real(kind = x_precision),dimension(nb_it)              :: sigma_real=0.0d0
 
     character(len = 8)                                     :: number_of_cell
-    character(len = 64)                                    :: fname
+    character(len = 64)                                    :: fname_1
     character(len = 64)                                    :: fname_2
     character(len = 64)                                    :: fname_3
-    integer                                                :: fid
+
+    integer                                                :: fid_1
     integer                                                :: fid_2
     integer                                                :: fid_3
-    !integer                                               :: n_cell = 1
     integer                                                :: index_fcp
     real(kind = x_precision)                               :: sigma_c_thick
     real(kind = x_precision)                               :: temp_c_thick
@@ -87,39 +91,46 @@ contains
     ! Test for 1 value of r
     !-------------------------------------------------------------------------
     do k              = 1 , n_cell
+
        !r = (rmax-rmin)/(n_cell-1)*(k-1) + rmin
        !r              = 10._x_precision*G*params%M/(c**2)
        r   = r_state%r(k)
+
        omega          = sqrt(G*params%M/r**3) / Omega_0
+
        write(number_of_cell,'(I5.5)') k
-       fid = 20 + k
+       fid_1 = 20 + k
        fid_2 = 21 + k
        fid_3 = 22 + k
 
-       fname = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_1.dat'
+
+       fname_1 = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_1.dat'
        fname_2 = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_0.dat'
        fname_3 = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_tot.dat'
 
-       open(fid,file  = fname, status='unknown',action='readwrite')
+
+       open(fid_1,file  = fname_1, status='unknown',action='readwrite')
        open(fid_2,file  = fname_2, status='unknown',action='readwrite')
        open(fid_3,file  = fname_3, status='unknown',action='readwrite')
 
        do i          = 1, nb_it
+
           Smin        = 1d-2
           Smax        = 1d54
 
           temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
           optical_depth = 1
+
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
-          
+
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
               K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
 
         !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
         !      K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
 
-          temp_real_1(i)   = log10(temp * T_0)
-          sigma_real_1(i)  = log10(sigma * sigma_0)
+          temp_t_1(i)   =  temp 
+          sigma_t_1(i)  = sigma   
 
           !do j          = 1, nb_it
           !   write(fid_2,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(j),temp_real_1(j)
@@ -128,42 +139,51 @@ contains
           optical_depth = 0
 
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
-          
+
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
                K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
-          
+
         !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
         !      K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
 
-          temp_real_0(i)   = log10(temp * T_0)
-          sigma_real_0(i)  = log10(sigma * sigma_0)
+          temp_t_0(i)   =  temp 
+          sigma_t_0(i)  =  sigma   
 
-          do l          = 1, nb_it
-             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(l),temp_real_0(l)
-          enddo
+
+         ! do l          = 1, nb_it
+         !    write(fid_1,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(l),temp_real_0(l)
+         ! enddo
           
        enddo
 
 
-       call first_critical_point(sigma_real_1, temp_real_1, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
+       call first_critical_point(sigma_t_1, temp_t_1, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
 
-       call second_critical_point(sigma_real_1, sigma_real_0, temp_real_1,&
+       call second_critical_point(sigma_t_1, sigma_t_0, temp_t_1,&
          index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it, eps2)
 
-       call build_s_curve(sigma_real_1, sigma_real_0, temp_real_1,nb_it, index_scp, sigma_real, temp_real)
+       call build_s_curve(sigma_t_1, sigma_t_0, temp_t_1,nb_it, index_scp, sigma_real, temp_real)
 
-        call display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, k)
+       call display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, k)
 
+       ! call write_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, nb_it)
 
        
           do l          = 1, nb_it
+
+             temp_real(l)  = log10( temp_real(l) * T_0 )
+             sigma_real(l) = log10( sigma_real(l) * Sigma_0 )
+
              write(fid_3,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real(l),temp_real(l)
           enddo
        
-       
-       close(fid)
+       close(fid_1)
        close(fid_2)
        close(fid_3)
+
+          temperature(k) = temp_c_thick
+          s(k)           = sigma_c_thick * Omega**(1._x_precision / 3._x_precision)
+          
 
     enddo
 
@@ -277,15 +297,37 @@ contains
       !------------------------------------------------------------------------
       write(*,*)'**** Critical Point',k,'********'
       write(*,*)'****************************************'
-      write(*,"(' Opticaly thin (T,sigma) :',1p,E12.4,4x,1p,E12.4)")temp_c_thin,sigma_c_thin
-      write(*,"(' Opticaly thick (T,sigma):',1p,E12.4,4x,1p,E12.4)")temp_c_thick,sigma_c_thick
+      write(*,"(' Optically thin (T,sigma) :',1p,E12.4,4x,1p,E12.4)")temp_c_thin,sigma_c_thin
+      write(*,"(' Optically thick (T,sigma):',1p,E12.4,4x,1p,E12.4)")temp_c_thick,sigma_c_thick
 
       write(*,*)'****************************************'
 
     end subroutine display_critical_points
 
 
+    subroutine write_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick,nb_it)
 
+      implicit none
+      integer                                  ,intent(in):: nb_it
+      real(kind = x_precision),dimension(nb_it),intent(in):: sigma_c_thin
+      real(kind = x_precision),dimension(nb_it),intent(in):: temp_c_thin
+      real(kind = x_precision),dimension(nb_it),intent(in):: sigma_c_thick
+      real(kind = x_precision),dimension(nb_it),intent(in):: temp_c_thick
+      integer                                             :: i
+      integer                                             :: fid_4 = 11
+      character(len = 64)                                 :: fname_4
+      !------------------------------------------------------------------------
+       fname_4 = 'critical_points/file.dat'
+
+       open(fid_4,file  = fname_4, status='unknown',action='readwrite')
+       !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
+       do i = 1,nb_it
+          write(fid_4,'(I3,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')i,&
+                        temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
+       end do
+       close(fid_4)
+
+    end subroutine write_critical_points
     
 
 
@@ -306,8 +348,15 @@ contains
 
     delta          = coeff_b**2 - 4_x_precision * coeff_a * coeff_c
 
+    if (coeff_a == 0.0) then
+      write(*,*)'Coefficient a in the quadratic equation is nought.'
+      continue
+    else 
+
+
     if (delta .lt. 0.) then
       write(*,*)'No solutions in the R field.'
+ 
    else
       sol_1         = -0.5_x_precision *(coeff_b + sign(sqrt(delta),coeff_b))/coeff_a
       if (sol_1 .lt. 0.d-12) then
@@ -316,6 +365,8 @@ contains
       endif
       sol_2 = (coeff_c / (coeff_a * sol_1))
       sol = max(sol_1,sol_2)
+
+    end if
 
     end if
   end subroutine quadratic
@@ -394,6 +445,7 @@ contains
 
     call quadratic(coeff_a , coeff_b , coeff_c , H)
 
+
     rho                  = Sigma / H
     P_rad                = T**4
     P_gaz                = rho * T
@@ -419,7 +471,7 @@ contains
 
     case(1)
 
-       Fz = 4._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
+       Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
             * (K_ff + K_e) * Sigma * Sigma_0)
     case (0)
 
@@ -428,7 +480,7 @@ contains
     end select
 
     Q_plus              = 3._x_precision  * rs**2 * nu * Omega**2 * Omega_0**2
-    Q_minus             = Fz  / Sigma
+    Q_minus             = Fz  / ( Sigma * Omega**(1._x_precision / 3._x_precision) )
 
     f                   = Q_plus - Q_minus
 
@@ -482,7 +534,7 @@ contains
     ! eps -> Precision
     ! T-> Fixed variable
     !-------------------------------------------------------------------------
-    dichotomy             = (Smin+Smax)/2.
+    S_center             = (Smin+Smax)/2.
     j = 0
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
          tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0,optical_depth)
@@ -495,7 +547,7 @@ contains
 
     if ( f_max * f_min .gt. 0.) then
    !    write(*,*)'This function image does not switch its sign in this particular interval.'
-       dichotomy = 0
+     !  dichotomy = 0
 
     else if( f_max * f_min .lt. 0.) then
        iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. 10000)
@@ -545,7 +597,7 @@ contains
     write(*,"(' alpha       =',1p,E12.4)") params%alpha
     ! write(*,"(' X           =',1p,E12.4)") X
     write(*,*)'****************************************'
-    read(*,*)
+    !read(*,*)
 
   end subroutine display_parameters
 
@@ -579,7 +631,7 @@ contains
     write(*,"(' rs          =',1p,E12.4)") rs
     write(*,*)'****************************************'
 
-    read(*,*)
+   ! read(*,*)
 
   end subroutine display_initial_variables
 
