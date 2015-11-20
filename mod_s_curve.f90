@@ -19,8 +19,8 @@ contains
     integer                                                :: l     = 0
 
     real(kind = x_precision)                               :: temp  = 0.0d0
-    real(kind = x_precision), parameter                    :: t_min = 5.0d-1
-    real(kind = x_precision), parameter                    :: t_max = 4.49d0
+    real(kind = x_precision), parameter                    :: t_min = 4.0d-1
+    real(kind = x_precision), parameter                    :: t_max = 3.49d0
 
     integer,                  parameter                    :: nb_it = 100
     real(kind = x_precision)                               :: eps   = 1.0d-4
@@ -347,7 +347,7 @@ contains
 
     case(1)
 
-       Fz = 4._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
+       Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
             * (K_ff + K_e) * Sigma * state_0%S_0)
     case (0)
 
