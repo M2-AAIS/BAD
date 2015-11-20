@@ -56,9 +56,9 @@ contains
     Ledd = 4._x_precision * pi * G * mp * c / thomson
 
     ! Process M and M_dot in cgs, M_dot_crit = 12 * Ledd * M / c^2
-    params%M    = params%M * M_sun
+    params%M         = params%M * M_sun
     params%Mdot_crit =  12._x_precision * Ledd * params%M / c**2 
-    params%Mdot = params%Mdot *  params%Mdot_crit
+    params%Mdot      = params%Mdot * params%Mdot_crit
 
     ! Compute c2, rs, T_0 and Omega_0
     c2      = c**2
@@ -77,7 +77,6 @@ contains
     rmin      = 3._x_precision
     params%dx = (sqrt(rmax) - sqrt(rmin)) / n_cell
 
-    
     ! Process x_state, r_state
     do i = 1, n_cell
       x_state%x(i)       = sqrt(rmin) + i * params%dx
