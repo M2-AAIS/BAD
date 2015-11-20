@@ -86,7 +86,10 @@ contains
     end do
 
     ! Process t_v
-    t_v = 0.28 * params%alpha**(-4._x_precision / 5._x_precision) * (M_dot/M_dot_c)**(-3._x_precision/10._x_precision)*(M/M_sun)**(6._x_precision/5._x_precision)*(r/(3*rs))**(5._x_precision / 4._x_precision)*( 1 - (r_state%r(i)/(3 * rs))**(-1._x_precision/2._x_precision))**(-6._x_precision / 5._x_precision)
+    params%t_v = 0.28 * params%alpha**(-4._x_precision / 5._x_precision) * (params%Mdot/params%Mdot_crit)**&
+         (-3._x_precision/10._x_precision)*(params%M/M_sun)**(6._x_precision/5._x_precision)*&
+         (r_state%r(n_cell)/(3*rs))**(5._x_precision / 4._x_precision)*( 1 - (r_state%r(n_cell)/(3 * rs))**&
+         (-1._x_precision/2._x_precision))**(-6._x_precision / 5._x_precision)
     
     ! Process kappa_e
     params%kappa_e = 0.2_x_precision * (1._x_precision + X)
