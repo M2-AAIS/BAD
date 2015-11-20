@@ -12,14 +12,25 @@ program black_hole_diffusion
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, prev_T, S_crit
+  real(kind = x_precision)                    :: t_V, t_T  
+  real(kind = x_precision)                    :: dt_V, dt_T
 
+  ! FIXME
+  t_V = 1.3e4_x_precision / state_0%temps_0 
+  t_T = 0.72_x_precision / state_0%temps_0
+  dt_V = t_V / 100._x_precision
+  dt_T = t_T / 100._x_precision
+  
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
   delta_S_max = 1e-2
   ! FIXME I love it
   delta_T_max = 1e-2
-  
+
+  ! FIXEME
+  dt_V = 1.0_x_precision
+  dt_T = 1.0_x_precision
 
   ! Initial time = 0
   t = 0
@@ -49,13 +60,14 @@ program black_hole_diffusion
   end if
 
   ! Initialize prev_S and prev_T
+  ! we add initially 2*delta to prevent the code from thinking it converged
   prev_S = s%S + 2*delta_S_max
   prev_T = s%T + 2*delta_T_max
 
   call snapshot(s, iteration, t, 13)
   
   ! Start iterating
-  do iteration = 1, n_iterations
+  do iteration = 1, 1!n_iterations
      ! Check that S is at a fixed point
      do while (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max)
         print *, "While prev_S/s%S", iteration
@@ -67,10 +79,9 @@ program black_hole_diffusion
            prev_S = s%S
 
            ! Integrate S
-           call do_timestep_S(s)
-
-           print *, "After S timestep", maxval(abs(prev_S - s%S)/s%S)
-           call snapshot(s, iteration, t, 13)
+           call do_timestep_S(s, dt_V)
+           ! Increment time
+           t = t + dt_V
            
            ! Recompute variables
            call compute_variables(s)
@@ -84,18 +95,17 @@ program black_hole_diffusion
               prev_T = s%T
 
               ! Integrate T
-              call do_timestep_T(s)
+              call do_timestep_T(s, dt_T)
+              ! Increment time
+              t = t + dt_V
               ! Recompute variables
               call compute_variables(s)
-              print *, "After integration of T", j, maxval(abs(prev_T - s%T)/s%T)
               call snapshot(s, iteration, t, 13)
               j = j+1
 
               ! FIXME : increment time
            end do
            ! Output things here
-           write(13, *) "YOLO DUDE"
-           call snapshot(s, iteration, t, 13)
         end if
      end do
      
