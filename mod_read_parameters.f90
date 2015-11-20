@@ -57,7 +57,8 @@ contains
 
     ! Process M and M_dot in cgs, M_dot_crit = 12 * Ledd * M / c^2
     params%M    = params%M * M_sun
-    params%Mdot = params%Mdot * ( Ledd * 12._x_precision / c**2) * params%M
+    params%Mdot_crit =  12._x_precision * Ledd * params%M / c**2 
+    params%Mdot = params%Mdot *  params%Mdot_crit
 
     ! Compute c2, rs, T_0 and Omega_0
     c2      = c**2
@@ -76,6 +77,7 @@ contains
     rmin      = 3._x_precision
     params%dx = (sqrt(rmax) - sqrt(rmin)) / n_cell
 
+    
     ! Process x_state, r_state
     do i = 1, n_cell
       x_state%x(i)       = sqrt(rmin) + i * params%dx
@@ -84,6 +86,9 @@ contains
       r_state%Omega_r(i) = x_state%Omega(i) * Omega_0
     end do
 
+    ! Process t_v
+    t_v = 0.28 * params%alpha**(-4._x_precision / 5._x_precision) * (M_dot/M_dot_c)**(-3._x_precision/10._x_precision)*(M/M_sun)**(6._x_precision/5._x_precision)*(r/(3*rs))**(5._x_precision / 4._x_precision)*( 1 - (r_state%r(i)/(3 * rs))**(-1._x_precision/2._x_precision))**(-6._x_precision / 5._x_precision)
+    
     ! Process kappa_e
     params%kappa_e = 0.2_x_precision * (1._x_precision + X)
 
