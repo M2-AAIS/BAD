@@ -15,11 +15,6 @@ program black_hole_diffusion
   real(kind = x_precision)                    :: t_V, t_T  
   real(kind = x_precision)                    :: dt_V, dt_T
 
-  t_V = params%t_nu / state_0%temps_0
-  t_T = params%t_T / state_0%temps_0
-  dt_V = t_V / 100._x_precision
-  dt_T = t_T / 100._x_precision
-
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
@@ -28,7 +23,7 @@ program black_hole_diffusion
   delta_T_max = 1e-2
 
   ! Initial time = 0
-  t = 0
+  t = 0._x_precision
 
   ! Read the parameters 
   call get_parameters()
@@ -58,6 +53,14 @@ program black_hole_diffusion
   ! we add initially 2*delta to prevent the code from thinking it converged
   prev_S = s%S + 2*delta_S_max
   prev_T = s%T + 2*delta_T_max
+  
+  ! FIXME
+  t_V = 1.3e4_x_precision / state_0%temps_0 
+  t_T = 0.72_x_precision / state_0%temps_0
+  dt_V = t_V / 100._x_precision
+  dt_T = t_T / 100._x_precision
+
+  print *, dt_V, dt_T
 
   call snapshot(s, iteration, t, 13)
   
@@ -74,6 +77,7 @@ program black_hole_diffusion
            prev_S = s%S
 
            ! Integrate S
+           print *, 'S integration'
            call do_timestep_S(s, dt_V)
            ! Increment time
            t = t + dt_V
@@ -81,8 +85,6 @@ program black_hole_diffusion
            ! Recompute variables
            call compute_variables(s)
 
-           ! FIXME : increment time
-           print *, "Before integration of T", j, maxval(abs(prev_T - s%T)/s%T)
            ! Iterate while T hasn't converged
            j = 0
            do while (maxval(abs(prev_T - s%T)/s%T) > delta_T_max)
