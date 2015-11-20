@@ -150,7 +150,7 @@ contains
           sigma_t_0(i)  =  sigma   
 
           do l          = 1, nb_it
-             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(l),temp_real_0(l)
+             write(fid_1,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_t_0(l),temp_t_0(l)
           enddo
 
        enddo
