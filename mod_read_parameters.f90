@@ -74,11 +74,11 @@ contains
 
     ! Process dx
     rmin      = 3._x_precision
-    params%dx = (sqrt(rmax) - sqrt(rmin)) / (n_cell - 1._x_precision)
+    params%dx = (sqrt(rmax) - sqrt(rmin)) / n_cell
 
     ! Process x_state, r_state
     do i = 1, n_cell
-      x_state%x(i)       = sqrt(rmin) + (i - 1) * params%dx
+      x_state%x(i)       = sqrt(rmin) + i * params%dx
       r_state%r(i)       = x_state%x(i)**2 * rs
       x_state%Omega(i)   = 1._x_precision / x_state%x(i)**3
       r_state%Omega_r(i) = x_state%Omega(i) * Omega_0
