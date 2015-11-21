@@ -92,7 +92,7 @@ program black_hole_diffusion
               ! Integrate T
               call do_timestep_T(s, dt_T)
               ! Increment time
-              t = t + dt_V
+              t = t + dt_T
               ! Recompute variables
               call compute_variables(s)
               call snapshot(s, iteration, t, 13)
