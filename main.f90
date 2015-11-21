@@ -55,8 +55,13 @@ program black_hole_diffusion
   prev_T = 1.2*s%T
   
   ! FIXME
+ ! write(*,*) state_0%temps_0
+ ! t_T = params%t_T/state_0%temps_0 
+ ! t_V = params%t_nu/state_0%temps_0
+ ! write(*,*)t_T, t_V
   t_V = 1.3e4_x_precision / state_0%temps_0 
   t_T = 0.72_x_precision / state_0%temps_0
+  write(*,*)t_T, t_V
   dt_V = t_V / 10000._x_precision
   dt_T = t_T / 1000000._x_precision
 
