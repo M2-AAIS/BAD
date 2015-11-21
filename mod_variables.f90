@@ -45,9 +45,10 @@ contains
     state_out%rho  = state_out%S / (state_out%H * x_state%x)
     state_out%nu   = params%alpha * state_out%cs * state_out%H
     state_out%Pgaz = state_out%rho * state_out%T
+    !state_out%beta = state_out%P_gaz / (state_out%P_gaz + state_out%P_rad)
     state_out%beta = 1._x_precision / (1 + state_0%beta_0 * state_out%Prad / state_out%Pgaz)
-    state_out%Cv   = params%RTM * ((12._x_precision * gammag - 1._x_precision) * &
-                      (1._x_precision - state_out%beta) + state_out%beta) / &
+    state_out%Cv   = params%RTM * ((12._x_precision * (gammag - 1._x_precision) * &
+                      (1._x_precision - state_out%beta)) + state_out%beta) / &
                       (state_out%beta * (gammag - 1._x_precision))
 
     ! Compute v while taking care of limit conditions
