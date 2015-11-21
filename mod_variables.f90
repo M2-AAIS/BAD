@@ -68,10 +68,12 @@ contains
     epsilo   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho)**2 * sqrt(state_0%T_0 * state_out%T)
 
     ! Compute Fz depending on optical thickness
-    where (tau >= 1.0) state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
-                                       sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
-
-    where (tau <  1.0) state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
+    where (tau >= 1.0)
+       state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
+            sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
+    elsewhere
+       state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
+    end where
 
     ! Loop over all cells to update Fz
     !do i=1,n_cell
