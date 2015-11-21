@@ -15,24 +15,17 @@ program black_hole_diffusion
   real(kind = x_precision)                    :: t_V, t_T  
   real(kind = x_precision)                    :: dt_V, dt_T
 
-  ! FIXME
- ! t_V = 1.3e4_x_precision / state_0%temps_0 
- ! t_T = 0.72_x_precision / state_0%temps_0
   t_V = params%t_nu / state_0%temps_0
   t_T = params%t_T / state_0%temps_0
   dt_V = t_V / 100._x_precision
   dt_T = t_T / 100._x_precision
-  
+
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
   delta_S_max = 1e-2
   ! FIXME I love it
   delta_T_max = 1e-2
-
-  ! FIXEME
-  dt_V = 1.0_x_precision
-  dt_T = 1.0_x_precision
 
   ! Initial time = 0
   t = 0
