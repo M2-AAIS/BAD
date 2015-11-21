@@ -104,7 +104,7 @@ contains
   end function f_exp
 
 
-  subroutine do_timestep_S (states, dt)
+  subroutine do_timestep_S (s, dt)
   !process the temporal evolution of S
     implicit none
     
