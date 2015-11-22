@@ -75,16 +75,6 @@ contains
        state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
     end where
 
-    ! Loop over all cells to update Fz
-    !do i=1,n_cell
-    !  ! Compute Fz depending on optical thickness
-    !  if (tau(i) >= 1.0) then
-    !     state_out%Fz(i) = (2._x_precision * c**2 * x_state%x(i) * state_out%T(i)**4) / (27._x_precision * &
-    !                       sqrt(3._x_precision) * (kappa_ff(i) + params%kappa_e) * state_out%S(i) * state_0%S_0)
-    !  else
-    !     state_out%Fz(i) = epsilo(i) * state_out%H(i) * state_0%temps_0 / state_0%rho_0
-    !  endif
-    !enddo
   end subroutine compute_variables
 
   ! Transform dimensions of variables

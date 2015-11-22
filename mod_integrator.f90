@@ -22,33 +22,16 @@ contains
     real (kind=x_precision), dimension(n_cell) :: f
 
     real (kind=x_precision)                    :: overdx, overdx2, overdt
-    real (kind=x_precision), dimension(n_cell) :: dS_over_dt, dS_over_x_over_dx, S_over_x, dT_over_dx, nuS, x2
+    real (kind=x_precision), dimension(n_cell) :: x2
 
     x2 = x_state%x**2
 
     overdx  = 1/params%dx
     overdx2 = overdx**2
     overdt  = 1/dt
-    nuS = s%nu*s%S
-
-    ! Compute dT/dx as the right spatial derivative
-    dT_over_dx(1:n_cell - 1) = (s%T(2:n_cell) - s%T(1:n_cell - 1)) * overdx
-    dT_over_dx(n_cell)       = 0
-
-    ! Compute d(S/x)/dx as the right spatial derivative 
-    S_over_x                        = s%S / x_state%x
-    dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell - 1)) * overdx
-    dS_over_x_over_dx(n_cell)       = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
-                                      ( x2(n_cell)**2 * s%v(n_cell) * params%dx**2 )
-
-    ! Compute dS/dt using the corresponding equation, with d²(nuS)/dx² as (d(left)+d(right))/2
-    dS_over_dt(1:n_cell-1) = 1 / x2(1:n_cell-1)**2 * (nuS(2:n_cell) - 2._x_precision*nuS(1:n_cell-1) + &
-                             nuS(1:n_cell-1)) * overdx2
-    dS_over_dt(n_cell)     = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
-                             ( x2(n_cell)**2 * params%dx**2 )
-
+    
     ! Second member of the dT/dt equation
-    f = (3_x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
+    f = (3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
          s%Fz * x_state%x / s%S) / s%Cv
          ! remove advection term
          ! + params%RTM * (4._x_precision - 3._x_precision * s%beta) / s%beta * s%T / s%S * &
@@ -178,18 +161,18 @@ contains
   !process the temporal evolution of T
     implicit none
     
-    type (state), intent(inout)                   :: s
+    type (state), intent(inout)                 :: s
 
-    type (state)                                  :: s_deriv
-    real(kind = x_precision), intent(in)          :: dt
+    type (state)                                :: s_deriv
+    real(kind = x_precision), intent(in)        :: dt
 
-    real(kind = x_precision), dimension(n_cell)   :: dtemp
-    real(kind = x_precision), dimension(n_cell)   :: f0, f1
+    real(kind = x_precision), dimension(n_cell) :: dtemp
+    real(kind = x_precision), dimension(n_cell) :: f0, f1
 
     !call timestep(s, dt) !FIXME call of function to process the viscosity timestep
-    dtemp = 0.01_x_precision * s%T
-    s_deriv = s
-    s_deriv%T = s%T + dtemp
+    dtemp = 1e-3_x_precision
+    s_deriv   = s
+    s_deriv%T = s%T * (1._x_precision + dtemp)
     
     call compute_variables(s_deriv)
 
@@ -198,7 +181,7 @@ contains
     f0 = f(s, dt)
     f1 = (f(s_deriv, dt) - f(s, dt)) / dtemp
     
-    s%T = s%T + dt * f0 * (1_x_precision + dt * f1)
+    s%T = s%T + dt * f0 * (1._x_precision + dt * f1)
 
     ! Copy the result
   end subroutine do_timestep_T

@@ -61,10 +61,10 @@ program black_hole_diffusion
  ! write(*,*)t_T, t_V
   t_V = 1.3e4_x_precision / state_0%temps_0 
   t_T = 0.72_x_precision / state_0%temps_0
-  write(*,*)t_T, t_V
+
   dt_V = t_V / 10000._x_precision
   dt_T = t_T / 1000000._x_precision
-
+  
   call snapshot(s, iteration, t, 13)
   
   ! Start iterating
@@ -95,7 +95,9 @@ program black_hole_diffusion
               prev_T = s%T
 
               ! Integrate T
+              print *, 'T integration'
               call do_timestep_T(s, dt_T)
+              print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), maxval(abs(prev_T - s%T)/s%T)
               ! Increment time
               t = t + dt_T
               ! Recompute variables
