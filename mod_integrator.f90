@@ -33,6 +33,11 @@ contains
     ! Second member of the dT/dt equation
     f = (3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
          s%Fz * x_state%x / s%S) / s%Cv
+
+    print *, '# Q+   ', 3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 / s%Cv
+    print *, '# Q-   ', (s%Fz * x_state%x / s%S) / s%Cv
+    print *, f
+    print *,
          ! remove advection term
          ! + params%RTM * (4._x_precision - 3._x_precision * s%beta) / s%beta * s%T / s%S * &
          ! (dS_over_dt + s%v * dS_over_x_over_dx) &
@@ -181,7 +186,7 @@ contains
     f0 = f(s, dt)
     f1 = (f(s_deriv, dt) - f(s, dt)) / dtemp
     
-    s%T = s%T + dt * f0 * (1._x_precision + dt * f1)
+    s%T = s%T + dt * f0 ! * (1._x_precision + dt * f1)
 
     ! Copy the result
   end subroutine do_timestep_T

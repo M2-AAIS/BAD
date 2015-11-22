@@ -102,16 +102,15 @@ contains
     params%kappa_e = 0.2_x_precision * (1._x_precision + X)
 
     ! Display parameters
-    write(*,*)'           Input Parameters             '
-    write(*,*)'****************************************'
-    write(*,"(' BH_mass     =',1p,E12.4)") params%M
-    write(*,"(' rmax        =',1p,E12.4)") rmax
-    write(*,"(' Mdot        =',1p,E12.4)") params%Mdot
-    write(*,"(' alpha       =',1p,E12.4)") params%alpha
-    write(*,"(' X           =',1p,E12.4)") X
-    write(*,"(' Y           =',1p,E12.4)") Y
-    write(*,*)'****************************************'
-    read(*,*)
+    write(*,"('#           Input Parameters             ')")
+    write(*,"('#****************************************')")
+    write(*,"('# BH_mass     =',1p,E12.4)") params%M
+    write(*,"('# rmax        =',1p,E12.4)") rmax
+    write(*,"('# Mdot        =',1p,E12.4)") params%Mdot
+    write(*,"('# alpha       =',1p,E12.4)") params%alpha
+    write(*,"('# X           =',1p,E12.4)") X
+    write(*,"('# Y           =',1p,E12.4)") Y
+    write(*,"('#****************************************')")
   end subroutine get_parameters
 
 end module mod_read_parameters

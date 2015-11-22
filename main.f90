@@ -50,28 +50,28 @@ program black_hole_diffusion
   end if
 
   ! Initialize prev_S and prev_T
-  ! we add initially 2*delta to prevent the code from thinking it converged
+  ! we multiply delta to prevent the code from thinking it converged
   prev_S = 1.2*s%S
   prev_T = 1.2*s%T
   
   ! FIXME
- ! write(*,*) state_0%temps_0
- ! t_T = params%t_T/state_0%temps_0 
- ! t_V = params%t_nu/state_0%temps_0
- ! write(*,*)t_T, t_V
-  t_V = 1.3e4_x_precision / state_0%temps_0 
-  t_T = 0.72_x_precision / state_0%temps_0
-
-  dt_V = t_V / 10000._x_precision
-  dt_T = t_T / 1000000._x_precision
+  ! write(*,*) state_0%temps_0
+  t_T = params%t_T *state_0%temps_0 
+  t_V = params%t_nu*state_0%temps_0
+  write(*,*)'t_T, t_V:', t_T, t_V
   
-  call snapshot(s, iteration, t, 13)
+  !  t_V = 1.3e4_x_precision / state_0%temps_0 
+  !  t_T = 0.72_x_precision / state_0%temps_0
+
+  dt_V = t_V / 2._x_precision
+  dt_T = t_T / 2._x_precision
+  
+  ! call snapshot(s, iteration, t, 13)
   
   ! Start iterating
-  do iteration = 1, 1!n_iterations
+  do iteration = 1, 100!n_iterations
      ! Check that S is at a fixed point
-     do while (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max)
-        print *, "While prev_S/s%S", iteration
+     if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
         ! Check here that S < S_crit
         if (maxval(s%S - S_crit) > 0) then
            ! Switch to explicit scheme
@@ -80,36 +80,43 @@ program black_hole_diffusion
            prev_S = s%S
 
            ! Integrate S
-           print *, 'S integration'
+           print *, '#S integration'
+           call snapshot(s, iteration, t, 13)
            call do_timestep_S(s, dt_V)
            ! Increment time
            t = t + dt_V
+
+           print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0)
            
            ! Recompute variables
            call compute_variables(s)
 
            ! Iterate while T hasn't converged
            j = 0
-           do while (maxval(abs(prev_T - s%T)/s%T) > delta_T_max)
+           do while (maxval(abs(prev_T - s%T)/s%T) > delta_T_max) 
               ! Check here that T < T_crit
               prev_T = s%T
 
               ! Integrate T
-              print *, 'T integration'
+              print *, '# T integration'
               call do_timestep_T(s, dt_T)
-              print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), maxval(abs(prev_T - s%T)/s%T)
+              print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), t
               ! Increment time
               t = t + dt_T
               ! Recompute variables
               call compute_variables(s)
-              call snapshot(s, iteration, t, 13)
+              if (mod(j, 50) == 0) then
+                 call snapshot(s, iteration, t, 13)
+              end if
               j = j+1
 
               ! FIXME : increment time
            end do
            ! Output things here
         end if
-     end do
+     else
+        ! give a Mdot kick
+     end if
      
      ! Increase M_0_dot if stalled
      ! TODO : increase M_dot_0

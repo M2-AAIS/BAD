@@ -22,6 +22,7 @@ contains
     real(kind = x_precision), dimension(n_cell) :: a1, b1, c1
     real(kind = x_precision), dimension(n_cell) :: Delta
     real(kind = x_precision), dimension(n_cell) :: kappa_ff, tau, epsilo
+    real(kind=x_precision) :: truc
 
     type(state), intent(inout)                  :: state_out
 
@@ -46,7 +47,9 @@ contains
     state_out%nu   = params%alpha * state_out%cs * state_out%H
     state_out%Pgaz = state_out%rho * state_out%T
     !state_out%beta = state_out%P_gaz / (state_out%P_gaz + state_out%P_rad)
-    state_out%beta = 1._x_precision / (1 + state_0%beta_0 * state_out%Prad / state_out%Pgaz)
+
+    state_out%beta = 1._x_precision / (1._x_precision + state_0%beta_0 * state_out%Prad / state_out%Pgaz)
+    
     state_out%Cv   = params%RTM * ((12._x_precision * (gammag - 1._x_precision) * &
                       (1._x_precision - state_out%beta)) + state_out%beta) / &
                       (state_out%beta * (gammag - 1._x_precision))
@@ -137,8 +140,28 @@ contains
     state_0%T_0     = (params%Mdot * c2 / (sqrt(27.0) * 48._x_precision * pi * rs**2 * stefan))**0.25_x_precision
     state_0%Fz_0    = state_0%S_0 * state_0%Omega_0 / 4._x_precision
     state_0%Cv_0    = 1._x_precision / state_0%T_0
-    state_0%P_gaz_0 = state_0%rho_0 * params%RTM
-    state_0%P_rad_0 = cst_rad * state_0%T_0**4 / 3._x_precision
+    state_0%Pgaz_0  = state_0%rho_0 * params%RTM
+    state_0%Prad_0  = cst_rad * state_0%T_0**4 / 3._x_precision
+    state_0%beta_0  = state_0%Prad_0 / state_0%Pgaz_0
+
+    write(*,"('#           Initial Variables            ')")
+    write(*,"('#****************************************')")
+    write(*,"('# Omega_0     =',1p,E12.4)") state_0%Omega_0
+    write(*,"('# t_0         =',1p,E12.4)") state_0%temps_0
+    write(*,"('# nu_0        =',1p,E12.4)") state_0%nu_0
+    write(*,"('# v_0         =',1p,E12.4)") state_0%v_0
+    write(*,"('# cs_0        =',1p,E12.4)") state_0%cs_0
+    write(*,"('# Sigma_0     =',1p,E12.4)") state_0%S_0
+    write(*,"('# H_0         =',1p,E12.4)") state_0%H_0
+    write(*,"('# Mdot_0      =',1p,E12.4)") state_0%Mdot_0
+    write(*,"('# rho_0       =',1p,E12.4)") state_0%rho_0
+    write(*,"('# T_0         =',1p,E12.4)") state_0%T_0
+    write(*,"('# Fz_0        =',1p,E12.4)") state_0%Fz_0
+    write(*,"('# Cv_0        =',1p,E12.4)") state_0%Cv_0
+    write(*,"('# P_gaz_0     =',1p,E12.4)") state_0%Pgaz_0
+    write(*,"('# P_rad_0     =',1p,E12.4)") state_0%Prad_0
+    write(*,"('#****************************************')")
+
   end subroutine init_variable_0
 
 end module mod_variables
