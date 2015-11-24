@@ -4,13 +4,51 @@ module mod_S_curve
   use mod_variables
   implicit none
 
+! _____________________________________________________________________________________________
+
+  ! BE SURE TO CREATE TWO FILES IN YOUR WORKING DIRECTORY : s_curves ( & critical_points )        
+
+  !PROBLEMATIC FOR THE SECOND CRITICAL POINT. 
+
+!_____________________________________________________________________________________________
+
 contains
   !-------------------------------------------------------------------------
-  ! Subroutine in order to find the result of the equation Q+ - Q- = 0
-  ! output : datafile with the temperature T and the surface density Sigma
-  ! Range of surface density [Smin, Smax] and temperature [T_min, T_max]
-  ! values should be changed in order to find more coherent results
+  ! SUBROUTINES :
+  !               curve                 : : fake main 
+  !                                         --> output : 2 arrays for the coordinates (Temperature, S ) of the first critical point
+  
+  !               first_critical_point  : : 
+  !                                     <-- input : T and Sigma for the optically thick medium + number of points
+  !                                         --> output : (Temperature, Sigma) of the first critical point + index of the point
+
+  !               second_critical_point  : : 
+  !                                     <-- input : T and Sigma for the optically thin medium + T for the thick one + number of points + index of the thick critical point + precision
+  !                                         --> output : (Temperature, Sigma) of the second critical point + index of the point
+
+  !                build_s_curve         : : combining both thin and thick media 
+  !                                     <-- input : T and Sigma for both media + index of the thin critical point 
+  !                                         --> output : array for (Temperature, Sigma)
+
+  !               quadratic              : : For a positive real solution of a quadratic equation ax^2 + bx + c =0 
+  !                                     <-- input : factors a, b, c
+  !                                         --> output : positive solution
+ 
+  !               intial_variables       : : Computing some variables 
+  !                                         --> output : rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0 (+ nu_0 )
+
+  !               variables              : : Computing all the variables for Q+ and Q-  
+  !                                     <-- input : Temperature, Sigma, Omega + optical depth indicator (0 or 1) + more
+  !                                         --> output : ...
+
+
+  !               dichotomy              : : In order to find the result of the equation Q+ - Q- = 0
+  !                                     <-- input : Temperature, Sigma, Omega + optical depth indicator (0 or 1) + precision + more
+  !                                         --> output : Sigma between a computed range of surface density [Smin, Smax] for a given temperature
+
+  !               + subroutines for displaying values and saving data into files
   !-------------------------------------------------------------------------
+
   subroutine curve( temperature, s)
     implicit none
 
@@ -75,13 +113,18 @@ contains
     integer                                                :: fid_1
     integer                                                :: fid_2
     integer                                                :: fid_3
+
     integer                                                :: index_fcp
     real(kind = x_precision)                               :: sigma_c_thick
     real(kind = x_precision)                               :: temp_c_thick
+   ! real(kind = x_precision),dimension(n_cell)             :: sigma_thick
+   ! real(kind = x_precision),dimension(n_cell)             :: temp_thick
     integer                                                :: index_scp
     real(kind = x_precision)                               :: sigma_c_thin
     real(kind = x_precision)                               :: temp_c_thin
-    
+   ! real(kind = x_precision),dimension(n_cell)             :: sigma_thin
+   ! real(kind = x_precision),dimension(n_cell)             :: temp_thin    
+
     !------------------------------------------------------------------------
 
     call display_parameters()
@@ -112,6 +155,7 @@ contains
        open(fid_1,file  = fname_1, status='unknown',action='readwrite')
        open(fid_2,file  = fname_2, status='unknown',action='readwrite')
        open(fid_3,file  = fname_3, status='unknown',action='readwrite')
+
 
        do i          = 1, nb_it
 
@@ -166,7 +210,6 @@ contains
 
        call display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, k)
 
-       ! call write_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, nb_it)
 
        
           do l          = 1, nb_it
@@ -186,7 +229,16 @@ contains
           s(k)           = sigma_c_thick * Omega**(1._x_precision / 3._x_precision)
           
 
+       !  temp_thick(k)  = log10( temp_c_thick * T_0 )
+       !  sigma_thick(k) = log10( sigma_c_thick * Sigma_0 )       
+       !  temp_thin(k)  = log10( temp_c_thin * T_0 )
+       !  sigma_thin(k) = log10( sigma_c_thin * Sigma_0 ) !PROBLEMATIC 
+     
+
     enddo
+
+     !  call write_critical_points(n_cell, r_state%r, rs, sigma_thin, temp_thin, sigma_thick, temp_thick)
+
 
   end subroutine curve
 
@@ -232,9 +284,10 @@ contains
     real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
     real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_0
 
+    real(kind = x_precision)                 ,intent(in):: eps2
+
     integer                                  ,intent(in) :: index_fcp
     integer                                  ,intent(out):: index_scp
-    real(kind = x_precision)                 ,intent(in):: eps2
 
     real(kind = x_precision)                 ,intent(out):: sigma_c_thin
     real(kind = x_precision)                 ,intent(out):: temp_c_thin
@@ -306,26 +359,31 @@ contains
     end subroutine display_critical_points
 
 
-    subroutine write_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick,nb_it)
+    subroutine write_critical_points(n,radius, rs, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick)
 
       implicit none
-      integer                                  ,intent(in):: nb_it
-      real(kind = x_precision),dimension(nb_it),intent(in):: sigma_c_thin
-      real(kind = x_precision),dimension(nb_it),intent(in):: temp_c_thin
-      real(kind = x_precision),dimension(nb_it),intent(in):: sigma_c_thick
-      real(kind = x_precision),dimension(nb_it),intent(in):: temp_c_thick
+     
+      integer                                  ,intent(in):: n 
+      real(kind = x_precision),dimension(n)    ,intent(in):: radius
+      real(kind = x_precision)                 ,intent(in):: rs
+      real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thin
+      real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thin
+      real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thick
+      real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thick
       integer                                             :: i
       integer                                             :: fid_4 = 11
       character(len = 64)                                 :: fname_4
       !------------------------------------------------------------------------
        fname_4 = 'critical_points/file.dat'
 
-       open(fid_4,file  = fname_4, status='unknown',action='readwrite')
+       open(fid_4,file  = fname_4, status='unknown',action='write')
        !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
-       do i = 1,nb_it
-          write(fid_4,'(I3,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')i,&
+      
+          do i=1, n
+             write(fid_4,'(E12.6,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sqrt(radius(i)/rs),&
                         temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
-       end do
+          end do 
+       
        close(fid_4)
 
     end subroutine write_critical_points
@@ -376,7 +434,7 @@ contains
 
   !-------------------------------------------------------------------------
   !Subroutine in order to compute initial variables rs, rmin, Mdot_0,
-  !Sigma_0
+  !Sigma_0, Omega_0, T_0
   !-------------------------------------------------------------------------
   subroutine initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
     implicit none
@@ -408,7 +466,7 @@ contains
 
   !-------------------------------------------------------------------------
   !Subroutine in order to compute variables H, rho, cs, nu, Q_plus, Q_minus,
-  !K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz for T, Sigma and Omega given
+  !K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz given T, Sigma and Omega 
   !------------------------------------------------------------------------
   subroutine variables(T, Sigma, Omega, H, rho, cs, nu, Q_plus, Q_minus,&
        K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0,&
