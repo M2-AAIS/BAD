@@ -56,15 +56,15 @@ contains
     state_out%v(1:n_cell-1) = - 1._x_precision / (state_out%S(1:n_cell-1) * x_state%x(1:n_cell-1)) * &
                               (state_out%nu(2:n_cell) * state_out%S(2:n_cell) - &
                                state_out%nu(1:n_cell-1) * state_out%S(1:n_cell-1)) / params%dx
-    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * x_state%x(n_cell))
+    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * x_state%x(n_cell)) !FIXME !not equal to (Mdot_0 =) 1
 
     state_out%Mdot = - state_out%v * state_out%S * x_state%x
 
     ! Compute variables needed for Fz
     kappa_ff = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
-               (state_0%T_0 * state_out%T)**(-7._x_precision/2._x_precision)
+               (state_0%T_0 * state_out%T)**(-7._x_precision/2._x_precision) !FIXME some difference with the report 
 
-    tau      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * (state_0%S_0 * state_out%S / x_state%x)
+    tau      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * state_0%S_0 * state_out%S / x_state%x
 
     epsilo   = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho)**2 * sqrt(state_0%T_0 * state_out%T)
 
