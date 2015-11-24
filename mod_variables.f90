@@ -62,7 +62,7 @@ contains
 
     ! Compute variables needed for Fz
     kappa_ff = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
-               (state_0%T_0 * state_out%T)**(-7._x_precision/2._x_precision) !FIXME some difference with the report 
+               (state_0%T_0 * state_out%T)**(-7._x_precision/2._x_precision) 
 
     tau      = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * state_0%S_0 * state_out%S / x_state%x
 
