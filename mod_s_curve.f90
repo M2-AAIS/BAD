@@ -1,4 +1,4 @@
-module mod_s_curve
+module mod_S_curve
   use mod_constants
   use mod_read_parameters
   use mod_variables
@@ -28,7 +28,7 @@ contains
     integer, parameter                                     :: nb_it = 100
 
     real(kind = x_precision)                               :: eps   = 1.0d-4
-    real(kind = x_precision)                               :: eps2  = 5.0d-1
+    real(kind = x_precision)                               :: eps2   = 5.0d-1
 
 
     real(kind = x_precision)                               :: sigma = 0.0d0
@@ -81,7 +81,7 @@ contains
     integer                                                :: index_scp
     real(kind = x_precision)                               :: sigma_c_thin
     real(kind = x_precision)                               :: temp_c_thin
-
+    
     !------------------------------------------------------------------------
 
     call display_parameters()
@@ -149,10 +149,11 @@ contains
           temp_t_0(i)   =  temp 
           sigma_t_0(i)  =  sigma   
 
-          do l          = 1, nb_it
-             write(fid_1,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_t_0(l),temp_t_0(l)
-          enddo
 
+         ! do l          = 1, nb_it
+         !    write(fid_1,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_0(l),temp_real_0(l)
+         ! enddo
+          
        enddo
 
 
@@ -190,7 +191,7 @@ contains
   end subroutine curve
 
 
-
+  
   !-------------------------------------------------------------------------
   ! Subroutine in order to find the first critical point
   !-------------------------------------------------------------------------
@@ -244,7 +245,7 @@ contains
       ! write(*,*)sigma_real_0(i), sigma_real_1(i)
      !  write(*,*)(dabs(sigma_real_1(i) - sigma_real_0(i+1)))
     end do
-
+    
         do i = index_fcp, nb_it - 1
 
            if(dabs(sigma_real_1(i) - sigma_real_0(i+1)) .lt. eps2)then
@@ -259,11 +260,11 @@ contains
     endsubroutine second_critical_point
 
 
-
+    
     subroutine build_s_curve(sigma_real_1, sigma_real_0, temp_real_1,nb_it, index_scp, sigma_real, temp_real)
       implicit none
       integer,intent(in)                                   :: nb_it
-
+      
       real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_1
       real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_0
       real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
@@ -282,7 +283,7 @@ contains
          sigma_real(i) = sigma_real_0(i)
          temp_real(i) = temp_real_1(i)
       enddo
-
+      
     end subroutine build_s_curve
 
 
@@ -304,6 +305,34 @@ contains
 
     end subroutine display_critical_points
 
+
+    subroutine write_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick,nb_it)
+
+      implicit none
+      integer                                  ,intent(in):: nb_it
+      real(kind = x_precision),dimension(nb_it),intent(in):: sigma_c_thin
+      real(kind = x_precision),dimension(nb_it),intent(in):: temp_c_thin
+      real(kind = x_precision),dimension(nb_it),intent(in):: sigma_c_thick
+      real(kind = x_precision),dimension(nb_it),intent(in):: temp_c_thick
+      integer                                             :: i
+      integer                                             :: fid_4 = 11
+      character(len = 64)                                 :: fname_4
+      !------------------------------------------------------------------------
+       fname_4 = 'critical_points/file.dat'
+
+       open(fid_4,file  = fname_4, status='unknown',action='readwrite')
+       !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
+       do i = 1,nb_it
+          write(fid_4,'(I3,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')i,&
+                        temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
+       end do
+       close(fid_4)
+
+    end subroutine write_critical_points
+    
+
+
+    
   !-------------------------------------------------------------------------
   !Subroutine for resolving a quadratic equation as long as the solutions are
   !a set of real numbers
@@ -444,7 +473,7 @@ contains
     case(1)
 
        Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
-            * (K_ff + K_e) * Sigma * Sigma_0 * Omega**(1._x_precision / 3._x_precision))
+            * (K_ff + K_e) * Sigma * Sigma_0) * (Omega**(1._x_precision / 3._x_precision))
     case (0)
 
        Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
