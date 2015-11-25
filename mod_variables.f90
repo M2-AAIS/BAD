@@ -30,27 +30,17 @@ contains
     !a1 = r_state%Omega_r**2 * (state_out%S * state_0%S_0)
     !b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * x_state%x / 3._x_precision
     !c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
-    a1 = x_state%Omega**2 * state_0%Omega_0**2 * (state_out%S * state_0%S_0) * state_0%H_0**2
-    b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
-    c1 = - (params%RTM * state_out%T * state_out%S * state_0%S_0)
-    !a1 = x_state%Omega**2 * state_0%Omega_0 * state_0%Mdot_0 * (state_out%S * state_0%S_0)
-    !b1 = - 4._x_precision * pi * cst_rad * (state_out%T * state_0%T_0)**4 * state_0%H_0 * x_state%x / 3._x_precision
-    !c1 = - 2._x_precision * pi * (params%RTM * state_out%T * state_out%S * state_0%S_0)
+    a1 = (x_state%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
+    b1 = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * x_state%x / (3._x_precision * state_0%H_0)
+    c1 = - params%RTM * state_out%T * state_out%S * state_0%S_0 / state_0%H_0**2
     Delta = b1**2 - 4._x_precision * a1 * c1
 
-    ! Start computing variables
+    ! Compute variable depending on S, H
     !state_out%H    = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1 / state_0%H_0
     state_out%H    = - 0.5_x_precision * (b1 + sign(sqrt(Delta),b1)) / a1
-    state_out%Prad = state_out%T**4
     state_out%cs   = x_state%Omega * state_out%H
-    state_out%rho  = state_out%S / (state_out%H * x_state%x)
     state_out%nu   = params%alpha * state_out%cs * state_out%H
-    state_out%Pgaz = state_out%rho * state_out%T
-    !state_out%beta = state_out%P_gaz / (state_out%P_gaz + state_out%P_rad)
-    state_out%beta = 1._x_precision / (1 + state_0%beta_0 * state_out%T**3 / state_out%rho)
-    state_out%Cv   = params%RTM * ((12._x_precision * (gammag - 1._x_precision) * &
-                      (1._x_precision - state_out%beta)) + state_out%beta) / &
-                      (state_out%beta * (gammag - 1._x_precision))
+    state_out%rho  = state_out%S / (state_out%H * x_state%x)
 
     ! Compute v while taking care of limit conditions
     state_out%v(1:n_cell-1) = - 1._x_precision / (state_out%S(1:n_cell-1) * x_state%x(1:n_cell-1)) * &
@@ -71,10 +61,19 @@ contains
     ! Compute Fz depending on optical thickness
     where (tau >= 1.0)
        state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
-            sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
+                      sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
     elsewhere
        state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
     end where
+
+    ! Compute variables related to pressure
+    state_out%Pgaz = state_out%rho * state_out%T
+    state_out%Prad = state_out%T**4
+    !state_out%beta = state_out%P_gaz / (state_out%P_gaz + state_0%beta_0 * state_out%P_rad)
+    state_out%beta = 1._x_precision / (1._x_precision + state_0%beta_0 * state_out%Prad / state_out%Pgaz)
+    state_out%Cv   = params%RTM * ((12._x_precision * (gammag - 1._x_precision) * &
+                     (1._x_precision - state_out%beta)) + state_out%beta) / &
+                     (state_out%beta * (gammag - 1._x_precision))
 
   end subroutine compute_variables
 
