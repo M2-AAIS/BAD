@@ -49,7 +49,7 @@ contains
   !
   !-------------------------------------------------------------------------
 
-  subroutine curve( temperature, s)
+  subroutine curve(temperature, s)
     implicit none
 
     real(kind = x_precision),dimension(n_cell),intent(out)  :: temperature
@@ -67,7 +67,6 @@ contains
     real(kind = x_precision), parameter                    :: dt    = (t_max-t_min) / (nb_it-1)
 
     real(kind = x_precision)                               :: eps   = 1.0d-4
-    real(kind = x_precision)                               :: eps2   = 5.0d-1
 
     real(kind = x_precision)                               :: Sigma = 0.0d0
     real(kind = x_precision)                               :: Smin  = 0.0d0
@@ -172,7 +171,7 @@ contains
        call first_critical_point(sigma_t_thick, temp_t_thick, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
 
        call second_critical_point(sigma_t_thick, sigma_t_thin, temp_t_thick,&
-         index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it, eps2)
+         index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
 
        call build_s_curve(sigma_t_thick, sigma_t_thin, temp_t_thick, nb_it, index_scp, sigma_real, temp_real)
 
@@ -214,24 +213,24 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine in order to find the first critical point
   !-------------------------------------------------------------------------
-  subroutine first_critical_point(sigma_real_1,temp_real_1, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
+  subroutine first_critical_point(sigma_real_thick, temp_real_thick, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
     implicit none
     integer,intent(in)                                   :: nb_it
 
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_1
-    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
+    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
+    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
 
     integer                                  ,intent(out):: index_fcp
     real(kind = x_precision)                 ,intent(out):: sigma_c_thick
     real(kind = x_precision)                 ,intent(out):: temp_c_thick
     integer                                              :: i
     i = 1
-    do while (sigma_real_1(i) .le. sigma_real_1(i+1) .and. i .lt. nb_it - 1)
-       index_fcp = i
-       sigma_c_thick = sigma_real_1(i)
-       temp_c_thick = temp_real_1(i)
-       i = i + 1
+    do while (sigma_real_thick(i) < sigma_real_thick(i+1) .and. i < nb_it - 1)
+       index_fcp     = i
+       sigma_c_thick = sigma_real_thick(i)
+       i             = i + 1
     enddo
+    temp_c_thick  = temp_real_thick(i)
 
     endsubroutine first_critical_point
 
@@ -243,7 +242,7 @@ contains
     ! Subroutine in order to find the second critical point
     !-------------------------------------------------------------------------
     subroutine second_critical_point(sigma_real_thick, sigma_real_thin, temp_real_thick,&
-         index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it, eps2)
+         index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
     implicit none
     integer,intent(in)                                   :: nb_it
 
@@ -251,31 +250,28 @@ contains
     real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thin
 
-    real(kind = x_precision)                 ,intent(in) :: eps2
-
     integer                                  ,intent(in) :: index_fcp
     integer                                  ,intent(out):: index_scp
 
     real(kind = x_precision)                 ,intent(out):: sigma_c_thin
     real(kind = x_precision)                 ,intent(out):: temp_c_thin
-    integer                                              :: i = 0
+    integer                                              :: i
+    i = max(1, index_fcp)
+    
+    ! The change occurs when the difference of sigma changes sign
+    do while (sigma_real_thick(i) < sigma_real_thin(i) .and. i < nb_it)
+       i = i + 1
+    end do
 
-    do i = index_fcp, nb_it - 1
-
-       if(dabs((sigma_real_thick(i) - sigma_real_thin(i+1) / sigma_real_thick(i))) .lt. eps2)then
-          index_scp = i
-          ! sigma_c_thin = (sigma_real_thick(i) + sigma_real_thin(i+1))/2._x_precision
-          sigma_c_thin =  sigma_real_thin(i+1)
-
-          temp_c_thin = temp_real_thick(i)
-       end if
-    enddo
+    index_scp = i
+    sigma_c_thin =  sigma_real_thin(i+1)
+    temp_c_thin = temp_real_thick(i)
 
     endsubroutine second_critical_point
 
 
 
-    subroutine build_s_curve(sigma_real_thick, sigma_real_thin, temp_real_thick,nb_it, index_scp, sigma_real, temp_real)
+    subroutine build_s_curve(sigma_real_thick, sigma_real_thin, temp_real_thick, nb_it, index_scp, sigma_real, temp_real)
       implicit none
       integer,intent(in)                                   :: nb_it
 
