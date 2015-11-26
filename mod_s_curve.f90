@@ -259,7 +259,7 @@ contains
 
     do i = index_fcp, nb_it - 1
 
-       if(dabs(sigma_real_thick(i) - sigma_real_thin(i+1)) .lt. eps2)then
+       if(dabs((sigma_real_thick(i) - sigma_real_thin(i+1) / sigma_real_thick(i))) .lt. eps2)then
           index_scp = i
           ! sigma_c_thin = (sigma_real_thick(i) + sigma_real_thin(i+1))/2._x_precision
           sigma_c_thin =  sigma_real_thin(i+1)
