@@ -64,6 +64,7 @@ contains
     real(kind = x_precision), parameter                    :: t_max = 4.49d0
 
     integer, parameter                                     :: nb_it = 100
+    real(kind = x_precision), parameter                    :: dt    = (t_max-t_min) / (nb_it-1)
 
     real(kind = x_precision)                               :: eps   = 1.0d-4
     real(kind = x_precision)                               :: eps2   = 5.0d-1
@@ -129,13 +130,12 @@ contains
        open(fid_2,file  = fname_2, status='unknown',action='readwrite')
        open(fid_3,file  = fname_3, status='unknown',action='readwrite')
 
-
        do i          = 1, nb_it
 
           Smin        = 1d1
           Smax        = 1d4
 
-          temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
+          temp        = dt * (i-1) + t_min
           optical_depth = 1
 
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
@@ -148,6 +148,9 @@ contains
           !do j          = 1, nb_it
           !   write(fid_2,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(j),temp_real_1(j)
           !enddo
+
+          Smin        = 1d1
+          Smax        = 1d4
 
           optical_depth = 0
 
