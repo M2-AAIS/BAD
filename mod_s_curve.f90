@@ -76,10 +76,10 @@ contains
     real(kind = x_precision)                               :: f     = 0.0d0
     integer                                                :: optical_depth =0
 
-    real(kind = x_precision),dimension(nb_it)              :: temp_t_1  =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: sigma_t_1 =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: temp_t_0  =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: sigma_t_0 =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: temp_t_thick  =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: sigma_t_thick =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: temp_t_thin  =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: sigma_t_thin =0.0d0
     real(kind = x_precision),dimension(nb_it)              :: temp_real =0.0d0
     real(kind = x_precision),dimension(nb_it)              :: sigma_real=0.0d0
 
@@ -142,8 +142,8 @@ contains
 
           call variables(temp, sigma, omega, f, optical_depth)
 
-          temp_t_1(i)   =  temp
-          sigma_t_1(i)  = sigma
+          temp_t_thick(i)   =  temp
+          sigma_t_thick(i)  = sigma
 
           !do j          = 1, nb_it
           !   write(fid_2,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real_1(j),temp_real_1(j)
@@ -155,8 +155,8 @@ contains
 
           call variables(temp, sigma, omega, f, optical_depth)
 
-          temp_t_0(i)   =  temp
-          sigma_t_0(i)  =  sigma
+          temp_t_thin(i)   =  temp
+          sigma_t_thin(i)  =  sigma
 
 
          ! do l          = 1, nb_it
@@ -166,12 +166,12 @@ contains
        enddo
 
 
-       call first_critical_point(sigma_t_1, temp_t_1, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
+       call first_critical_point(sigma_t_thick, temp_t_thick, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
 
-       call second_critical_point(sigma_t_1, sigma_t_0, temp_t_1,&
+       call second_critical_point(sigma_t_thick, sigma_t_thin, temp_t_thick,&
          index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it, eps2)
 
-       call build_s_curve(sigma_t_1, sigma_t_0, temp_t_1,nb_it, index_scp, sigma_real, temp_real)
+       call build_s_curve(sigma_t_thick, sigma_t_thin, temp_t_thick, nb_it, index_scp, sigma_real, temp_real)
 
        call display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, k)
 
@@ -239,16 +239,16 @@ contains
     !-------------------------------------------------------------------------
     ! Subroutine in order to find the second critical point
     !-------------------------------------------------------------------------
-    subroutine second_critical_point(sigma_real_1, sigma_real_0, temp_real_1,&
+    subroutine second_critical_point(sigma_real_thick, sigma_real_thin, temp_real_thick,&
          index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it, eps2)
     implicit none
     integer,intent(in)                                   :: nb_it
 
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_1
-    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_0
+    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
+    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
+    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thin
 
-    real(kind = x_precision)                 ,intent(in):: eps2
+    real(kind = x_precision)                 ,intent(in) :: eps2
 
     integer                                  ,intent(in) :: index_fcp
     integer                                  ,intent(out):: index_scp
@@ -259,18 +259,18 @@ contains
             ! write(*,*)index_fcp
 
     ! do i = index_fcp, nb_it
-    !   write(*,*)sigma_real_0(i), sigma_real_1(i)
-    !   write(*,*)(dabs(sigma_real_1(i) - sigma_real_0(i+1)))
+    !   write(*,*)sigma_real_thin(i), sigma_real_thick(i)
+    !   write(*,*)(dabs(sigma_real_thick(i) - sigma_real_thin(i+1)))
     ! end do
 
     do i = index_fcp, nb_it - 1
 
-       if(dabs(sigma_real_1(i) - sigma_real_0(i+1)) .lt. eps2)then
+       if(dabs(sigma_real_thick(i) - sigma_real_thin(i+1)) .lt. eps2)then
           index_scp = i
-          ! sigma_c_thin = (sigma_real_1(i) + sigma_real_0(i+1))/2._x_precision
-          sigma_c_thin =  sigma_real_0(i+1)
+          ! sigma_c_thin = (sigma_real_thick(i) + sigma_real_thin(i+1))/2._x_precision
+          sigma_c_thin =  sigma_real_thin(i+1)
 
-          temp_c_thin = temp_real_1(i)
+          temp_c_thin = temp_real_thick(i)
        end if
     enddo
 
@@ -278,13 +278,13 @@ contains
 
 
 
-    subroutine build_s_curve(sigma_real_1, sigma_real_0, temp_real_1,nb_it, index_scp, sigma_real, temp_real)
+    subroutine build_s_curve(sigma_real_thick, sigma_real_thin, temp_real_thick,nb_it, index_scp, sigma_real, temp_real)
       implicit none
       integer,intent(in)                                   :: nb_it
 
-      real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_1
-      real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_0
-      real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_1
+      real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
+      real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thin
+      real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
       integer                                  ,intent(in) :: index_scp
       !real(kind = x_precision),dimension(:),allocatable,intent(out) :: sigma_real
       !real(kind = x_precision),dimension(:),allocatable,intent(out) :: temp_real
@@ -293,12 +293,12 @@ contains
       integer::i = 0
 
       do i = 1,index_scp
-         sigma_real(i) = sigma_real_1(i)
-         temp_real(i) = temp_real_1(i)
+         sigma_real(i) = sigma_real_thick(i)
+         temp_real(i) = temp_real_thick(i)
       enddo
       do i = index_scp + 1, nb_it
-         sigma_real(i) = sigma_real_0(i)
-         temp_real(i) = temp_real_1(i)
+         sigma_real(i) = sigma_real_thin(i)
+         temp_real(i) = temp_real_thick(i)
       enddo
 
     end subroutine build_s_curve
