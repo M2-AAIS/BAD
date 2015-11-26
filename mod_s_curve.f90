@@ -183,10 +183,10 @@ contains
 
       do j = 1, nb_it
 
-        temp_real(l)  = log10( temp_real(l) * state_0%T_0 )
-        sigma_real(l) = log10( sigma_real(l) * state_0%S_0 )
+        temp_real(j)  = log10( temp_real(j) * state_0%T_0 )
+        sigma_real(j) = log10( sigma_real(j) * state_0%S_0 )
 
-        write(fid_tot,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') sigma_real(l), temp_real(l)
+        write(fid_tot,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') sigma_real(j), temp_real(j)
       enddo
 
       !close(fid_thick)
@@ -215,8 +215,8 @@ contains
   !-------------------------------------------------------------------------
   subroutine first_critical_point(sigma_real_thick, temp_real_thick, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
     implicit none
-    integer,intent(in)                                   :: nb_it
 
+    integer                                  ,intent(in) :: nb_it
     real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
 
@@ -243,11 +243,11 @@ contains
          index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
     implicit none
 
+    integer                                  ,intent(in) :: nb_it
     real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thin
 
-    integer                                  ,intent(in) :: nb_it
     integer                                  ,intent(in) :: index_fcp
     integer                                  ,intent(out):: index_scp
 
@@ -271,10 +271,10 @@ contains
   subroutine build_s_curve(sigma_real_thick, sigma_real_thin, temp_real_thick, nb_it, index_scp, sigma_real, temp_real)
     implicit none
 
+    integer                                  ,intent(in) :: nb_it
     real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thin
     real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
-    integer                                  ,intent(in) :: nb_it
     integer                                  ,intent(in) :: index_scp
     !real(kind = x_precision),dimension(:),allocatable,intent(out) :: sigma_real
     !real(kind = x_precision),dimension(:),allocatable,intent(out) :: temp_real
