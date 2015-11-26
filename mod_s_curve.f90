@@ -82,20 +82,10 @@ contains
     real(kind = x_precision)                               :: K_ff   = 0.0d0
     real(kind = x_precision)                               :: K_e    = 0.0d0
     real(kind = x_precision)                               :: tau_eff= 0.0d0
-    real(kind = x_precision)                               :: P_rad  = 0.0d0
-    real(kind = x_precision)                               :: P_gaz  = 0.0d0
     real(kind = x_precision)                               :: f      = 0.0d0
     real(kind = x_precision)                               :: E_ff   = 0.0d0
     real(kind = x_precision)                               :: Fz     = 0.0d0
     integer                                                :: optical_depth =0
-
-    real(kind = x_precision)                               :: rs
-    real(kind = x_precision)                               :: rmin
-    real(kind = x_precision)                               :: Mdot_0
-    real(kind = x_precision)                               :: Sigma_0
-    real(kind = x_precision)                               :: Omega_0
-    real(kind = x_precision)                               :: rho_0
-    real(kind = x_precision)                               :: T_0
 
     real(kind = x_precision),dimension(nb_it)              :: temp_t_1  =0.0d0
     real(kind = x_precision),dimension(nb_it)              :: sigma_t_1 =0.0d0
@@ -124,10 +114,6 @@ contains
    ! real(kind = x_precision),dimension(n_cell)             :: sigma_thin
    ! real(kind = x_precision),dimension(n_cell)             :: temp_thin
 
-    !------------------------------------------------------------------------
-
-    call initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
-    call display_initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
     !-------------------------------------------------------------------------
     ! Test for 1 value of r
     !-------------------------------------------------------------------------
@@ -137,7 +123,7 @@ contains
        !r              = 10._x_precision*G*params%M/(c**2)
        r   = r_state%r(k)
 
-       omega          = sqrt(G*params%M/r**3) / Omega_0
+       omega          = x_state%Omega(k)
 
        write(number_of_cell,'(I5.5)') k
        fid_1 = 20 + k
@@ -157,19 +143,19 @@ contains
 
        do i          = 1, nb_it
 
-          Smin        = 1d2
+          Smin        = 1d1
           Smax        = 1d4
 
           temp        = (t_max-t_min)/(nb_it-1)*(i-1) + t_min
           optical_depth = 1
 
-          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+          sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
 
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-              K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+              K_e, tau_eff, E_ff,Fz,f, optical_depth)
 
         !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
-        !      K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
+        !      K_ff, K_e, tau_eff, E_ff,Fz,f)
 
           temp_t_1(i)   =  temp
           sigma_t_1(i)  = sigma
@@ -180,13 +166,13 @@ contains
 
           optical_depth = 0
 
-          sigma       = dichotomy(Smin, Smax, eps, temp, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+          sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
 
           call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-               K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+               K_e, tau_eff, E_ff,Fz,f, optical_depth)
 
         !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
-        !      K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
+        !      K_ff, K_e, tau_eff, E_ff,Fz,f)
 
           temp_t_0(i)   =  temp
           sigma_t_0(i)  =  sigma
@@ -212,8 +198,8 @@ contains
 
           do l          = 1, nb_it
 
-             temp_real(l)  = log10( temp_real(l) * T_0 )
-             sigma_real(l) = log10( sigma_real(l) * Sigma_0 )
+             temp_real(l)  = log10( temp_real(l) * state_0%T_0 )
+             sigma_real(l) = log10( sigma_real(l) * state_0%S_0 )
 
              write(fid_3,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sigma_real(l),temp_real(l)
           enddo
@@ -226,10 +212,10 @@ contains
           s(k)           = sigma_c_thick * Omega**(1._x_precision / 3._x_precision)
 
 
-       !  temp_thick(k)  = log10( temp_c_thick * T_0 )
-       !  sigma_thick(k) = log10( sigma_c_thick * Sigma_0 )
-       !  temp_thin(k)  = log10( temp_c_thin * T_0 )
-       !  sigma_thin(k) = log10( sigma_c_thin * Sigma_0 ) !PROBLEMATIC
+       !  temp_thick(k)  = log10( temp_c_thick * state_0%T_0 )
+       !  sigma_thick(k) = log10( sigma_c_thick * state_0%S_0 )
+       !  temp_thin(k)  = log10( temp_c_thin * state_0%T_0 )
+       !  sigma_thin(k) = log10( sigma_c_thin * state_0%S_0 ) !PROBLEMATIC
 
 
     enddo
@@ -428,54 +414,15 @@ contains
   end subroutine quadratic
 
 
-
-  !-------------------------------------------------------------------------
-  !Subroutine in order to compute initial variables rs, rmin, Mdot_0,
-  !Sigma_0, Omega_0, T_0
-  !-------------------------------------------------------------------------
-  subroutine initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
-    implicit none
-
-    real(kind=x_precision),intent(out)                      :: rs
-    real(kind=x_precision),intent(out)                      :: rmin
-    real(kind=x_precision),intent(out)                      :: Mdot_0
-    real(kind=x_precision),intent(out)                      :: Sigma_0
-    real(kind=x_precision),intent(out)                      :: Omega_0
-    real(kind=x_precision),intent(out)                      :: T_0
-    real(kind=x_precision),intent(out)                      :: rho_0
-    real(kind=x_precision)                                  :: nu_0
-
-    !------------------------------------------------------------------------
-
-    rs                 = 2._x_precision * G * params%M/(c**2)
-    rmin               = 3._x_precision * rs
-    Mdot_0             = params%Mdot
-    Omega_0            = sqrt(G * params%M / rs**3 )
-    Sigma_0            = Mdot_0 /(Omega_0 * rs**2 * 2_x_precision * pi)
-    T_0                = (Mdot_0 * c**2 / (48._x_precision * pi * rs**2 * stefan * &
-                         sqrt(27._x_precision) ) )**(1._x_precision/4._x_precision)
-    rho_0              = Sigma_0 / (2._x_precision * rs)
-    nu_0                 = 2._x_precision * rs**2 * Omega_0 / 3._x_precision
-
-  end subroutine initial_variables
-
-
-
   !-------------------------------------------------------------------------
   !Subroutine in order to compute variables H, rho, cs, nu, Q_plus, Q_minus,
-  !K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz given T, Sigma and Omega
+  !K_ff, K_e, tau_eff, E_ff,Fz given T, Sigma and Omega
   !------------------------------------------------------------------------
   subroutine variables(T, Sigma, Omega, H, rho, cs, nu, Q_plus, Q_minus,&
-       K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f,Sigma_0,&
-     Omega_0,rs, T_0, rho_0, optical_depth)
+       K_ff, K_e, tau_eff, E_ff,Fz,f, optical_depth)
     implicit none
 
     real(kind = x_precision),intent(in)                      :: T,Sigma,Omega
-    real(kind = x_precision),intent(in)                      :: Sigma_0
-    real(kind = x_precision),intent(in)                      :: Omega_0
-    real(kind = x_precision),intent(in)                      :: T_0
-    real(kind = x_precision),intent(in)                      :: rho_0
-    real(kind = x_precision),intent(in)                      :: rs
     integer, intent(in)                                      :: optical_depth
     real(kind = x_precision)                                 :: coeff_a=0.,coeff_b=0.,coeff_c=0.
 
@@ -490,27 +437,23 @@ contains
     real(kind = x_precision),intent(out)                     :: tau_eff
     real(kind = x_precision),intent(out)                     :: Fz
     real(kind = x_precision),intent(out)                     :: Q_minus
-    real(kind = x_precision),intent(out)                     :: P_rad
-    real(kind = x_precision),intent(out)                     :: P_gaz
     real(kind = x_precision),intent(out)                     :: f
     !------------------------------------------------------------------------
 
-    coeff_a              = (Omega**2 * Omega_0**2 * Sigma * Sigma_0)/2._x_precision
-    coeff_b              = (-1._x_precision/3._x_precision) * cst_rad*T**4 * T_0**4 / rs
-    coeff_c              = (-1._x_precision * params%RTM * T  *  Sigma * Sigma_0)/(2._x_precision * rs**2)
+    coeff_a              = (Omega * state_0%Omega_0)**2 * Sigma * state_0%S_0 / 2._x_precision
+    coeff_b              = (-1._x_precision/3._x_precision) * cst_rad * (T * state_0%T_0)**4 / state_0%H_0
+    coeff_c              = - params%RTM * T * Sigma * state_0%S_0 / (2._x_precision * state_0%H_0**2)
 
     call quadratic(coeff_a , coeff_b , coeff_c , H)
 
 
     rho                  = Sigma / H
-    P_rad                = T**4
-    P_gaz                = rho * T
     cs                   = Omega * H
     nu                   = params%alpha * cs * H
-    K_ff                 = 6.13d22 * rho_0 * rho * (T_0 * T)**(-3.5_x_precision)
+    K_ff                 = 6.13d22 * state_0%rho_0 * rho * (state_0%T_0 * T)**(-3.5_x_precision)
     K_e                  = params%kappa_e
-    E_ff                 = 6.22d20 * (rho_0 * rho)**2 * sqrt(T_0 * T)
-    tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * Sigma_0
+    E_ff                 = 6.22d20 * (state_0%rho_0 * rho)**2 * sqrt(state_0%T_0 * T)
+    tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * state_0%S_0
 
 
     !-------------------------------------------------------------------------
@@ -528,15 +471,15 @@ contains
     case(1)
 
        Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
-            * (K_ff + K_e) * Sigma * Sigma_0)
+            * (K_ff + K_e) * Sigma * state_0%S_0)
     case (0)
 
-       Fz = 4._x_precision * rs * E_ff * H / (Omega_0 * Sigma_0)
+       Fz = 4._x_precision * state_0%H_0 * E_ff * H / (state_0%Omega_0 * state_0%S_0)
 
     end select
 
-    Q_plus              = 3._x_precision  * rs**2 * nu * Omega**2 * Omega_0**2
-    Q_minus             = Fz  / ( Sigma * Omega**(1._x_precision / 3._x_precision) )
+    Q_plus              = 3._x_precision  * state_0%H_0**2 * nu * (Omega * state_0%Omega_0)**2
+    Q_minus             = Fz / Sigma
 
     f                   = Q_plus - Q_minus
 
@@ -547,7 +490,7 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, sigma_0, Omega_0,rs, T_0, rho_0, optical_depth)
+  real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, optical_depth)
     use mod_read_parameters
     use mod_constants
     use mod_variables
@@ -557,11 +500,6 @@ contains
     real(kind=x_precision),intent(in)                        :: eps
     real(kind=x_precision),intent(in)                        :: T
     real(kind=x_precision),intent(in)                        :: omega
-    real(kind=x_precision),intent(in)                        :: Sigma_0
-    real(kind=x_precision),intent(in)                        :: Omega_0
-    real(kind=x_precision),intent(in)                        :: T_0
-    real(kind=x_precision),intent(in)                        :: rho_0
-    real(kind=x_precision),intent(in)                        :: rs
     integer,intent(in)                                       :: optical_depth
 
     real(kind=x_precision)                                   :: H
@@ -573,8 +511,6 @@ contains
     real(kind=x_precision)                                   :: K_ff
     real(kind=x_precision)                                   :: K_e
     real(kind=x_precision)                                   :: tau_eff
-    real(kind=x_precision)                                   :: P_rad
-    real(kind=x_precision)                                   :: P_gaz
     real(kind=x_precision)                                   :: f_min
     real(kind=x_precision)                                   :: f_max
     real(kind=x_precision)                                   :: f_center
@@ -593,10 +529,10 @@ contains
     S_center             = (Smin+Smax)/2.
     j = 0
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0,optical_depth)
+         tau_eff, E_ff,Fz,f_min, optical_depth)
 
     call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
+         tau_eff, E_ff,Fz,f_max, optical_depth)
 
   !   write(*,*)'fmin = ',f_min
   !   write(*,*)'fmax = ',f_max
@@ -610,13 +546,13 @@ contains
 
 
     call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_min,Sigma_0, Omega_0,rs,T_0,rho_0, optical_depth)
+         tau_eff, E_ff,Fz,f_min, optical_depth)
 
     call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, P_rad, P_gaz,E_ff,Fz,f_max,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
+         tau_eff, E_ff,Fz,f_max, optical_depth)
 
     call variables(T, S_center, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-         K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f_center,Sigma_0, Omega_0,rs,T_0, rho_0, optical_depth)
+         K_e, tau_eff, E_ff,Fz,f_center, optical_depth)
 
 
           if(f_min * f_center .gt. 0.) then
@@ -641,44 +577,10 @@ contains
 
 
   !-------------------------------------------------------------------------
-  !Subroutine in order to display initial variables
-  !-------------------------------------------------------------------------
-  subroutine display_initial_variables(rs, rmin, Mdot_0, Sigma_0, Omega_0, T_0, rho_0)
-    implicit none
-
-    real(kind = x_precision), intent(in)                     :: rs
-    real(kind = x_precision), intent(in)                     :: rmin
-    real(kind = x_precision), intent(in)                     :: Mdot_0
-    real(kind = x_precision), intent(in)                     :: Sigma_0
-    real(kind = x_precision), intent(in)                     :: Omega_0
-    real(kind = x_precision), intent(in)                     :: T_0
-    real(kind = x_precision), intent(in)                     :: rho_0
-
-    !-----------------------------------------------------------------------
-
-    write(*,*)'           Initial Variables            '
-    write(*,*)'****************************************'
-    write(*,"(' Temp_0      =',1p,E12.4)") T_0
-    write(*,"(' Sigma_0     =',1p,E12.4)") Sigma_0
-    write(*,"(' Omega_0     =',1p,E12.4)") Omega_0
-    write(*,"(' Omega_max   =',1p,E12.4)") sqrt(G*params%M / rmin**3)
-    write(*,"(' H_0         =',1p,E12.4)") rs
-    write(*,"(' Mdot_0      =',1p,E12.4)") Mdot_0
-    write(*,"(' rho_0       =',1p,E12.4)") rho_0
-    write(*,"(' rmin        =',1p,E12.4)") rmin
-    write(*,"(' rs          =',1p,E12.4)") rs
-    write(*,*)'****************************************'
-
-   ! read(*,*)
-
-  end subroutine display_initial_variables
-
-
-  !-------------------------------------------------------------------------
   !Subroutine in order to display variables
   !-------------------------------------------------------------------------
   subroutine display_variables(temp,Omega,r,sigma, H, rho, cs, nu, Q_plus, &
-       Q_minus, K_ff, K_e, tau_eff, P_rad, P_gaz,E_ff,Fz,f)
+       Q_minus, K_ff, K_e, tau_eff, E_ff,Fz,f)
     implicit none
 
     real(kind = x_precision), intent(in)                     :: temp
@@ -694,8 +596,6 @@ contains
     real(kind = x_precision), intent(in)                     :: K_ff
     real(kind = x_precision), intent(in)                     :: K_e
     real(kind = x_precision), intent(in)                     :: tau_eff
-    real(kind = x_precision), intent(in)                     :: P_rad
-    real(kind = x_precision), intent(in)                     :: P_gaz
     real(kind = x_precision), intent(in)                     :: f
     real(kind = x_precision), intent(in)                     :: E_ff
     real(kind = x_precision), intent(in)                     :: Fz
@@ -716,8 +616,6 @@ contains
     write(*,"(' K_ff        =',1p,E12.4)") K_ff
     write(*,"(' K_e         =',1p,E12.4)") K_e
     write(*,"(' tau_eff     =',1p,E12.4)") tau_eff
-    write(*,"(' P_gaz       =',1p,E12.4)") P_gaz
-    write(*,"(' P_rad       =',1p,E12.4)") P_rad
     write(*,"(' E_ff        =',1p,E12.4)") E_ff
     write(*,"(' delta Q     =',1p,E12.4)") f
     write(*,"(' Fz          =',1p,E12.4)") Fz
