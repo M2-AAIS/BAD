@@ -8,26 +8,25 @@ program black_hole_s_curve
 
   implicit none
 
-    integer                                                 :: i
-   
-    integer                 ,parameter                                :: nb_it = 1000
-    real(kind = x_precision),parameter                                :: eps   = 1.0d-4
-    real(kind = x_precision),parameter                                :: t_min = 5.0d-1
-    real(kind = x_precision),parameter                                :: t_max = 3.49d0
-    real(kind = x_precision)                                          :: S_min  = 1.0d1 
-    real(kind = x_precision)                                          :: S_max  = 1.0d4
-    real(kind = x_precision), parameter                               :: dt    = (t_max-t_min) / (nb_it-1)
+  integer                                    :: i
 
-    real(kind = x_precision),dimension(n_cell)                        :: temperature
-    real(kind = x_precision),dimension(n_cell)                        :: s
+  integer                 ,parameter         :: nb_it = 1000
+  real(kind = x_precision),parameter         :: eps   = 1.0d-4
+  real(kind = x_precision),parameter         :: t_min = 5.0d-1
+  real(kind = x_precision),parameter         :: t_max = 3.49d0
+  real(kind = x_precision),parameter         :: dt    = (t_max-t_min) / (nb_it-1)
+  real(kind = x_precision),parameter         :: S_min = 1.0d1
+  real(kind = x_precision),parameter         :: S_max = 1.0d4
+
+  real(kind = x_precision),dimension(n_cell) :: temperature
+  real(kind = x_precision),dimension(n_cell) :: s
 
 
-  call get_parameters() 
-  
-     call curve( nb_it, eps, t_min, t_max, dt, s_min, s_max, temperature, s)
-  do i          = 1, n_cell
+  call get_parameters()
 
-    
+  call curve( nb_it, eps, t_min, t_max, dt, s_min, s_max, temperature, s)
+  do i = 1, n_cell
+
      write(*,*)'**********************************'
      write(*,*)'T = ',temperature(i)
      write(*,*)'S = ',s(i)
@@ -35,5 +34,4 @@ program black_hole_s_curve
 
   enddo
 
-  
 end program black_hole_s_curve
