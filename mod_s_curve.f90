@@ -190,7 +190,7 @@ contains
        close(fid_3)
 
           temperature(k) = temp_c_thick
-          s(k)           = sigma_c_thick * Omega**(1._x_precision / 3._x_precision)
+          s(k)           = sigma_c_thick
 
 
        !  temp_thick(k)  = log10( temp_c_thick * state_0%T_0 )
