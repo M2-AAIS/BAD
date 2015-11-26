@@ -1,6 +1,5 @@
 program black_hole_s_curve
   use mod_constants
-  use mod_variables
   use mod_read_parameters
   use mod_s_curve
 
@@ -16,7 +15,6 @@ program black_hole_s_curve
 
 
   call get_parameters() 
-  call init_variable_0()
   
      call curve( temperature,s)
 

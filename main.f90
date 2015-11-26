@@ -26,12 +26,8 @@ program black_hole_diffusion
   ! Initial time = 0
   t = 0._x_precision
 
-  ! Read the parameters 
+  ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
-  
-  ! Call init variable to create the adim state vector and
-  ! generate the state_0
-  call init_variable_0()
 
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
