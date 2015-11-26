@@ -26,5 +26,5 @@ for line in infile:
 figManager = plt.get_current_fig_manager()
 figManager.window.showMaximized()
 #plt.plot(log(x),log(y))
-plt.plot(x,y)
+plt.plot(x,y,"o")
 plt.show()
