@@ -46,7 +46,7 @@ contains
   !                                     <-- input : Temperature, Sigma, Omega + optical depth indicator (0 or 1) + precision + more
   !                                         --> output : Sigma between a computed range of surface density [Smin, Smax] for a given temperature
 
-  !               + subroutines for displaying values and saving data into files
+  !
   !-------------------------------------------------------------------------
 
   subroutine curve( temperature, s)
@@ -68,23 +68,12 @@ contains
     real(kind = x_precision)                               :: eps   = 1.0d-4
     real(kind = x_precision)                               :: eps2   = 5.0d-1
 
-    real(kind = x_precision)                               :: sigma = 0.0d0
+    real(kind = x_precision)                               :: Sigma = 0.0d0
     real(kind = x_precision)                               :: Smin  = 0.0d0
     real(kind = x_precision)                               :: Smax  = 0.0d0
     real(kind = x_precision)                               :: omega = 0.0d0
     real(kind = x_precision)                               :: r     = 0.0d0
-    real(kind = x_precision)                               :: H     = 0.0d0
-    real(kind = x_precision)                               :: rho   = 0.0d0
-    real(kind = x_precision)                               :: cs    = 0.0d0
-    real(kind = x_precision)                               :: nu    = 0.0d0
-    real(kind = x_precision)                               :: Q_plus = 0.0d0
-    real(kind = x_precision)                               :: Q_minus= 0.0d0
-    real(kind = x_precision)                               :: K_ff   = 0.0d0
-    real(kind = x_precision)                               :: K_e    = 0.0d0
-    real(kind = x_precision)                               :: tau_eff= 0.0d0
-    real(kind = x_precision)                               :: f      = 0.0d0
-    real(kind = x_precision)                               :: E_ff   = 0.0d0
-    real(kind = x_precision)                               :: Fz     = 0.0d0
+    real(kind = x_precision)                               :: f     = 0.0d0
     integer                                                :: optical_depth =0
 
     real(kind = x_precision),dimension(nb_it)              :: temp_t_1  =0.0d0
@@ -151,11 +140,7 @@ contains
 
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
 
-          call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-              K_e, tau_eff, E_ff,Fz,f, optical_depth)
-
-        !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
-        !      K_ff, K_e, tau_eff, E_ff,Fz,f)
+          call variables(temp, sigma, omega, f, optical_depth)
 
           temp_t_1(i)   =  temp
           sigma_t_1(i)  = sigma
@@ -168,11 +153,7 @@ contains
 
           sigma       = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
 
-          call variables(temp, sigma, omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-               K_e, tau_eff, E_ff,Fz,f, optical_depth)
-
-        !  call display_variables(temp,Omega,r, sigma, H, rho, cs, nu, Q_plus, Q_minus,&
-        !      K_ff, K_e, tau_eff, E_ff,Fz,f)
+          call variables(temp, sigma, omega, f, optical_depth)
 
           temp_t_0(i)   =  temp
           sigma_t_0(i)  =  sigma
@@ -418,26 +399,25 @@ contains
   !Subroutine in order to compute variables H, rho, cs, nu, Q_plus, Q_minus,
   !K_ff, K_e, tau_eff, E_ff,Fz given T, Sigma and Omega
   !------------------------------------------------------------------------
-  subroutine variables(T, Sigma, Omega, H, rho, cs, nu, Q_plus, Q_minus,&
-       K_ff, K_e, tau_eff, E_ff,Fz,f, optical_depth)
+  subroutine variables(T, Sigma, Omega, f, optical_depth)
     implicit none
 
     real(kind = x_precision),intent(in)                      :: T,Sigma,Omega
     integer, intent(in)                                      :: optical_depth
+    real(kind = x_precision),intent(out)                     :: f
     real(kind = x_precision)                                 :: coeff_a=0.,coeff_b=0.,coeff_c=0.
 
-    real(kind = x_precision),intent(out)                     :: H
-    real(kind = x_precision),intent(out)                     :: rho
-    real(kind = x_precision),intent(out)                     :: cs
-    real(kind = x_precision),intent(out)                     :: nu
-    real(kind = x_precision),intent(out)                     :: Q_plus
-    real(kind = x_precision),intent(out)                     :: K_ff
-    real(kind = x_precision),intent(out)                     :: K_e
-    real(kind = x_precision),intent(out)                     :: E_ff
-    real(kind = x_precision),intent(out)                     :: tau_eff
-    real(kind = x_precision),intent(out)                     :: Fz
-    real(kind = x_precision),intent(out)                     :: Q_minus
-    real(kind = x_precision),intent(out)                     :: f
+    real(kind = x_precision)                     :: H
+    real(kind = x_precision)                     :: rho
+    real(kind = x_precision)                     :: cs
+    real(kind = x_precision)                     :: nu
+    real(kind = x_precision)                     :: Q_plus
+    real(kind = x_precision)                     :: K_ff
+    real(kind = x_precision)                     :: K_e
+    real(kind = x_precision)                     :: E_ff
+    real(kind = x_precision)                     :: tau_eff
+    real(kind = x_precision)                     :: Fz
+    real(kind = x_precision)                     :: Q_minus
     !------------------------------------------------------------------------
 
     coeff_a              = (Omega * state_0%Omega_0)**2 * Sigma * state_0%S_0 / 2._x_precision
@@ -445,7 +425,6 @@ contains
     coeff_c              = - params%RTM * T * Sigma * state_0%S_0 / (2._x_precision * state_0%H_0**2)
 
     call quadratic(coeff_a , coeff_b , coeff_c , H)
-
 
     rho                  = Sigma / H
     cs                   = Omega * H
@@ -455,23 +434,16 @@ contains
     E_ff                 = 6.22d20 * (state_0%rho_0 * rho)**2 * sqrt(state_0%T_0 * T)
     tau_eff              = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * state_0%S_0
 
-
     !-------------------------------------------------------------------------
     !Select the case for the optical depth to compute Fz
     !-------------------------------------------------------------------------
-
-   ! if (tau_eff .ge. 1.)  then
-   !    optical_depth     = 1
-   ! else
-   !    optical_depth     = 0
-   ! end if
 
     select case(optical_depth)
 
     case(1)
 
-       Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) &
-            * (K_ff + K_e) * Sigma * state_0%S_0)
+       Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) * (K_ff + K_e) * Sigma * state_0%S_0)
+
     case (0)
 
        Fz = 4._x_precision * state_0%H_0 * E_ff * H / (state_0%Omega_0 * state_0%S_0)
@@ -502,20 +474,9 @@ contains
     real(kind=x_precision),intent(in)                        :: omega
     integer,intent(in)                                       :: optical_depth
 
-    real(kind=x_precision)                                   :: H
-    real(kind=x_precision)                                   :: rho
-    real(kind=x_precision)                                   :: cs
-    real(kind=x_precision)                                   :: nu
-    real(kind=x_precision)                                   :: Q_plus
-    real(kind=x_precision)                                   :: Q_minus
-    real(kind=x_precision)                                   :: K_ff
-    real(kind=x_precision)                                   :: K_e
-    real(kind=x_precision)                                   :: tau_eff
     real(kind=x_precision)                                   :: f_min
     real(kind=x_precision)                                   :: f_max
     real(kind=x_precision)                                   :: f_center
-    real(kind=x_precision)                                   :: E_ff
-    real(kind=x_precision)                                   :: Fz
     real(kind=x_precision)                                   :: S_center = 0._x_precision
     integer                                                  :: j = 0
 
@@ -528,11 +489,9 @@ contains
     !-------------------------------------------------------------------------
     S_center             = (Smin+Smax)/2.
     j = 0
-    call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, E_ff,Fz,f_min, optical_depth)
+    call variables(T, Smin, Omega, f_min, optical_depth)
 
-    call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, E_ff,Fz,f_max, optical_depth)
+    call variables(T, Smax, Omega, f_max, optical_depth)
 
   !   write(*,*)'fmin = ',f_min
   !   write(*,*)'fmax = ',f_max
@@ -545,14 +504,11 @@ contains
        iteration:do while ( dabs( Smax - Smin ) .ge. eps .and. j .lt. 10000)
 
 
-    call variables(T, Smin, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e,&
-         tau_eff, E_ff,Fz,f_min, optical_depth)
+    call variables(T, Smin, Omega, f_min, optical_depth)
 
-    call variables(T, Smax, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff, K_e, &
-         tau_eff, E_ff,Fz,f_max, optical_depth)
+    call variables(T, Smax, Omega, f_max, optical_depth)
 
-    call variables(T, S_center, Omega, H, rho, cs, nu, Q_plus, Q_minus, K_ff,&
-         K_e, tau_eff, E_ff,Fz,f_center, optical_depth)
+    call variables(T, S_center, Omega, f_center, optical_depth)
 
 
           if(f_min * f_center .gt. 0.) then
@@ -574,53 +530,5 @@ contains
 
 
   end function dichotomy
-
-
-  !-------------------------------------------------------------------------
-  !Subroutine in order to display variables
-  !-------------------------------------------------------------------------
-  subroutine display_variables(temp,Omega,r,sigma, H, rho, cs, nu, Q_plus, &
-       Q_minus, K_ff, K_e, tau_eff, E_ff,Fz,f)
-    implicit none
-
-    real(kind = x_precision), intent(in)                     :: temp
-    real(kind = x_precision), intent(in)                     :: Omega
-    real(kind = x_precision), intent(in)                     :: r
-    real(kind = x_precision), intent(in)                     :: sigma
-    real(kind = x_precision), intent(in)                     :: H
-    real(kind = x_precision), intent(in)                     :: rho
-    real(kind = x_precision), intent(in)                     :: cs
-    real(kind = x_precision), intent(in)                     :: nu
-    real(kind = x_precision), intent(in)                     :: Q_plus
-    real(kind = x_precision), intent(in)                     :: Q_minus
-    real(kind = x_precision), intent(in)                     :: K_ff
-    real(kind = x_precision), intent(in)                     :: K_e
-    real(kind = x_precision), intent(in)                     :: tau_eff
-    real(kind = x_precision), intent(in)                     :: f
-    real(kind = x_precision), intent(in)                     :: E_ff
-    real(kind = x_precision), intent(in)                     :: Fz
-    !------------------------------------------------------------------------
-
-    write(*,*)'               Variables                '
-    write(*,*)'****************************************'
-    write(*,"(' r           =',1p,E12.4)") r
-    write(*,"(' Temp        =',1p,E12.4)") temp
-    write(*,"(' Sigma       =',1p,E12.4)") sigma
-    write(*,"(' Omega       =',1p,E12.4)") Omega
-    write(*,"(' H           =',1p,E12.4)") H
-    write(*,"(' rho         =',1p,E12.4)") rho
-    write(*,"(' cs          =',1p,E12.4)") cs
-    write(*,"(' nu          =',1p,E12.4)") nu
-    write(*,"(' Q plus      =',1p,E12.4)") Q_plus
-    write(*,"(' Q minus     =',1p,E12.4)") Q_minus
-    write(*,"(' K_ff        =',1p,E12.4)") K_ff
-    write(*,"(' K_e         =',1p,E12.4)") K_e
-    write(*,"(' tau_eff     =',1p,E12.4)") tau_eff
-    write(*,"(' E_ff        =',1p,E12.4)") E_ff
-    write(*,"(' delta Q     =',1p,E12.4)") f
-    write(*,"(' Fz          =',1p,E12.4)") Fz
-    write(*,*)'****************************************'
-  end subroutine display_variables
-
 
 end module mod_S_curve
