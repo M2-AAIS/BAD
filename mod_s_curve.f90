@@ -104,20 +104,15 @@ contains
     real(kind = x_precision),dimension(n_cell)             :: sigma_thin
     real(kind = x_precision),dimension(n_cell)             :: temp_thin
 
-    !-------------------------------------------------------------------------
-    ! Test for 1 value of r
-    !-------------------------------------------------------------------------
-    do k              = 1 , n_cell
+    do k = 1, n_cell
 
-      r   = r_state%r(k)
-
-      omega          = x_state%Omega(k)
+      r     = r_state%r(k)
+      omega = x_state%Omega(k)
 
       write(number_of_cell,'(I5.5)') k
       !fid_thick = 20 + k
       !fid_thin = 21 + k
       fid_tot = 22 + k
-
 
       !fname_thick = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_thick.dat'
       !fname_thin = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_thin.dat'
@@ -180,7 +175,7 @@ contains
 
 
 
-       do j = 1, nb_it
+      do j = 1, nb_it
 
         temp_real(j)  = log10( temp_real(j) * state_0%T_0 )
         sigma_real(j) = log10( sigma_real(j) * state_0%S_0 )
@@ -314,63 +309,62 @@ contains
   end subroutine display_critical_points
 
 
-   subroutine write_critical_points(n,radius, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick)
+  subroutine write_critical_points(n,radius, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick)
 
-      implicit none
+    implicit none
      
-      integer                                  ,intent(in):: n 
-      real(kind = x_precision),dimension(n)    ,intent(in):: radius
+    integer                                  ,intent(in):: n 
+    real(kind = x_precision),dimension(n)    ,intent(in):: radius
 
-      real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thin
-      real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thin
-      real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thick
-      real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thick
-      integer                                             :: i
-      integer                                             :: fid_4 = 11
-      character(len = 64)                                 :: fname_4      
+    real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thin
+    real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thin
+    real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thick
+    real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thick
+    integer                                             :: i
+    integer                                             :: fid_4 = 11
+    character(len = 64)                                 :: fname_4      
 
-      !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
 
-       fname_4 = 'critical_points/file.dat'
+     fname_4 = 'critical_points/file.dat'
 
-       open(fid_4,file  = fname_4, status='unknown',action='readwrite')
-       !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
-      
-          do i=1, n
-             write(fid_4,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sqrt(radius(i)),&
-                        temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
-          end do 
-       
-       close(fid_4)
+     open(fid_4,file  = fname_4, status='unknown',action='readwrite')
+     !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
+    
+        do i=1, n
+           write(fid_4,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sqrt(radius(i)),&
+                      temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
+        end do 
+     
+     close(fid_4)
 
-    end subroutine write_critical_points
+  end subroutine write_critical_points
     
 
-subroutine save_data(fid, filename, n, data_1, data_2)
+  subroutine save_data(fid, filename, n, data_1, data_2)
+    implicit none
 
-      implicit none
+    integer                                  ,intent(in):: fid      
+    character(len =64)                       ,intent(in):: filename
+    integer                                  ,intent(in):: n 
+    real(kind = x_precision)                 ,intent(in):: data_1
+    real(kind = x_precision)                 ,intent(in):: data_2
 
-      integer                                  ,intent(in):: fid      
-      character(len =64)                       ,intent(in):: filename
-      integer                                  ,intent(in):: n 
-      real(kind = x_precision)                 ,intent(in):: data_1
-      real(kind = x_precision)                 ,intent(in):: data_2
-
-      integer                                             :: i
+    integer                                             :: i
   
-     !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
 
 
-       open(fid,file  = filename, status='unknown',access='direct',action='readwrite')
+    open(fid,file  = filename, status='unknown',access='direct',action='readwrite')
 
       
-          do i=1, n
-             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') data_1, data_2
-          end do 
+    do i = 1, n
+      write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') data_1, data_2
+    end do 
        
-       close(fid)
+    close(fid)
 
-    end subroutine save_data
+  end subroutine save_data
 
 
   !-------------------------------------------------------------------------
