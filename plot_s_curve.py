@@ -18,7 +18,7 @@ if os.path.isfile(inpath):
 else:
     _filenames = os.listdir(inpath)
     _filenames.sort()
-    filesnames = [inpath + '/' + fname for fname in _filesnames if '_tot.dat' in fname]
+    filesnames = [inpath + '/' + fname for fname in _filenames if '_tot.dat' in fname]
     
     print('Visiting all files of {}'.format(inpath))
 
