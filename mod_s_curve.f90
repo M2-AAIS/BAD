@@ -52,13 +52,13 @@ contains
   subroutine curve(nb_it, eps, t_min, t_max, dt, s_min, s_max, temperature, s)
     implicit none
 
-    integer                 ,                    intent(in):: nb_it
-    real(kind = x_precision),                    intent(in):: eps
-    real(kind = x_precision),                    intent(in):: t_min
-    real(kind = x_precision),                    intent(in):: t_max
-    real(kind = x_precision),                    intent(in):: dt
-    real(kind = x_precision),                 intent(inout):: S_min
-    real(kind = x_precision),                 intent(inout):: S_max
+    integer                                   ,intent(in)  :: nb_it
+    real(kind = x_precision)                  ,intent(in)  :: eps
+    real(kind = x_precision)                  ,intent(in)  :: t_min
+    real(kind = x_precision)                  ,intent(in)  :: t_max
+    real(kind = x_precision)                  ,intent(in)  :: dt
+    real(kind = x_precision)                  ,intent(in)  :: S_min
+    real(kind = x_precision)                  ,intent(in)  :: S_max
 
     real(kind = x_precision),dimension(n_cell),intent(out) :: temperature
     real(kind = x_precision),dimension(n_cell),intent(out) :: s
