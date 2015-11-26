@@ -49,8 +49,16 @@ contains
   !
   !-------------------------------------------------------------------------
 
-  subroutine curve(temperature, s)
+  subroutine curve(nb_it, eps, t_min, t_max, dt, s_min, s_max, temperature, s)
     implicit none
+
+    integer                 ,                    intent(in):: nb_it 
+    real(kind = x_precision),                    intent(in):: eps  
+    real(kind = x_precision),                    intent(in):: t_min 
+    real(kind = x_precision),                    intent(in):: t_max 
+    real(kind = x_precision),                    intent(in):: dt    
+    real(kind = x_precision),                 intent(inout):: S_min  
+    real(kind = x_precision),                 intent(inout):: S_max  
 
     real(kind = x_precision),dimension(n_cell),intent(out) :: temperature
     real(kind = x_precision),dimension(n_cell),intent(out) :: s
@@ -60,28 +68,21 @@ contains
     integer                                                :: k     = 0
 
     real(kind = x_precision)                               :: temp  = 0.0d0
-    real(kind = x_precision), parameter                    :: t_min = 5.0d-1
-    real(kind = x_precision), parameter                    :: t_max = 3.49d0
-
-    integer, parameter                                     :: nb_it = 1000
-    real(kind = x_precision), parameter                    :: dt    = (t_max-t_min) / (nb_it-1)
-
-    real(kind = x_precision)                               :: eps   = 1.0d-4
-
-    real(kind = x_precision)                               :: Sigma = 0.0d0
     real(kind = x_precision)                               :: Smin  = 0.0d0
     real(kind = x_precision)                               :: Smax  = 0.0d0
+    real(kind = x_precision)                               :: Sigma = 0.0d0
+
     real(kind = x_precision)                               :: omega = 0.0d0
     real(kind = x_precision)                               :: r     = 0.0d0
     real(kind = x_precision)                               :: f     = 0.0d0
     integer                                                :: optical_depth =0
 
-    real(kind = x_precision),dimension(nb_it)              :: temp_t_thick  =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: sigma_t_thick =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: temp_t_thin   =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: sigma_t_thin  =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: temp_real     =0.0d0
-    real(kind = x_precision),dimension(nb_it)              :: sigma_real    =0.0d0
+    real(kind = x_precision),dimension(nb_it)              :: temp_t_thick  
+    real(kind = x_precision),dimension(nb_it)              :: sigma_t_thick 
+    real(kind = x_precision),dimension(nb_it)              :: temp_t_thin   
+    real(kind = x_precision),dimension(nb_it)              :: sigma_t_thin  
+    real(kind = x_precision),dimension(nb_it)              :: temp_real     
+    real(kind = x_precision),dimension(nb_it)              :: sigma_real    
 
     character(len = 8)                                     :: number_of_cell
     !character(len = 64)                                    :: fname_thick
@@ -95,21 +96,19 @@ contains
     integer                                                :: index_fcp
     real(kind = x_precision)                               :: sigma_c_thick
     real(kind = x_precision)                               :: temp_c_thick
-    !real(kind = x_precision),dimension(n_cell)             :: sigma_thick
-    !real(kind = x_precision),dimension(n_cell)             :: temp_thick
+    real(kind = x_precision),dimension(n_cell)             :: sigma_thick
+    real(kind = x_precision),dimension(n_cell)             :: temp_thick
     integer                                                :: index_scp
     real(kind = x_precision)                               :: sigma_c_thin
     real(kind = x_precision)                               :: temp_c_thin
-    !real(kind = x_precision),dimension(n_cell)             :: sigma_thin
-    !real(kind = x_precision),dimension(n_cell)             :: temp_thin
+    real(kind = x_precision),dimension(n_cell)             :: sigma_thin
+    real(kind = x_precision),dimension(n_cell)             :: temp_thin
 
     !-------------------------------------------------------------------------
     ! Test for 1 value of r
     !-------------------------------------------------------------------------
     do k              = 1 , n_cell
 
-      !r = (rmax-rmin)/(n_cell-1)*(k-1) + rmin
-      !r              = 10._x_precision*G*params%M/(c**2)
       r   = r_state%r(k)
 
       omega          = x_state%Omega(k)
@@ -127,7 +126,7 @@ contains
 
       !open(fid_thick,file  = fname_thick, status='unknown',action='readwrite')
       !open(fid_thin,file  = fname_thin, status='unknown',action='readwrite')
-      open(fid_tot,file  = fname_tot, status='unknown',action='readwrite')
+      !open(fid_tot,file  = fname_tot, status='unknown',action='readwrite')
 
       do i = 1, nb_it
 
@@ -135,8 +134,8 @@ contains
 
         ! Optical thick case
 
-        Smin          = 1d1
-        Smax          = 1d4
+        Smin          = S_max
+        Smax          = S_min
 
         optical_depth = 1
 
@@ -149,8 +148,8 @@ contains
 
         ! Optical thin case
 
-        Smin          = 1d1
-        Smax          = 1d4
+        Smin          = S_max
+        Smax          = S_min
 
         optical_depth = 0
 
@@ -181,7 +180,7 @@ contains
 
 
 
-      do j = 1, nb_it
+       do j = 1, nb_it
 
         temp_real(j)  = log10( temp_real(j) * state_0%T_0 )
         sigma_real(j) = log10( sigma_real(j) * state_0%S_0 )
@@ -193,19 +192,21 @@ contains
       !close(fid_thin)
       close(fid_tot)
 
+     ! call save_data(fid_tot, fname_tot, n, data_1, data_2)
+
       temperature(k) = temp_c_thick
       s(k)           = sigma_c_thick
 
 
-      !temp_thick(k)  = log10( temp_c_thick * state_0%T_0 )
-      !sigma_thick(k) = log10( sigma_c_thick * state_0%S_0 )
-      !temp_thin(k)   = log10( temp_c_thin * state_0%T_0 )
-      !sigma_thin(k)  = log10( sigma_c_thin * state_0%S_0 ) !PROBLEMATIC
+      temp_thick(k)  = log10( temp_c_thick * state_0%T_0 )
+      sigma_thick(k) = log10( sigma_c_thick * state_0%S_0 )
+      temp_thin(k)   = log10( temp_c_thin * state_0%T_0 )
+      sigma_thin(k)  = log10( sigma_c_thin * state_0%S_0 ) 
 
 
     enddo
 
-    !call write_critical_points(r_state%r, rs, sigma_thin, temp_thin, sigma_thick, temp_thick)
+    call write_critical_points(n_cell, x_state%x, sigma_thin, temp_thin, sigma_thick, temp_thick)
 
   end subroutine curve
 
@@ -256,7 +257,7 @@ contains
     integer                                               :: i
     i = max(1, index_fcp)
     
-    ! The change occurs when the difference of sigma changes sign
+    ! The change occurs when the difference of sigma changes its sign
     do while (sigma_real_thick(i) > sigma_real_thin(i) .and. i < nb_it)
       i = i + 1
     end do
@@ -313,32 +314,63 @@ contains
   end subroutine display_critical_points
 
 
-  subroutine write_critical_points(radius, rs, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick)
-    implicit none
+   subroutine write_critical_points(n,radius, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick)
 
-    real(kind = x_precision),dimension(n_cell),intent(in) :: radius
-    real(kind = x_precision),dimension(n_cell),intent(in) :: rs
-    real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thin
-    real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thin
-    real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thick
-    real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thick
-    integer                                               :: i
-    integer                                               :: fid_4 = 11
-    character(len = 64)                                   :: fname_4
-    !------------------------------------------------------------------------
-     fname_4 = 'critical_points/file.dat'
+      implicit none
+     
+      integer                                  ,intent(in):: n 
+      real(kind = x_precision),dimension(n)    ,intent(in):: radius
 
-     open(fid_4,file  = fname_4, status='unknown',action='write')
-     !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
+      real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thin
+      real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thin
+      real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thick
+      real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thick
+      integer                                             :: i
+      integer                                             :: fid_4 = 11
+      character(len = 64)                                 :: fname_4      
 
-        do i=1, n_cell
-           write(fid_4,'(E12.6,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sqrt(radius(i)/rs),&
-                      temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
-        end do
+      !------------------------------------------------------------------------
 
-     close(fid_4)
+       fname_4 = 'critical_points/file.dat'
 
-  end subroutine write_critical_points
+       open(fid_4,file  = fname_4, status='unknown',action='readwrite')
+       !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
+      
+          do i=1, n
+             write(fid_4,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sqrt(radius(i)),&
+                        temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
+          end do 
+       
+       close(fid_4)
+
+    end subroutine write_critical_points
+    
+
+subroutine save_data(fid, filename, n, data_1, data_2)
+
+      implicit none
+
+      integer                                  ,intent(in):: fid      
+      character(len =64)                       ,intent(in):: filename
+      integer                                  ,intent(in):: n 
+      real(kind = x_precision)                 ,intent(in):: data_1
+      real(kind = x_precision)                 ,intent(in):: data_2
+
+      integer                                             :: i
+  
+     !------------------------------------------------------------------------
+
+
+       open(fid,file  = filename, status='unknown',access='direct',action='readwrite')
+
+      
+          do i=1, n
+             write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') data_1, data_2
+          end do 
+       
+       close(fid)
+
+    end subroutine save_data
 
 
   !-------------------------------------------------------------------------
@@ -372,7 +404,7 @@ contains
         sol_2 = (coeff_c / (coeff_a * sol_1))
         sol = max(sol_1,sol_2)
         if (sol /= sol_1) then
-          write(*,*)'The solution was the other one !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+          write(*,*)'The solution was the other one !'
         end if
       end if
 
@@ -447,15 +479,17 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, optical_depth)
+  real(kind=x_precision) function dichotomy(S_min, S_max, eps, T, omega, optical_depth)
     implicit none
 
-    real(kind=x_precision),intent(inout) :: Smin,Smax
+    real(kind=x_precision),intent(inout) :: S_min,S_max
     real(kind=x_precision),intent(in)    :: eps
     real(kind=x_precision),intent(in)    :: T
     real(kind=x_precision),intent(in)    :: omega
     integer,intent(in)                   :: optical_depth
 
+    real(kind=x_precision)               :: Smin
+    real(kind=x_precision)               :: Smax
     real(kind=x_precision)               :: f_min
     real(kind=x_precision)               :: f_max
     real(kind=x_precision)               :: f_center
@@ -468,6 +502,10 @@ contains
     ! eps -> Precision
     ! T-> Fixed variable
     !-------------------------------------------------------------------------
+
+    Smin                 = S_min
+    Smax                 = S_max 
+
     S_center             = (Smin+Smax)/2.
     j = 0
     call variables(T, Smin, Omega, f_min, optical_depth)
