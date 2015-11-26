@@ -4,31 +4,65 @@
 import matplotlib.pyplot as plt
 from numpy import array, log
 import sys
+import os
 
-x = []
+import matplotlib.animation as animation
 
-y = []
+fig = plt.figure()
 
-infile = open(sys.argv[1])
+inpath = sys.argv[1]
 
-for line in infile:
-    data = line.replace('\n','').split()
-    print(data)
-    try : 
-        x.append(float(data[0]))
-        y.append(float(data[1]))
-    except ValueError:
-        pass
+if os.path.isfile(inpath):
+    print('Visiting {}'.format(inpath))
+    filenames = [inpath]
+else:
+    _filenames = os.listdir(inpath)
+    _filenames.sort()
+    filesnames = [inpath + '/' + fname for fname in _filesnames if '_tot.dat' in fname]
+    
+    print('Visiting all files of {}'.format(inpath))
 
-#x = array(x)
-#y = array(y)
+axline, = plt.plot(0, 0, 'o')
 
-figManager = plt.get_current_fig_manager()
-figManager.window.showMaximized()
-#plt.plot(log(x),log(y))
-plt.plot(x,y,"o")
+def draw_once(filename):
+    x = []
+    y = []
+    if not 'tot.dat' in filename:
+        return ([0], [0])
+    else:
+        print('Visiting {}'.format(filename))
+        outfile = filename.replace('.dat', '.png')
+        
+    for line in open(filename):
+        data = line.replace('\n', '').split()
+        try :
+            print (data)
+            xData = float(data[0])
+            yData = float(data[1])
+            x.append(xData)
+            y.append(yData)
+        except ValueError:
+            pass
 
-plt.ylabel('$\log T$')
-plt.xlabel('$\log \Sigma$')
-plt.grid()
-plt.show()
+    axline.set_xdata(x)
+    axline.set_ydata(y)
+
+    return axline,
+
+def init():
+    print('Initialisation')
+    plt.ylabel('$\log T$')
+    plt.xlabel('$\log \Sigma$')
+    plt.xlim(1.8, 4)
+    plt.ylim(6, 8)
+    plt.grid()
+
+if len(filenames) > 1:
+    ani = animation.FuncAnimation(fig, draw_once, filenames, init_func=init, interval=10)
+else:
+    init()
+    draw_once(filenames[0])
+    plt.show()
+# x, y = draw_once(filenames[2])
+# plt.plot(x, y, 'o')
+
