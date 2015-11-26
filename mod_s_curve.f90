@@ -121,7 +121,7 @@ contains
 
       !open(fid_thick,file  = fname_thick, status='unknown',action='readwrite')
       !open(fid_thin,file  = fname_thin, status='unknown',action='readwrite')
-      !open(fid_tot,file  = fname_tot, status='unknown',action='readwrite')
+      open(fid_tot,file  = fname_tot, status='unknown',action='readwrite')
 
       do i = 1, nb_it
 
