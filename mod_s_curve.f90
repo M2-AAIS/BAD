@@ -256,12 +256,6 @@ contains
     real(kind = x_precision)                 ,intent(out):: sigma_c_thin
     real(kind = x_precision)                 ,intent(out):: temp_c_thin
     integer                                              :: i = 0
-            ! write(*,*)index_fcp
-
-    ! do i = index_fcp, nb_it
-    !   write(*,*)sigma_real_thin(i), sigma_real_thick(i)
-    !   write(*,*)(dabs(sigma_real_thick(i) - sigma_real_thin(i+1)))
-    ! end do
 
     do i = index_fcp, nb_it - 1
 
