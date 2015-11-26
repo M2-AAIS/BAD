@@ -53,7 +53,7 @@ def init():
     print('Initialisation')
     plt.ylabel('$\log T$')
     plt.xlabel('$\log \Sigma$')
-    plt.xlim(1.8, 4)
+    plt.xlim(1.8, 3.2)
     plt.ylim(6, 8)
     plt.grid()
 

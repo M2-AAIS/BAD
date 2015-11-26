@@ -16,7 +16,7 @@ program black_hole_s_curve
   real(kind = x_precision),parameter         :: t_max = 3.49d0
   real(kind = x_precision),parameter         :: dt    = (t_max-t_min) / (nb_it-1)
   real(kind = x_precision),parameter         :: S_min = 1.0d1
-  real(kind = x_precision),parameter         :: S_max = 1.0d4
+  real(kind = x_precision),parameter         :: S_max = 2.5d3
 
   real(kind = x_precision),dimension(n_cell) :: temperature
   real(kind = x_precision),dimension(n_cell) :: s
