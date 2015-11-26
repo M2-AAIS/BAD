@@ -258,21 +258,21 @@ contains
     integer                                              :: i = 0
             ! write(*,*)index_fcp
 
-    do i = index_fcp, nb_it
-      ! write(*,*)sigma_real_0(i), sigma_real_1(i)
-     !  write(*,*)(dabs(sigma_real_1(i) - sigma_real_0(i+1)))
-    end do
+    ! do i = index_fcp, nb_it
+    !   write(*,*)sigma_real_0(i), sigma_real_1(i)
+    !   write(*,*)(dabs(sigma_real_1(i) - sigma_real_0(i+1)))
+    ! end do
 
-        do i = index_fcp, nb_it - 1
+    do i = index_fcp, nb_it - 1
 
-           if(dabs(sigma_real_1(i) - sigma_real_0(i+1)) .lt. eps2)then
-           index_scp = i
-           ! sigma_c_thin = (sigma_real_1(i) + sigma_real_0(i+1))/2._x_precision
-           sigma_c_thin =  sigma_real_0(i+1)
+       if(dabs(sigma_real_1(i) - sigma_real_0(i+1)) .lt. eps2)then
+          index_scp = i
+          ! sigma_c_thin = (sigma_real_1(i) + sigma_real_0(i+1))/2._x_precision
+          sigma_c_thin =  sigma_real_0(i+1)
 
-           temp_c_thin = temp_real_1(i)
-           end if
-        enddo
+          temp_c_thin = temp_real_1(i)
+       end if
+    enddo
 
     endsubroutine second_critical_point
 
