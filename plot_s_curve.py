@@ -14,8 +14,11 @@ infile = open(sys.argv[1])
 for line in infile:
     data = line.replace('\n','').split()
     print(data)
-    x.append(float(data[0]))
-    y.append(float(data[1]))
+    try : 
+        x.append(float(data[0]))
+        y.append(float(data[1]))
+    except ValueError:
+        pass
 
 #x = array(x)
 #y = array(y)
