@@ -52,8 +52,8 @@ contains
   subroutine curve(temperature, s)
     implicit none
 
-    real(kind = x_precision),dimension(n_cell),intent(out)  :: temperature
-    real(kind = x_precision),dimension(n_cell),intent(out)  :: s
+    real(kind = x_precision),dimension(n_cell),intent(out) :: temperature
+    real(kind = x_precision),dimension(n_cell),intent(out) :: s
 
     integer                                                :: i     = 0
     integer                                                :: j     = 0
@@ -205,7 +205,7 @@ contains
 
     enddo
 
-    !call write_critical_points(n_cell, r_state%r, rs, sigma_thin, temp_thin, sigma_thick, temp_thick)
+    !call write_critical_points(r_state%r, rs, sigma_thin, temp_thin, sigma_thick, temp_thick)
 
   end subroutine curve
 
@@ -216,14 +216,14 @@ contains
   subroutine first_critical_point(sigma_real_thick, temp_real_thick, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
     implicit none
 
-    integer                                  ,intent(in) :: nb_it
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
-    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
+    integer                                  ,intent(in)  :: nb_it
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thick
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: temp_real_thick
 
-    integer                                  ,intent(out):: index_fcp
-    real(kind = x_precision)                 ,intent(out):: sigma_c_thick
-    real(kind = x_precision)                 ,intent(out):: temp_c_thick
-    integer                                              :: i
+    integer                                  ,intent(out) :: index_fcp
+    real(kind = x_precision)                 ,intent(out) :: sigma_c_thick
+    real(kind = x_precision)                 ,intent(out) :: temp_c_thick
+    integer                                               :: i
 
     i = 1
     do while (sigma_real_thick(i) < sigma_real_thick(i+1) .and. i < nb_it - 1)
@@ -243,17 +243,17 @@ contains
          index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
     implicit none
 
-    integer                                  ,intent(in) :: nb_it
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
-    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thin
+    integer                                  ,intent(in)  :: nb_it
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thick
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: temp_real_thick
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thin
 
-    integer                                  ,intent(in) :: index_fcp
-    integer                                  ,intent(out):: index_scp
+    integer                                  ,intent(in)  :: index_fcp
+    integer                                  ,intent(out) :: index_scp
 
-    real(kind = x_precision)                 ,intent(out):: sigma_c_thin
-    real(kind = x_precision)                 ,intent(out):: temp_c_thin
-    integer                                              :: i
+    real(kind = x_precision)                 ,intent(out) :: sigma_c_thin
+    real(kind = x_precision)                 ,intent(out) :: temp_c_thin
+    integer                                               :: i
     i = max(1, index_fcp)
     
     ! The change occurs when the difference of sigma changes sign
@@ -271,11 +271,11 @@ contains
   subroutine build_s_curve(sigma_real_thick, sigma_real_thin, temp_real_thick, nb_it, index_scp, sigma_real, temp_real)
     implicit none
 
-    integer                                  ,intent(in) :: nb_it
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thick
-    real(kind = x_precision),dimension(nb_it),intent(in) :: sigma_real_thin
-    real(kind = x_precision),dimension(nb_it),intent(in) :: temp_real_thick
-    integer                                  ,intent(in) :: index_scp
+    integer                                  ,intent(in)  :: nb_it
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thick
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thin
+    real(kind = x_precision),dimension(nb_it),intent(in)  :: temp_real_thick
+    integer                                  ,intent(in)  :: index_scp
     !real(kind = x_precision),dimension(:),allocatable,intent(out) :: sigma_real
     !real(kind = x_precision),dimension(:),allocatable,intent(out) :: temp_real
     real(kind = x_precision),dimension(nb_it),intent(out) :: sigma_real
@@ -297,11 +297,11 @@ contains
   subroutine display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick,k)
     implicit none
 
-    real(kind = x_precision)                 ,intent(in):: sigma_c_thin
-    real(kind = x_precision)                 ,intent(in):: temp_c_thin
-    real(kind = x_precision)                 ,intent(in):: sigma_c_thick
-    real(kind = x_precision)                 ,intent(in):: temp_c_thick
-    integer                                  ,intent(in):: k
+    real(kind = x_precision),intent(in) :: sigma_c_thin
+    real(kind = x_precision),intent(in) :: temp_c_thin
+    real(kind = x_precision),intent(in) :: sigma_c_thick
+    real(kind = x_precision),intent(in) :: temp_c_thick
+    integer                 ,intent(in) :: k
     !------------------------------------------------------------------------
     write(*,*)'**** Critical Point',k,'********'
     write(*,*)'****************************************'
@@ -313,26 +313,25 @@ contains
   end subroutine display_critical_points
 
 
-  subroutine write_critical_points(n,radius, rs, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick)
+  subroutine write_critical_points(radius, rs, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick)
     implicit none
 
-    integer                                  ,intent(in):: n
-    real(kind = x_precision),dimension(n)    ,intent(in):: radius
-    real(kind = x_precision)                 ,intent(in):: rs
-    real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thin
-    real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thin
-    real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thick
-    real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thick
-    integer                                             :: i
-    integer                                             :: fid_4 = 11
-    character(len = 64)                                 :: fname_4
+    real(kind = x_precision),dimension(n_cell),intent(in) :: radius
+    real(kind = x_precision),dimension(n_cell),intent(in) :: rs
+    real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thin
+    real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thin
+    real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thick
+    real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thick
+    integer                                               :: i
+    integer                                               :: fid_4 = 11
+    character(len = 64)                                   :: fname_4
     !------------------------------------------------------------------------
      fname_4 = 'critical_points/file.dat'
 
      open(fid_4,file  = fname_4, status='unknown',action='write')
      !write(fid_4)'nb_cell,temp_c_thin,sigma_c_thin,temp_c_thick,sigma_thin'
 
-        do i=1, n
+        do i=1, n_cell
            write(fid_4,'(E12.6,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')sqrt(radius(i)/rs),&
                       temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
         end do
@@ -348,11 +347,11 @@ contains
   subroutine quadratic(coeff_a, coeff_b, coeff_c, sol)
     implicit none
 
-    real(kind=x_precision), intent(in)                     :: coeff_a,coeff_b,coeff_c
-    real(kind=x_precision), intent(out)                    :: sol
-    real(kind=x_precision)                                 :: sol_1 = 0.0d0
-    real(kind=x_precision)                                 :: sol_2 = 0.0d0
-    real(kind=x_precision)                                 :: delta = 0.0d0
+    real(kind=x_precision), intent(in)  :: coeff_a,coeff_b,coeff_c
+    real(kind=x_precision), intent(out) :: sol
+    real(kind=x_precision)              :: sol_1 = 0.0d0
+    real(kind=x_precision)              :: sol_2 = 0.0d0
+    real(kind=x_precision)              :: delta = 0.0d0
     !------------------------------------------------------------------------
 
     delta          = coeff_b**2 - 4_x_precision * coeff_a * coeff_c
@@ -372,6 +371,9 @@ contains
         end if
         sol_2 = (coeff_c / (coeff_a * sol_1))
         sol = max(sol_1,sol_2)
+        if (sol /= sol_1) then
+          write(*,*)'The solution was the other one !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        end if
       end if
 
     end if
@@ -385,22 +387,22 @@ contains
   subroutine variables(T, Sigma, Omega, f, optical_depth)
     implicit none
 
-    real(kind = x_precision),intent(in)          :: T,Sigma,Omega
-    integer, intent(in)                          :: optical_depth
-    real(kind = x_precision),intent(out)         :: f
-    real(kind = x_precision)                     :: coeff_a=0.,coeff_b=0.,coeff_c=0.
+    real(kind = x_precision),intent(in)  :: T,Sigma,Omega
+    integer, intent(in)                  :: optical_depth
+    real(kind = x_precision),intent(out) :: f
+    real(kind = x_precision)             :: coeff_a=0.,coeff_b=0.,coeff_c=0.
 
-    real(kind = x_precision)                     :: H
-    real(kind = x_precision)                     :: rho
-    real(kind = x_precision)                     :: cs
-    real(kind = x_precision)                     :: nu
-    real(kind = x_precision)                     :: Q_plus
-    real(kind = x_precision)                     :: K_ff
-    real(kind = x_precision)                     :: K_e
-    real(kind = x_precision)                     :: E_ff
-    real(kind = x_precision)                     :: tau_eff
-    real(kind = x_precision)                     :: Fz
-    real(kind = x_precision)                     :: Q_minus
+    real(kind = x_precision)             :: H
+    real(kind = x_precision)             :: rho
+    real(kind = x_precision)             :: cs
+    real(kind = x_precision)             :: nu
+    real(kind = x_precision)             :: Q_plus
+    real(kind = x_precision)             :: K_ff
+    real(kind = x_precision)             :: K_e
+    real(kind = x_precision)             :: E_ff
+    real(kind = x_precision)             :: tau_eff
+    real(kind = x_precision)             :: Fz
+    real(kind = x_precision)             :: Q_minus
     !------------------------------------------------------------------------
 
     coeff_a = (Omega * state_0%Omega_0)**2 * Sigma * state_0%S_0 / 2._x_precision
@@ -448,17 +450,17 @@ contains
   real(kind=x_precision) function dichotomy(Smin, Smax, eps, T, omega, optical_depth)
     implicit none
 
-    real(kind=x_precision),intent(inout)                     :: Smin,Smax
-    real(kind=x_precision),intent(in)                        :: eps
-    real(kind=x_precision),intent(in)                        :: T
-    real(kind=x_precision),intent(in)                        :: omega
-    integer,intent(in)                                       :: optical_depth
+    real(kind=x_precision),intent(inout) :: Smin,Smax
+    real(kind=x_precision),intent(in)    :: eps
+    real(kind=x_precision),intent(in)    :: T
+    real(kind=x_precision),intent(in)    :: omega
+    integer,intent(in)                   :: optical_depth
 
-    real(kind=x_precision)                                   :: f_min
-    real(kind=x_precision)                                   :: f_max
-    real(kind=x_precision)                                   :: f_center
-    real(kind=x_precision)                                   :: S_center = 0._x_precision
-    integer                                                  :: j = 0
+    real(kind=x_precision)               :: f_min
+    real(kind=x_precision)               :: f_max
+    real(kind=x_precision)               :: f_center
+    real(kind=x_precision)               :: S_center = 0._x_precision
+    integer                              :: j = 0
 
     !-------------------------------------------------------------------------
     ! N-> Number of iterations for the dichotomy
