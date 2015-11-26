@@ -59,6 +59,7 @@ def init():
 
 if len(filenames) > 1:
     ani = animation.FuncAnimation(fig, draw_once, filenames, init_func=init, interval=10)
+    plt.show()
 else:
     init()
     draw_once(filenames[0])
