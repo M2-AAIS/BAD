@@ -33,10 +33,6 @@ contains
     ! Second member of the dT/dt equation
     f = (3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
          s%Fz * x_state%x / s%S) / s%Cv
-         ! remove advection term
-         ! + params%RTM * (4._x_precision - 3._x_precision * s%beta) / s%beta * s%T / s%S * &
-         ! (dS_over_dt + s%v * dS_over_x_over_dx) &
-         ! - s%Cv * s%v / x_state%x * dT_over_dx) / s%Cv
     
   end function f
 
