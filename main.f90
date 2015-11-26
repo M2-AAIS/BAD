@@ -58,22 +58,25 @@ program black_hole_diffusion
   ! write(*,*) state_0%temps_0
   t_T = params%t_T *state_0%temps_0 
   t_V = params%t_nu*state_0%temps_0
-  write(*,*)'t_T, t_V:', t_T, t_V
   
   !  t_V = 1.3e4_x_precision / state_0%temps_0 
   !  t_T = 0.72_x_precision / state_0%temps_0
 
-  dt_V = t_V / 2._x_precision
-  dt_T = t_T / 2._x_precision
+  dt_V = t_V / 10._x_precision
+  dt_T = t_T / 10._x_precision
+
+  write(*,*)'dt_T, dt_V:', dt_T, dt_V
   
   ! call snapshot(s, iteration, t, 13)
-  
+
+  print *, 'nu', 'H', 'a1', 'S'
   ! Start iterating
-  do iteration = 1, 100!n_iterations
+  do iteration = 1, n_iterations
      ! Check that S is at a fixed point
      if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
         ! Check here that S < S_crit
         if (maxval(s%S - S_crit) > 0) then
+           print*, 'Exiting because of S'
            ! Switch to explicit scheme
         else
            ! Switch to implicit scheme
@@ -86,28 +89,31 @@ program black_hole_diffusion
            ! Increment time
            t = t + dt_V
 
-           print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0)
+           ! print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0)
            
            ! Recompute variables
            call compute_variables(s)
 
            ! Iterate while T hasn't converged
            j = 0
-           do while (maxval(abs(prev_T - s%T)/s%T) > delta_T_max) 
+           T_converged = .false.
+           do while (.not. T_converged)
               ! Check here that T < T_crit
               prev_T = s%T
 
               ! Integrate T
-              print *, '# T integration'
-              call do_timestep_T(s, dt_T)
-              print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), t
+              ! print *, '# T integration'
+              call do_timestep_T(s, dt_T, T_converged)
               ! Increment time
               t = t + dt_T
+              
               ! Recompute variables
               call compute_variables(s)
               if (mod(j, 50) == 0) then
                  call snapshot(s, iteration, t, 13)
               end if
+
+              ! print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), t
               j = j+1
 
               ! FIXME : increment time
@@ -115,6 +121,7 @@ program black_hole_diffusion
            ! Output things here
         end if
      else
+        print*, 'Mdot kick'
         ! give a Mdot kick
      end if
      

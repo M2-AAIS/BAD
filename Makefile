@@ -1,6 +1,6 @@
 GC=gfortran
-GFLAGS= -Wall -Wextra -pedantic -std=f2008 -g -g3 -O0 -fno-second-underscore -Wno-compare-reals -fcheck=all -fimplicit-none -ffpe-trap=zero,overflow -fbacktrace -gdwarf-2 -fall-intrinsics -Wno-unused-function -fcheck=bounds
-CFLAGS=-llapack -g
+GFLAGS= -Wall -Wextra -pedantic -std=f2008 -g -g3 -O0 -fno-second-underscore -Wno-compare-reals -fcheck=all -fimplicit-none -ffpe-trap=zero,overflow -fbacktrace -gdwarf-2 -fall-intrinsics -Wno-unused-function -fcheck=bounds -O0
+CFLAGS=-llapack -g -O0
 OUT=simul
 OUTS=s_curve
 
@@ -37,7 +37,7 @@ mod_output.o: mod_output.f90
 
 mod_s_curve.o: mod_s_curve.f90
 	$(GC) $(GFLAGS) -c $^
-	
+
 mod_critical.o: mod_critical.f90
 	$(GC) $(GFLAGS) -c $^
 

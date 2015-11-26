@@ -162,22 +162,23 @@ contains
     states%S = S_tmp
   end subroutine do_timestep_S_exp
   
-  subroutine do_timestep_T(s, dt) 
+  subroutine do_timestep_T(s, dt, converge) 
   !process the temporal evolution of T
     implicit none
     
     type (state), intent(inout)                 :: s
+    logical, intent(out)                        :: converge
 
     type (state)                                :: s_deriv
     real(kind = x_precision), intent(in)        :: dt
 
-    real(kind = x_precision), dimension(n_cell) :: dtemp
+    real(kind = x_precision), dimension(n_cell) :: dtemp, rhs
     real(kind = x_precision), dimension(n_cell) :: f0, f1
+    real(kind = x_precision) :: maxi
 
-    !call timestep(s, dt) !FIXME call of function to process the viscosity timestep
-    dtemp = 1e-3_x_precision
+    dtemp     = s%T * 1.e-3_x_precision
     s_deriv   = s
-    s_deriv%T = s%T * (1._x_precision + dtemp)
+    s_deriv%T = s%T + dtemp
     
     call compute_variables(s_deriv)
 
@@ -185,8 +186,19 @@ contains
     
     f0 = f(s, dt)
     f1 = (f(s_deriv, dt) - f(s, dt)) / dtemp
+
+    rhs = dt*f0 * (1._x_precision + dt*f1)
     
-    s%T = s%T + dt * f0 ! * (1._x_precision + dt * f1)
+    s%T = s%T + rhs
+
+    maxi = maxval(abs(rhs / s%T))
+    if (maxi < 1e-2) then
+       ! print *,'Converged — RHS=',  maxi
+       converge = .true.
+    else
+       ! print *, 'Not converged — RHS=', maxi
+       converge = .false.
+    end if
 
     ! Copy the result
   end subroutine do_timestep_T
