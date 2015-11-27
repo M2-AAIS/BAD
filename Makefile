@@ -48,3 +48,5 @@ run: all
 	./$(OUT)
 
 rerun: clean all run
+
+rebuild: clean all
