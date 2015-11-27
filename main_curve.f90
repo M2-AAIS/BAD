@@ -8,7 +8,7 @@ program black_hole_s_curve
 
   implicit none
 
-  integer                                    :: i
+ ! integer                                    :: i
 
   integer                 ,parameter         :: nb_it = 1000
   real(kind = x_precision),parameter         :: eps   = 1.0d-4
@@ -25,13 +25,12 @@ program black_hole_s_curve
   call get_parameters()
 
   call curve( nb_it, eps, t_min, t_max, dt, s_min, s_max, temperature, s)
-  do i = 1, n_cell
 
+  !do i = 1, n_cell
      write(*,*)'**********************************'
-     write(*,*)'T = ',temperature(i)
-     write(*,*)'S = ',s(i)
+   !  write(*,*)'T = ',temperature(i)
+   !  write(*,*)'S = ',s(i)
      write(*,*)'**********************************'
-
-  enddo
+  !enddo
 
 end program black_hole_s_curve
