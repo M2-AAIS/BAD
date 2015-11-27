@@ -65,6 +65,13 @@ module mod_constants
     ! Usefull quantities to get the dimensionless ones
   end type state_zero
 
+  type state_ci
+     real(kind = x_precision), dimension(n_cell) :: T_ci, Sig_ci
+    ! T_ci      : initial condition for Temperature
+    ! Sig_ci    : initial condition for Sigma 
+  end type state_ci
+
+
 contains
 
 end module mod_constants
