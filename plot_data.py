@@ -33,7 +33,7 @@ class Data:
             while i < len(lines):
                 niter = int(lines[i].split('#')[1])
                 time = float(lines[i+1].split('#')[1])
-                headers = lines[i+2].split('#')[1].split()
+                headers = lines[i+2].split()
                 data = []
                 i += 3
 

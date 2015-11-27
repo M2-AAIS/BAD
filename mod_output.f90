@@ -27,7 +27,7 @@ contains
 
     write(unit, fmt=*) '# ', iteration
     write(unit, fmt=*) '# ', time
-    write(unit, fmt='(2a, 15(a16))') 'r', 'Omega*', 'nu', 'v', 'T', 'P_rad',&
+    write(unit, fmt='(15(a16))') 'r', 'Omega*', 'nu', 'v', 'T', 'P_rad',&
          'P_gas', 'beta', 'cs', 'H', 'rho', 'S', 'Fz', 'M_dot', 'Cv'
 
     state_dim = s
