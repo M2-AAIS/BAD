@@ -40,9 +40,9 @@ program black_hole_diffusion
      if (ios /= 0) then
         stop "Error while opening output file."
      end if
-     write(15,*)'#x, T, S'
+     write(15,*)'#x T* S* T Sigma '
      do i= 1, n_cell
-        write(15,*)x_state%x(i), s%T(i), s%S(i)
+        write(15,*)x_state%x(i), s%T(i), s%S(i), CI%T_ci, CI%Sig_ci
      enddo
      close(15)
 
