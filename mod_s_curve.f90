@@ -107,6 +107,7 @@ contains
  !____________________________________________________________________________________
 
     do k = 1, n_cell
+       file_length = 0
 
        r     = r_state%r(k)
        omega = x_state%Omega(k)
@@ -159,26 +160,26 @@ contains
 
  ! Saving S and T for the S curve in a file
       do j = 1, nb_it
-        file_length = file_length + 1
- !        temp_real(j)  = log10( temp_real(j) * state_0%T_0 )
- !        sigma_real(j) = log10( sigma_real(j) * state_0%S_0 )
+        temp_real(j)  =  temp_real(j) * state_0%T_0 
+        sigma_real(j) =  sigma_real(j) * state_0%S_0 
         call save_data(fid_tot, fname_tot, nb_it, file_length, sigma_real(j), temp_real(j))
+        file_length = file_length + 1
       enddo
 
       close(fid_tot)
 
  ! Critical T and S 
-      temperature(k) = temp_c_thick
-      s(k)           = sigma_c_thick
+      temperature(k) = temp_c_thick * state_0%T_0
+      s(k)           = sigma_c_thick * state_0%S_0
 
-      temp_thick(k)  = log10( temp_c_thick * state_0%T_0 )
-      sigma_thick(k) = log10( sigma_c_thick * state_0%S_0 )
-      temp_thin(k)   = log10( temp_c_thin * state_0%T_0 )
-      sigma_thin(k)  = log10( sigma_c_thin * state_0%S_0 )
+      temp_thick(k)  =  temp_c_thick * state_0%T_0 
+      sigma_thick(k) =  sigma_c_thick * state_0%S_0 
+      temp_thin(k)   =  temp_c_thin * state_0%T_0 
+      sigma_thin(k)  =  sigma_c_thin * state_0%S_0 
 
     enddo
 
-    call write_critical_points(n_cell, x_state%x, sigma_thin, temp_thin, sigma_thick, temp_thick)
+    call write_critical_points(n_cell, r_state%r, sigma_thin, temp_thin, sigma_thick, temp_thick)
 
   end subroutine curve
 
@@ -310,6 +311,9 @@ contains
      fname_4 = 'critical_points/file.dat'
 
      open(fid_4,file  = fname_4, status='unknown',action='readwrite')
+     write(fid_4,'(1p,A6,10x,1p,A9,8x,1p,A9,8x,1p,A10,6x,1p,A11)')'Radius',&
+                   'Temp_thin','Sigma_thin','Temp_thick','Sigma_thick'
+
         do i=1, n
            write(fid_4,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')radius(i),&
                       temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
