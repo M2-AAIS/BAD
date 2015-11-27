@@ -112,13 +112,18 @@ contains
     fmdot = 1.e-2_x_precision 
     ! Process T_ci
     CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1._x_precision/5._x_precision) & 
-         * (params%Mdot * fmdot / 1.e16_x_precision)**(3._x_precision/10) * (params%M / M_sun)**(1._x_precision/4._x_precision) & 
-         * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) * f1**(3._x_precision/10._x_precision)
+         * (params%Mdot * fmdot / 1.e16_x_precision)**(3._x_precision/10._x_precision) * &
+         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) & 
+         * f1**(3._x_precision/10._x_precision)
     ! Process Sig_ci 
     CI%Sig_ci = 5.2_x_precision * params%alpha**(-4._x_precision/5._x_precision) * &
          (params%Mdot * fmdot / 1.e16_x_precision)**(7._x_precision/10._x_precision) * & 
          (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) & 
          * f1**(7._x_precision/10._x_precision)
+    ! Process H_over_r 
+    CI%H_over_r = 1.7e-2_x_precision * params%alpha**(-1._x_precision/10._x_precision) * (params%Mdot  &
+         * fmdot / 1.e16_x_precision)**(3._x_precision/20._x_precision) * (params%M / M_sun)**(-3._x_precision/8._x_precision) &
+         * (r_state%r / 1.e10_x_precision)**(1._x_precision/8._x_precision) * f1**(3._x_precision/5._x_precision)
     !-----------------------------------------------------------
     !-----------------------------------------------------------
 
