@@ -42,7 +42,7 @@ program black_hole_diffusion
      end if
      write(15,*)'#T, S'
      do i= 1, n_cell
-        write(15,*)s%T(i), s%S(i)
+        write(15,*)x_state%x(i), s%T(i), s%S(i)
      enddo
      close(15)
 
