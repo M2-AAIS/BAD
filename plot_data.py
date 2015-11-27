@@ -79,13 +79,21 @@ def plot(data):
     ax22.set_ydata(data['S'])
 
 if __name__ == '__main__':
-    # read the outputs
-    x = Data('output.dat')
+    print('Reading initial conditions')
+    ic = pd.read_csv('CI.dat')
+    
+    print('Reading output file')
+    data = Data('output.dat')
 
-    x0 = x.data[0]
+    x0 = data.data[0]
 
+    ax11.plot(ic['x'], ic['T'])
     ax11.plot(x0['x'], x0['T'])
+
+    ax12.plot(ic['x'], ic['S'])
     ax12.plot(x0['x'], x0['S'])
+
+    ax22.plot(ic['T'], ic['S'])
     ax22.plot(x0['T'], x0['S'])
 
     plt.show()
