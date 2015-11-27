@@ -62,9 +62,6 @@ class Data:
         return dumpNumber, time, pd.DataFrame(data=data, columns=headers)
 
         
-
-
-        
 def plot(data):
     ax11.set_xdata(data['x'])
     ax11.set_ydata(data['T'])
@@ -100,21 +97,24 @@ if __name__ == '__main__':
     ax11.set_ylabel('$T$')
     ax11.plot(ic['r'], ic['T'], label='Initial conditions')
     ax11.plot(x0['r'], x0['T'], label='After 0 iteration')
+    ax11.plot(x0['r'], crit_pts['Temp_thick'])
+    ax11.plot(x0['r'], crit_pts['Temp_thin'])
     ax11.plot(label='Critical points')
     ax11.set_yscale('log')
     ax11.legend()
-    
+
     ax12.set_xlabel('$r$')
     ax12.set_ylabel('$\Sigma$')
     ax12.plot(ic['r'], ic['Sigma'])
     ax12.plot(x0['r'], x0['Sigma'])
+    ax12.plot(x0['r'], crit_pts['Sigma_thick'])
+    ax12.plot(x0['r'], crit_pts['Sigma_thi'])
     ax12.set_yscale('log')
 
     ax22.set_xlabel('$\Sigma$')
     ax22.set_ylabel('$T$')
     
-    ax22.plot(ic['Sigma'], ic['T'])
-    ax22.plot(x0['Sigma'], x0['T'])
-    ax22.plot(s_curves[0]['Sigma'], s_curves[0]['T'])
-
+    # ax22.plot(ic['Sigma'], ic['T'])
+    # ax22.plot(x0['Sigma'], x0['T'])
+    ax22.plot(s_curves[0][0]
     plt.show()
