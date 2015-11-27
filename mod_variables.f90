@@ -8,7 +8,7 @@ module mod_variables
 
   private
 
-  public           :: compute_variables, dim_adim
+  public :: compute_variables, dim_adim
 
 contains
 
@@ -16,7 +16,7 @@ contains
   subroutine compute_variables(state_out)
     implicit none
 
-    real(kind = x_precision), dimension(n_cell) :: a, b, c
+    real(kind = x_precision), dimension(n_cell) :: coeff_a, coeff_b, coeff_c
     real(kind = x_precision), dimension(n_cell) :: Delta
     real(kind = x_precision), dimension(n_cell) :: kappa_ff, tau, epsilo
     real(kind=x_precision) :: truc
@@ -24,13 +24,13 @@ contains
     type(state), intent(inout)                  :: state_out
 
     ! Compute trinomial coefficients for H
-    a = (x_state%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
-    b = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * x_state%x / (3._x_precision * state_0%H_0)
-    c = - params%RTM * state_out%T * state_out%S * state_0%S_0 / state_0%H_0**2
-    Delta = b**2 - 4._x_precision * a * c
+    coeff_a = (x_state%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
+    coeff_b = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * x_state%x / (3._x_precision * state_0%H_0)
+    coeff_c = - params%RTM * state_out%T * state_out%S * state_0%S_0 / state_0%H_0**2
+    Delta = coeff_b**2 - 4._x_precision * coeff_a * coeff_c
 
     ! Compute variable depending on S, H
-    state_out%H    = - 0.5_x_precision * (b + sign(sqrt(Delta), b)) / a
+    state_out%H    = - 0.5_x_precision * (coeff_b + sign(sqrt(Delta), coeff_b)) / coeff_a
     state_out%cs   = x_state%Omega * state_out%H
     state_out%nu   = params%alpha * state_out%cs * state_out%H
     state_out%rho  = state_out%S / (state_out%H * x_state%x)
