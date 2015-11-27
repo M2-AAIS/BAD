@@ -108,12 +108,13 @@ contains
     f1 = 1._x_precision - (sqrt(3._x_precision) / x_state%x)
     
     ! Process T_ci
-    CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1/5) * (params%Mdot / 1.e16_x_precision)**(3/10) &
-         * (params%M / M_sun)**(1/4) * (r_state%r / 1.e10_x_precision)**(-3/4) * f1**(3/10)
-    
+    CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1._x_precision/5._x_precision) & 
+         * (params%Mdot / 1.e16_x_precision)**(3._x_precision/10) * (params%M / M_sun)**(1._x_precision/4._x_precision) & 
+         * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) * f1**(3._x_precision/10._x_precision)
     ! Process Sig_ci 
-    CI%Sig_ci = 5.2_x_precision * params%alpha**(-4/5) * (params%Mdot / 1.e16_x_precision)**(7/10) &
-         * (params%M / M_sun)**(1/4) * (r_state%r / 1.e10_x_precision)**(-3/4) * f1**(7/10)
+    CI%Sig_ci = 5.2_x_precision * params%alpha**(-4._x_precision/5._x_precision) * &
+         (params%Mdot / 1.e16_x_precision)**(7._x_precision/10._x_precision) * (params%M / M_sun)**(1._x_precision/4._x_precision) &
+         * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) * f1**(7._x_precision/10._x_precision)
     !-----------------------------------------------------------
     !-----------------------------------------------------------
 
