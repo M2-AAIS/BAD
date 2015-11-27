@@ -1,5 +1,5 @@
 GC=gfortran
-GFLAGS=-Wall -Wextra -pedantic -std=f2008 -g -O0 -fno-second-underscore -fcheck=all -fimplicit-none -ffpe-trap=zero,overflow -fbacktrace -gdwarf-2 -fall-intrinsics -Wno-unused-function -fcheck=bounds
+GFLAGS=-Wall -Wextra -pedantic -std=f2008 -g -O0 -fno-second-underscore -Wno-compare-reals -fcheck=all -fimplicit-none -ffpe-trap=zero,overflow -fbacktrace -gdwarf-2 -fall-intrinsics -Wno-unused-function -fcheck=bounds
 CFLAGS=-llapack -g -O0
 OUT=simul
 OUTS=s_curve
@@ -42,14 +42,14 @@ mod_critical.o: mod_critical.f90
 	$(GC) $(GFLAGS) -c $^
 
 clean:
-	\rm -rf *.o $(OUT) *.mod
+	\rm -rf *.o $(OUT) $(OUTS) *.mod
 
 run: all
 	./$(OUT)
 
+run_s_curve: s_curve
+	./$(OUTS)
+
 rerun: clean all run
 
-rebuild: clean all
-
-animate: 
-	./plot_s_curve.py s_curves
+rebuild: clean all s_curve
