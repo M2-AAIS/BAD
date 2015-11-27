@@ -8,7 +8,7 @@ program black_hole_diffusion
 
   implicit none
 
-  integer                                     :: iteration, ios, j
+  integer                                     :: iteration, ios, j, i
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, prev_T, S_crit
@@ -35,6 +35,9 @@ program black_hole_diffusion
   ! Copy the value of state_0 into state vector s
      s%T = CI%T_ci / state_0%T_0
      s%S = CI%Sig_ci / state_0%S_0
+     do i= 1, n_cell
+        write(*,*)"T = ", s%T(i), "S = ", s%S(i)
+     enddo
 
   call compute_variables(s)
 
@@ -117,7 +120,7 @@ program black_hole_diffusion
            ! Output things here
         end if
      else
-        print*, 'Mdot kick'
+       ! print*, 'Mdot kick'
         ! give a Mdot kick
      end if
      
