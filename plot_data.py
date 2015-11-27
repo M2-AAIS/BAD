@@ -86,9 +86,9 @@ if __name__ == '__main__':
     crit_pts = pd.read_csv('critical_points/file.dat', delim_whitespace=True)
 
     print('Reading S_curves')
-    s_curves = [ pd.read_csv('s_curves/Temperature_Sigma_00001_tot.dat'),
-                 pd.read_csv('s_curves/Temperature_Sigma_00010_tot.dat'),
-                 pd.read_csv('s_curves/Temperature_Sigma_00100_tot.dat')]
+    s_curves = [ pd.read_csv('s_curves/Temperature_Sigma_00001_tot.dat', delim_whitespace=True, dtype=float, header=0),
+                 pd.read_csv('s_curves/Temperature_Sigma_00010_tot.dat', delim_whitespace=True, dtype=float, header=0),
+                 pd.read_csv('s_curves/Temperature_Sigma_00100_tot.dat', delim_whitespace=True, dtype=float)]
     
 
     x0 = data.data[0]
@@ -97,7 +97,6 @@ if __name__ == '__main__':
     ax11.set_ylabel('$T$')
     ax11.plot(ic['r'], ic['T'], label='Initial conditions')
     ax11.plot(x0['r'], x0['T'], label='After 0 iteration')
-    ax11.plot(x0['r'], crit_pts['Temp_thick'])
     ax11.plot(x0['r'], crit_pts['Temp_thin'])
     ax11.plot(label='Critical points')
     ax11.set_yscale('log')
@@ -107,14 +106,14 @@ if __name__ == '__main__':
     ax12.set_ylabel('$\Sigma$')
     ax12.plot(ic['r'], ic['Sigma'])
     ax12.plot(x0['r'], x0['Sigma'])
-    ax12.plot(x0['r'], crit_pts['Sigma_thick'])
-    ax12.plot(x0['r'], crit_pts['Sigma_thi'])
+    ax12.plot(x0['r'], crit_pts['Sigma_thin'])
     ax12.set_yscale('log')
 
-    ax22.set_xlabel('$\Sigma$')
-    ax22.set_ylabel('$T$')
+    ax22.set_xlabel('$\log\Sigma$')
+    ax22.set_ylabel('$\log T$')
     
     # ax22.plot(ic['Sigma'], ic['T'])
     # ax22.plot(x0['Sigma'], x0['T'])
-    ax22.plot(s_curves[0][0]
+    for s_curve in s_curves:
+        ax22.plot(s_curve['Surface_density'], s_curve['Temperature'])
     plt.show()
