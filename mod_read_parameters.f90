@@ -15,7 +15,7 @@ module mod_read_parameters
 
   private
 
-  public           :: get_parameters, params, x_state, r_state, state_0, f1
+  public           :: get_parameters, params, x_state, r_state, state_0, f1, CI
 
 contains
 
