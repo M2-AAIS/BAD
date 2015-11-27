@@ -9,13 +9,15 @@ module mod_read_parameters
   type(adim_state) :: x_state ! Contains the x and Omega tables
   type(dim_state)  :: r_state ! Contains the r and Omega_r tables
   type(state_zero) :: state_0
-  type(state_ci)   :: CI      ! Contains the initial parmaters for Temparature end Sigma
+
+  real(kind = x_precision)  :: fmdot   ! Fraction of Mdot
+  type(state_ci)            :: CI      ! Contains the initial parmaters for Temparature end Sigma
 
   real(kind = x_precision), dimension(n_cell) :: f1 
 
   private
 
-  public           :: get_parameters, params, x_state, r_state, state_0, f1, CI
+  public           :: get_parameters, params, x_state, r_state, state_0, f1, fmdot, CI
 
 contains
 
@@ -107,14 +109,16 @@ contains
     ! Process f1 to compute T_ci and Sig_ci
     f1 = 1._x_precision - (sqrt(3._x_precision) / x_state%x)
     
+    fmdot = 1.e-2_x_precision 
     ! Process T_ci
     CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1._x_precision/5._x_precision) & 
-         * (params%Mdot / 1.e16_x_precision)**(3._x_precision/10) * (params%M / M_sun)**(1._x_precision/4._x_precision) & 
+         * (params%Mdot * fmdot / 1.e16_x_precision)**(3._x_precision/10) * (params%M / M_sun)**(1._x_precision/4._x_precision) & 
          * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) * f1**(3._x_precision/10._x_precision)
     ! Process Sig_ci 
     CI%Sig_ci = 5.2_x_precision * params%alpha**(-4._x_precision/5._x_precision) * &
-         (params%Mdot / 1.e16_x_precision)**(7._x_precision/10._x_precision) * (params%M / M_sun)**(1._x_precision/4._x_precision) &
-         * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) * f1**(7._x_precision/10._x_precision)
+         (params%Mdot * fmdot / 1.e16_x_precision)**(7._x_precision/10._x_precision) * & 
+         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) & 
+         * f1**(7._x_precision/10._x_precision)
     !-----------------------------------------------------------
     !-----------------------------------------------------------
 
