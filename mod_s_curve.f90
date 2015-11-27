@@ -341,7 +341,7 @@ contains
   end subroutine write_critical_points
 
 
-  subroutine save_data(fid, filename, n, data_1, data_2)
+    subroutine save_data(fid, filename, n, data_1, data_2)
     implicit none
 
     integer                                  ,intent(in):: fid
@@ -351,21 +351,27 @@ contains
     real(kind = x_precision)                 ,intent(in):: data_2
 
     integer                                             :: i
+    integer                                             :: length = 0
 
     !------------------------------------------------------------------------
 
 
-    open(fid,file  = filename, status='unknown',access='direct',action='readwrite')
-
-
-    do i = 1, n
-      write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') data_1, data_2
+    open(fid,file  = filename, status='unknown',action='readwrite')
+     do
+        read(fid,*,end=n)
+        length= length + 1
     end do
+    close(fid)
 
+   do i = 1,length
+       read(fid,*)
+   end do
+
+    open(fid,file  = filename, status='unknown',action='readwrite')
+       write(fid,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)') data_1, data_2
     close(fid)
 
   end subroutine save_data
-
 
   !-------------------------------------------------------------------------
   !Subroutine for resolving a quadratic equation as long as the solutions are a set of real numbers
