@@ -153,12 +153,13 @@ contains
     states%S = S_tmp
   end subroutine do_timestep_S_exp
   
-  subroutine do_timestep_T(s, dt, converge) 
+  subroutine do_timestep_T(s, dt, converge, epst) 
   !process the temporal evolution of T
     implicit none
     
-    type (state), intent(inout)                 :: s
-    logical, intent(out)                        :: converge
+    type (state), intent(inout)       :: s
+    logical, intent(out)              :: converge
+    real(kind=x_precision),intent(in) :: epst
 
     type (state)                                :: s_deriv
     real(kind = x_precision), intent(in)        :: dt
@@ -183,7 +184,7 @@ contains
     s%T = s%T + rhs
 
     maxi = maxval(abs(rhs / s%T))
-    if (maxi < 1e-2) then
+    if (maxi < epst) then
        ! print *,'Converged — RHS=',  maxi
        converge = .true.
     else

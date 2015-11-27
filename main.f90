@@ -12,8 +12,9 @@ program black_hole_diffusion
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, prev_T, S_crit
-  real(kind = x_precision)                    :: t_V, t_T  
+  real(kind = x_precision)                    :: t_V, t_T
   real(kind = x_precision)                    :: dt_V, dt_T
+  real(kind=x_precision)                      :: epst=1.e-3
   logical                                     :: T_converged
 
   ! FIXME
@@ -109,7 +110,7 @@ program black_hole_diffusion
 
               ! Integrate T
               ! print *, '# T integration'
-              call do_timestep_T(s, dt_T, T_converged)
+              call do_timestep_T(s, dt_T, T_converged,epst)
               ! Increment time
               t = t + dt_T
               
@@ -117,12 +118,14 @@ program black_hole_diffusion
               call compute_variables(s)
               if (mod(j, 50) == 0) then
                  call snapshot(s, iteration, t, 13)
+                 print*,'snapshot', j 
               end if
 
               ! print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), t
               j = j+1
 
               ! FIXME : increment time
+              print*, j
            end do
            ! Output things here
         end if
