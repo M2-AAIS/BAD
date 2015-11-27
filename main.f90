@@ -8,7 +8,7 @@ program black_hole_diffusion
 
   implicit none
 
-  integer                                     :: iteration, n, ios, j
+  integer                                     :: iteration, ios, j
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, prev_T, S_crit
@@ -33,10 +33,9 @@ program black_hole_diffusion
   ! call s_curve(foo, bar)
 
   ! Copy the value of state_0 into state vector s
-  do n = 1, n_cell
-     s%T(n)       = 0.52_x_precision
-     s%S(n)       = 1200._x_precision
-  end do
+     s%T = CI%T_ci
+     s%S = CI%Sig_ci
+
   call compute_variables(s)
 
   ! Open unit 13 to write
