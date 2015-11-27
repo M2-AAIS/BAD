@@ -22,7 +22,7 @@ else:
     
     print('Visiting all files of {}'.format(inpath))
 
-axline, = plt.plot(0, 0, 'o')
+axline, = plt.plot(0, 0, 'o', label='')
 
 def draw_once(filename):
     x = []
@@ -36,7 +36,6 @@ def draw_once(filename):
     for line in open(filename):
         data = line.replace('\n', '').split()
         try :
-            print (data)
             xData = float(data[0])
             yData = float(data[1])
             x.append(xData)
@@ -44,9 +43,14 @@ def draw_once(filename):
         except ValueError:
             pass
 
+    # this is a hack to get the x
+    arr = filename.split('/')[-1].split('_')
+    number = int(arr[2])
+
     axline.set_xdata(x)
     axline.set_ydata(y)
-
+    axline.set_label('$(T, \Sigma)_{'+str(number)+'}$')
+    plt.legend()
     return axline,
 
 def init():
@@ -56,6 +60,7 @@ def init():
     plt.xlim(1.8, 3.2)
     plt.ylim(6, 8)
     plt.grid()
+    plt.legend()
 
 if len(filenames) > 1:
     ani = animation.FuncAnimation(fig, draw_once, filenames, init_func=init, interval=10)
