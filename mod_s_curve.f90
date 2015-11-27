@@ -398,7 +398,7 @@ contains
     real(kind = x_precision),intent(in)  :: T,Sigma,Omega
     integer, intent(in)                  :: optical_depth
     real(kind = x_precision),intent(out) :: f
-    real(kind = x_precision)             :: coeff_a=0.,coeff_b=0.,coeff_c=0.
+    real(kind = x_precision)             :: coeff_a,coeff_b,coeff_c,delta
 
     real(kind = x_precision)             :: H
     real(kind = x_precision)             :: rho
@@ -417,6 +417,9 @@ contains
     coeff_b = (-1._x_precision/3._x_precision) * cst_rad * (T * state_0%T_0)**4 / state_0%H_0
     coeff_c = - params%RTM * T * Sigma * state_0%S_0 / (2._x_precision * state_0%H_0**2)
 
+    !delta   = coeff_b**2 - 4._x_precision * coeff_a * coeff_c
+    !H       = -0.5_x_precision * (coeff_b + sign(sqrt(delta),coeff_b)) / coeff_a
+    !H       = -0.5_x_precision * (coeff_b + sign(sqrt(coeff_b**2 - 4._x_precision * coeff_a * coeff_c),coeff_b)) / coeff_a
     call quadratic(coeff_a , coeff_b , coeff_c , H)
 
     rho     = Sigma / H
