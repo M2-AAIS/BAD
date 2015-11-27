@@ -50,3 +50,6 @@ run: all
 rerun: clean all run
 
 rebuild: clean all
+
+animate: 
+	./plot_s_curve.py s_curves
