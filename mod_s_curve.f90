@@ -311,8 +311,8 @@ contains
      fname_4 = 'critical_points/file.dat'
 
      open(fid_4,file  = fname_4, status='unknown',action='readwrite')
-     write(fid_4,'(1p,A6,10x,1p,A9,8x,1p,A9,8x,1p,A10,6x,1p,A11)')'Radius',&
-                   'Temp_thin','Sigma_thin','Temp_thick','Sigma_thick'
+     write(fid_4,'(1p,A6,10x,1p,A,8x,1p,A9,8x,1p,A10,6x,1p,A11)')'Radius',&
+                   'Temp_thick','Sigma_thick','Temp_thin','Sigma_thin'
 
         do i=1, n
            write(fid_4,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')radius(i),&
@@ -338,6 +338,7 @@ contains
 
     if( length .eq. 0 ) then
        open(fid,file  = filename, status='unknown', position='append', action='readwrite')
+       write(fid,'(1p,A15,2x,1p,A11)') 'Surface_density', 'Temperature'
     end if
     
     write(fid,'(1p,E12.6,4x,1p,E12.6)') data_1, data_2
