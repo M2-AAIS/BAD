@@ -33,8 +33,8 @@ program black_hole_diffusion
   ! call s_curve(foo, bar)
 
   ! Copy the value of state_0 into state vector s
-     s%T = CI%T_ci
-     s%S = CI%Sig_ci
+     s%T = CI%T_ci / state_0%T_0
+     s%S = CI%Sig_ci / state_0%S_0
 
   call compute_variables(s)
 
