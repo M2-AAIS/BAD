@@ -6,3 +6,6 @@
 
 # Data files
 *.dat
+
+# Output video files
+*.mp4
