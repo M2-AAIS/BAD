@@ -70,7 +70,7 @@ contains
   end subroutine compute_variables
 
   ! Transform dimensions of variables
-  subroutine dim_adim(mode,state_in)
+  subroutine dim_adim(mode, state_in)
     implicit none
 
     integer,     intent(in)    :: mode     ! Select 0 or 1 to adimension or dimension your state

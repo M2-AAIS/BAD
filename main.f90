@@ -38,7 +38,6 @@ program black_hole_diffusion
      s%S = CI%Sig_ci / state_0%S_0 * x_state%x
      ! H_over_r become H*
      CI%H_over_r = CI%H_over_r * r_state%r
-     
      open(15, file="CI.dat", status="replace", iostat=ios)
      if (ios /= 0) then
         stop "Error while opening output file."

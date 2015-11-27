@@ -85,6 +85,9 @@ if __name__ == '__main__':
     print('Reading output file')
     data = Data('output.dat')
 
+    print('Reading S curve')
+    s_curve = pd.read_csv('critical_points/file.dat', delim_whitespace=True)
+
     x0 = data.data[1]
 
     ax11.set_xlabel('x')
@@ -102,8 +105,10 @@ if __name__ == '__main__':
 
     ax22.set_xlabel('$S^\star$')
     ax22.set_ylabel('$T^\star$')
-    ax22.plot(ic['S*'], ic['T*'])
+    
+    ax22.plot(ic['Sigma'], ic['T'])
     ax22.plot(x0['S'], x0['T'])
+    ax22.plot(s_curve['sigma0'], s_curve['T0'], '--')
     ax22.set_yscale('log')
     ax22.set_xscale('log')
 
