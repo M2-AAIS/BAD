@@ -311,11 +311,11 @@ contains
      fname_4 = 'critical_points/file.dat'
 
      open(fid_4,file  = fname_4, status='unknown',action='readwrite')
-     write(fid_4,'(1p,A6,10x,1p,A,8x,1p,A9,8x,1p,A10,6x,1p,A11)')'Radius',&
+     write(fid_4,'(5(A16))') 'Radius',&
                    'Temp_thick','Sigma_thick','Temp_thin','Sigma_thin'
 
         do i=1, n
-           write(fid_4,'(1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6,4x,1p,E12.6)')radius(i),&
+           write(fid_4,'(5(e16.6e2))') radius(i),&
                       temp_c_thin(i),sigma_c_thin(i),temp_c_thick(i),sigma_c_thick(i)
         end do
      close(fid_4)
