@@ -80,20 +80,27 @@ def plot(data):
 
 if __name__ == '__main__':
     print('Reading initial conditions')
-    ic = pd.read_csv('CI.dat')
+    ic = pd.read_csv('CI.dat', delim_whitespace=True)
+    print(ic)
     
     print('Reading output file')
     data = Data('output.dat')
 
     x0 = data.data[0]
 
+    ax11.set_xlabel('x')
+    ax11.set_ylabel('T')
     ax11.plot(ic['x'], ic['T'])
     ax11.plot(x0['x'], x0['T'])
 
-    ax12.plot(ic['x'], ic['S'])
-    ax12.plot(x0['x'], x0['S'])
+    ax12.set_xlabel('x')
+    ax12.set_ylabel('S')
+    ax12.plot(ic['x'], ic['Sigma'])
+    ax12.plot(x0['x'], x0['S']/x0['x'])
 
-    ax22.plot(ic['T'], ic['S'])
-    ax22.plot(x0['T'], x0['S'])
+    ax22.set_xlabel('$\Sigma$')
+    ax22.set_ylabel('T')
+    ax22.plot(ic['Sigma'], ic['T'])
+    ax22.plot(x0['S']/x0['x'], x0['T'])
 
     plt.show()
