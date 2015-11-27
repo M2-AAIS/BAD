@@ -90,24 +90,24 @@ if __name__ == '__main__':
 
     x0 = data.data[1]
 
-    ax11.set_xlabel('x')
+    ax11.set_xlabel('$x$')
     ax11.set_ylabel('$T^\star$')
-    ax11.plot(ic['x'], ic['T*'], label='Initial conditions')
-    ax11.plot(x0['x'], x0['T'], label='Foobar')
+    ax11.plot(ic['r'], ic['T'], label='Initial conditions')
+    ax11.plot(x0['r'], x0['T'], label='Foobar')
     ax11.set_yscale('log')
     ax11.legend()
     
-    ax12.set_xlabel('x')
-    ax12.set_ylabel('$S^\star$')
-    ax12.plot(ic['x'], ic['S*'])
-    ax12.plot(x0['x'], x0['S'])
+    ax12.set_xlabel('$r$')
+    ax12.set_ylabel('$\Sigma$')
+    ax12.plot(ic['r'], ic['Sigma'])
+    ax12.plot(x0['r'], x0['Sigma'])
     ax12.set_yscale('log')
 
-    ax22.set_xlabel('$S^\star$')
-    ax22.set_ylabel('$T^\star$')
+    ax22.set_xlabel('$\Sigma$')
+    ax22.set_ylabel('$T$')
     
     ax22.plot(ic['Sigma'], ic['T'])
-    ax22.plot(x0['S'], x0['T'])
+    ax22.plot(x0['Sigma'], x0['T'])
     ax22.plot(s_curve['sigma0'], s_curve['T0'], '--')
     ax22.set_yscale('log')
     ax22.set_xscale('log')
