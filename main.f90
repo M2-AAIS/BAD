@@ -35,9 +35,16 @@ program black_hole_diffusion
   ! Copy the value of state_0 into state vector s
      s%T = CI%T_ci / state_0%T_0
      s%S = CI%Sig_ci / state_0%S_0 * x_state%x
+     
+     open(15, file="CI.dat", status="replace", iostat=ios)
+     if (ios /= 0) then
+        stop "Error while opening output file."
+     end if
+     write(15,*)'#T, S'
      do i= 1, n_cell
-        write(*,*)"T = ", s%T(i), "S = ", s%S(i)
+        write(15,*)s%T(i), s%S(i)
      enddo
+     close(15)
 
   call compute_variables(s)
 
