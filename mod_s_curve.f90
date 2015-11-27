@@ -358,7 +358,7 @@ contains
 
     open(fid,file  = filename, status='unknown',action='readwrite')
      do
-        read(fid,*,end=n)
+        read(fid,*)
         length= length + 1
     end do
     close(fid)
