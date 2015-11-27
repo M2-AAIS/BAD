@@ -11,10 +11,10 @@ program black_hole_diffusion
   integer                                     :: iteration, ios, j, i
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
-  real(kind = x_precision), dimension(n_cell) :: prev_S, prev_T, S_crit
+  real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
   real(kind = x_precision)                    :: t_V, t_T
   real(kind = x_precision)                    :: dt_V, dt_T
-  real(kind=x_precision)                      :: epst=1.e-3
+  real(kind=x_precision)                      :: epst=1.e-5_x_precision
   logical                                     :: T_converged
 
   ! FIXME
@@ -58,10 +58,9 @@ program black_hole_diffusion
      stop "Error while opening output file."
   end if
 
-  ! Initialize prev_S and prev_T
+  ! Initialize prev_S
   ! we multiply delta to prevent the code from thinking it converged
   prev_S = 1.2*s%S
-  prev_T = 1.2*s%T
   
   ! FIXME
   ! write(*,*) state_0%temps_0
@@ -107,9 +106,6 @@ program black_hole_diffusion
            j = 0
            T_converged = .false.
            do while (.not. T_converged)
-              ! Check here that T < T_crit
-              prev_T = s%T
-
               ! Integrate T
               ! print *, '# T integration'
               call do_timestep_T(s, dt_T, T_converged,epst)
