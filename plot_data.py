@@ -85,8 +85,14 @@ if __name__ == '__main__':
     print('Reading output file')
     data = Data('output.dat')
 
-    print('Reading S curve')
-    s_curve = pd.read_csv('critical_points/file.dat', delim_whitespace=True)
+    print('Reading critical points')
+    crit_pts = pd.read_csv('critical_points/file.dat', delim_whitespace=True)
+
+    print('Reading S_curves')
+    s_curves = [ pd.read_csv('s_curves/Temperature_Sigma_00001_tot.dat'),
+                 pd.read_csv('s_curves/Temperature_Sigma_00010_tot.dat'),
+                 pd.read_csv('s_curves/Temperature_Sigma_00100_tot.dat')]
+    
 
     x0 = data.data[0]
 
@@ -94,7 +100,7 @@ if __name__ == '__main__':
     ax11.set_ylabel('$T$')
     ax11.plot(ic['r'], ic['T'], label='Initial conditions')
     ax11.plot(x0['r'], x0['T'], label='After 0 iteration')
-    ax11.plot(label='s_curve')
+    ax11.plot(label='Critical points')
     ax11.set_yscale('log')
     ax11.legend()
     
@@ -109,9 +115,6 @@ if __name__ == '__main__':
     
     ax22.plot(ic['Sigma'], ic['T'])
     ax22.plot(x0['Sigma'], x0['T'])
-    ax22.plot(s_curve['sigma0'], s_curve['T0'], '--')
-    
-    ax22.set_yscale('log')
-    ax22.set_xscale('log')
+    ax22.plot(s_curves[0]['Sigma'], s_curves[0]['T'])
 
     plt.show()
