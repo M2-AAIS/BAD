@@ -5,6 +5,8 @@ import pandas as pd
 import matplotlib.animation as animation
 import numpy as np
 
+from itertools import tee
+
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
 
 class Data:
@@ -71,6 +73,23 @@ lines = {'r-T': 0,
          'r-Sigma': 0,
          'Sigma-T': []}
 
+class colorLooper:
+    def __init__(self, colors= ['red', 'green', 'blue', 'yellow']):
+        self.colors = colors
+        self.i = 0
+
+    def __next__(self):
+        self.i += 1
+        return self.colors[self.i - 1]
+    
+    def __iter__(self):
+        self.i = 0
+        while self.i < len(self.colors):
+            yield self.__next__()
+
+    def reset(self):
+        self.i = 0
+        
 def init(ic, crit_pts, s_curves, initial_data):
     ''' Plot the initial conditions, the critical points and the s_curves'''
     ax11.set_xlabel('$r\ (cm)$')
@@ -93,14 +112,18 @@ def init(ic, crit_pts, s_curves, initial_data):
     
     ax12.grid()
     ax12.set_yscale('log')
-    
+
+    colorsIter = colorLooper()
     for ind, s_curve in s_curves:
         ax22.plot(s_curve['Surface_density'], s_curve['Temperature'],
-                  label='$x_{'+str(ind)+'}$')
+                  label='$x_{'+str(ind)+'}$',
+                  c=colorsIter.__next__())
 
     # add the initial data on the s_curve plot
-    lines['Sigma-T'] = [ (ind, ax22.plot(np.log10(initial_data['S'][ind]),
-                                     np.log10(initial_data['T'][ind]), 'o')[0])
+    colorsIter.reset()
+    lines['Sigma-T'] = [ (ind, ax22.plot(initial_data['S'][ind],
+                                         initial_data['T'][ind], 'o',
+                                         c=colorsIter.__next__())[0])
                      for ind, foo in s_curves]
                              
 
@@ -123,8 +146,11 @@ def plotData(args):
     lines['r-Sigma'].set_ydata(data['Sigma'])
 
     for ind, line in lines['Sigma-T']:
-        line.set_xdata(np.log10(data['S'][ind]))
-        line.set_ydata(np.log10(data['T'][ind]))
+        x = data['S'][ind]
+        y = data['T'][ind]
+        print (x,y)
+        line.set_xdata(x)
+        line.set_ydata(y)
 
     ax11.legend()
     
