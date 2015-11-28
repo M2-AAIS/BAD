@@ -140,6 +140,7 @@ def plotData(args):
     '''
 
     index, data = args
+    print('Plotting {}'.format(index))
     lines['r-T'].set_ydata(data['T'])
     lines['r-T'].set_label('iteration {}'.format(index))
 
@@ -148,7 +149,6 @@ def plotData(args):
     for ind, line in lines['Sigma-T']:
         x = data['S'][ind]
         y = data['T'][ind]
-        print (x,y)
         line.set_xdata(x)
         line.set_ydata(y)
 
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     crit_pts = pd.read_csv('critical_points/file.dat', delim_whitespace=True)
 
     print('Reading S_curves')
-    s_curves_indexes = [1, 10, 100]
+    s_curves_indexes = [1, 10, 100, 250]
     s_curves = [ (ind, pd.read_csv('s_curves/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
                                    delim_whitespace=True, dtype=float, header=0))
                  for ind in s_curves_indexes]
@@ -175,7 +175,9 @@ if __name__ == '__main__':
     initFun = lambda: init(ic, crit_pts, s_curves, simulData.data[0])
 
     if len(simulData.data) > 1:
+        print('Go take a coffee, still {} frames to go.'.format(len(simulData.data)))
         ani = animation.FuncAnimation(fig, plotData, simulData, init_func=initFun, interval=10)
+        ani.save('evolution.mp4', writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
     else:
         initFun()
         plotData((0, simulData.data[0]))
