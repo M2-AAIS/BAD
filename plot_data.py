@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib.animation as animation
 import numpy as np
+from itertools import tee
 
 parser = argparse.ArgumentParser(description='Plot data from output of the black hole simulation.')
 parser.add_argument('--no-video', action='store_true',
@@ -22,9 +23,6 @@ parser.add_argument('--s-curves', metavar='n', nargs='+',
 parser.add_argument('--s-curves-dir', metavar='dir', nargs=1,
                     help='S curves directory (default: %(default)s).', default='s_curves')
 args = parser.parse_args()
-print(args)
-
-from itertools import tee
 
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
 
