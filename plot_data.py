@@ -57,9 +57,12 @@ class Data:
         headers = chunk[2]
 
         # read next line
-        data = ([ [ float(el) for el in line] for line in chunk[3]])
+        
+        return dumpNumber, time, pd.DataFrame(data=chunk[3], columns=headers, dtype=float)
 
-        return dumpNumber, time, pd.DataFrame(data=data, columns=headers)
+    def __iter__(self):
+        for key in self.data:
+            yield (key, self.data[key])
 
         
 def plot(data):
