@@ -4,7 +4,7 @@ program black_hole_s_curve
   use mod_s_curve
 
 
-! CAREFUL !!! The output arrays are for the NON dimensioned values of the surface density S (not Sigma) and the Temperature  whereas the produced data files used when ploting are dimensioned, in log10, for Sigma (not S) and the Temperature.
+! CAREFUL !!! The output arrays are for the NON dimensioned values of the surface density S (not Sigma) and the Temperature  whereas the produced data files used when ploting are dimensioned.
 
   implicit none
 
