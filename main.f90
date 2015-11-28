@@ -77,7 +77,7 @@ program black_hole_diffusion
   dt_V = t_V / 10._x_precision
   dt_T = t_T / 10._x_precision
 
-  write(*,*)'dt_T, dt_V:', dt_T, dt_V
+  write(*,*) 'dt_T, dt_V:', dt_T, dt_V
   
   ! call snapshot(s, iteration, t, 13)
 
