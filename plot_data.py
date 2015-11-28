@@ -10,37 +10,38 @@ from itertools import tee
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
 
 class Data:
+    ''' Class that opens filename and reads it. You can directly iterate over it.'''
     def __init__(self, filename):
         self.filename = filename
         self.data = {}
         self.times = {}
 
         i = 0
-        for chunk in self.chunkYielder():
-            dumpNumber, time, data = self.processChunk(chunk)
-            self.data[i] = data
-            self.times[i] = time
-            i += 1
+        with open(self.filename, 'r') as f:
+            for chunk in self.chunkYielder(f):
+                dumpNumber, time, data = self.processChunk(chunk)
+                self.data[i] = data
+                self.times[i] = time
+                i += 1
 
-    def chunkYielder(self):
-        lines = []
-        with open(self.filename, 'r') as f:            
-            # arf, not beautiful, should read it more carefully
-            lines = [l.replace('\n', '') for l in f]
+    def chunkYielder(self, f):
+        '''Read the file, split it arround '#' and yields it piece by piece. '''
+        # arf, not beautiful, should read it more carefully
+        lines = [l.replace('\n', '') for l in f]
 
-            i = 0
+        i = 0
+        
+        while i < len(lines):
+            niter = int(lines[i].split('#')[1])
+            time = float(lines[i+1].split('#')[1])
+            headers = lines[i+2].split()
+            data = []
+            i += 3
 
-            while i < len(lines):
-                niter = int(lines[i].split('#')[1])
-                time = float(lines[i+1].split('#')[1])
-                headers = lines[i+2].split()
-                data = []
-                i += 3
-
-                while i < len(lines) and '#' not in lines[i]:
-                    data.append([float(val) for val in lines[i].split()])
-                    i += 1
-                yield niter, time, headers, data
+            while i < len(lines) and '#' not in lines[i]:
+                data.append([float(val) for val in lines[i].split()])
+                i += 1
+            yield niter, time, headers, data
                     
                     
                 
