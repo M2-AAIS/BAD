@@ -46,9 +46,9 @@ program black_hole_diffusion
   end if
 
   ! Save initial conditions
-  write(15,*)'r x T* S* T Sigma H* '
+  write(15, *)'r x T* S* T Sigma H* '
   do i= 1, n_cell
-     write(15,*)r_state%r(i), x_state%x(i), s%T(i), s%S(i), CI%T_ci(i), CI%Sig_ci(i), CI%H_over_r(i)
+     write(15, *)r_state%r(i), x_state%x(i), s%T(i), s%S(i), CI%T_ci(i), CI%Sig_ci(i), CI%H_over_r(i)
   enddo
   
   close(15)
@@ -111,7 +111,7 @@ program black_hole_diffusion
            do while (.not. T_converged)
               ! Integrate T
               ! print *, '# T integration'
-              call do_timestep_T(s, dt_T, T_converged,epst)
+              call do_timestep_T(s, dt_T, T_converged, epst)
               ! Increment time
               t = t + dt_T
               
