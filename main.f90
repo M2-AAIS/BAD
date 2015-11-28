@@ -81,7 +81,6 @@ program black_hole_diffusion
   
   ! call snapshot(s, iteration, t, 13)
 
-  print *, 'nu', 'H', 'a1', 'S'
   ! Start iterating
   do iteration = 1, n_iterations
      ! Check that S is at a fixed point
