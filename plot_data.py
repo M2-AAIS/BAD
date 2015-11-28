@@ -73,7 +73,6 @@ lines = {'r-T': 0,
 
 def init(ic, crit_pts, s_curves, initial_data):
     ''' Plot the initial conditions, the critical points and the s_curves'''
-    print(initial_data)
     ax11.set_xlabel('$r\ (cm)$')
     ax11.set_ylabel('$T\ (K)$')
     ax11.plot(ic['r'], ic['T'], '--', label='Initial conditions')
