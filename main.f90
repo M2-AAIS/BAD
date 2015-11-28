@@ -14,7 +14,7 @@ program black_hole_diffusion
   real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
   real(kind = x_precision)                    :: t_V, t_T
   real(kind = x_precision)                    :: dt_V, dt_T
-  real(kind=x_precision)                      :: epst=1.e-5_x_precision
+  real(kind=x_precision)                      :: epst = 1.e-5_x_precision
   logical                                     :: T_converged
 
   ! FIXME
