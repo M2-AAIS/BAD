@@ -5,6 +5,25 @@ import pandas as pd
 import matplotlib.animation as animation
 import numpy as np
 
+parser = argparse.ArgumentParser(description='Plot data from output of the black hole simulation.')
+parser.add_argument('--no-video', action='store_true',
+                    help='do not save a video (faster)')
+parser.add_argument('--video-file', metavar='file', default='evolution.mp4',
+                    help='save the video as (default: %(default)s).')
+parser.add_argument('--plot', metavar='dump_id', nargs='*', type=int, default=[],
+                    help='dump_ids to plot.')
+parser.add_argument('--c-points', metavar='file',
+                    help='Critical point file (default: %(default)s).',
+                    default='critical_points/file.dat')
+parser.add_argument('--i-conditions', metavar='file',
+                    help='Initial conditions file (default: %(default)s).', default='CI.dat')
+parser.add_argument('--s-curves', metavar='n', nargs='+',
+                    help='S curves to plot (default: %(default)s).', default=[1, 10, 100, 200])
+parser.add_argument('--s-curves-dir', metavar='dir', nargs=1,
+                    help='S curves directory (default: %(default)s).', default='s_curves')
+args = parser.parse_args()
+print(args)
+
 from itertools import tee
 
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
@@ -170,23 +189,33 @@ if __name__ == '__main__':
     simulData = Data('output.dat')
 
     print('Reading critical points')
-    crit_pts = pd.read_csv('critical_points/file.dat', delim_whitespace=True)
+    crit_pts = pd.read_csv(args.c_points, delim_whitespace=True)
 
     print('Reading S_curves')
     s_curves_indexes = [1, 10, 100, 250]
-    s_curves = [ (ind, pd.read_csv('s_curves/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
+    s_curves = [ (ind, pd.read_csv(args.s_curves_dir + '/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
                                    delim_whitespace=True, dtype=float, header=0))
-                 for ind in s_curves_indexes]
+                 for ind in args.s_curves]
     
 
     initFun = lambda: init(ic, crit_pts, s_curves, simulData.data[0])
 
-    if len(simulData.data) > 1:
-        print('Go take a coffee, still {} frames to go.'.format(len(simulData.data)))
-        ani = animation.FuncAnimation(fig, plotData, simulData, init_func=initFun, interval=10)
-        ani.save('evolution.mp4', writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
-    else:
+    if len(simulData.data) == 1 or len(args.plot) == 1:
         initFun()
-        plotData((0, simulData.data[0]))
+        plotData((0, simulData.data[args.plot[0]]))
+        plt.show()
+    else:
+        if (len(args.plot) > 0):
+            nFrames = len(args.plot)
+            data = [(i, d) for i, d in simulData if i in args.plot]
+        else:
+            nFrames = len(simulData.data)
+            data = simulData
+            
+        print('Go take a coffee, still {} frames to go.'.format(nFrames))
 
-    plt.show()
+        ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun, interval=10)
+        if not args.no_video:
+            ani.save(args.video_file, writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
+
+        plt.show()
