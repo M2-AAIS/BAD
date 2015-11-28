@@ -104,7 +104,7 @@ def init(ic, crit_pts, s_curves, initial_data):
     ax11.legend()
 
     ax12.set_xlabel('$r\ (cm)$')
-    ax12.set_ylabel('$\Sigma\ (g.cm^{-2}$')
+    ax12.set_ylabel('$\Sigma\ (g.cm^{-2})$')
     ax12.plot(ic['r'], ic['Sigma'], '--')
     ax12.plot(ic['r'], crit_pts['Sigma_thin'], '--')
 
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     initFun = lambda: init(ic, crit_pts, s_curves, simulData.data[0])
 
     if len(simulData.data) > 1:
-        ani = animation.FuncAnimation(fig, plotData, simulData, init_func=initFun, interval=1)
+        ani = animation.FuncAnimation(fig, plotData, simulData, init_func=initFun, interval=10)
     else:
         initFun()
         plotData((0, simulData.data[0]))
