@@ -59,10 +59,9 @@ class Data:
         dumpNumber = chunk[0]
         time = chunk[1]
         headers = chunk[2]
-
-        # read next line
+        data = pd.DataFrame(data=chunk[3], columns=headers, dtype=float)
         
-        return dumpNumber, time, pd.DataFrame(data=chunk[3], columns=headers, dtype=float)
+        return dumpNumber, time, data
 
     def __iter__(self):
         for key in self.data:
