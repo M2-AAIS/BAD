@@ -92,16 +92,19 @@ class colorLooper:
         
 def init(ic, crit_pts, s_curves, initial_data):
     ''' Plot the initial conditions, the critical points and the s_curves'''
-    ax11.set_xlabel('$r\ (cm)$')
-    ax11.set_ylabel('$T\ (K)$')
     ax11.plot(ic['r'], ic['T'], '--', label='Initial conditions')
     ax11.plot(ic['r'], crit_pts['Temp_thin'], '--', label='critical')
+    
+    ax11.set_xlabel('$r\ (cm)$')
+    ax11.set_ylabel('$T\ (K)$')
 
     lines['r-T'] = ax11.plot(initial_data['r'], initial_data['T'], label='iteration 0')[0]
     
     ax11.set_yscale('log')
     ax11.grid()
     ax11.legend()
+
+    
 
     ax12.set_xlabel('$r\ (cm)$')
     ax12.set_ylabel('$\Sigma\ (g.cm^{-2})$')
@@ -112,6 +115,12 @@ def init(ic, crit_pts, s_curves, initial_data):
     
     ax12.grid()
     ax12.set_yscale('log')
+
+    
+    lines['r-Mdot'] = ax21.plot(initial_data['r'], initial_data['M_dot'])[0]
+    
+    ax21.set_xlabel('$r\ (cm)$')
+    ax21.set_ylabel('$\dot{M}$')
 
     colorsIter = colorLooper()
     for ind, s_curve in s_curves:
@@ -143,6 +152,8 @@ def plotData(args):
     print('Plotting {}'.format(index))
     lines['r-T'].set_ydata(data['T'])
     lines['r-T'].set_label('iteration {}'.format(index))
+
+    lines['r-Mdot'].set_ydata(data['M_dot'])
 
     lines['r-Sigma'].set_ydata(data['Sigma'])
 
