@@ -24,11 +24,7 @@ class Data:
 
     def chunkYielder(self):
         lines = []
-        with open(self.filename, 'r') as f:
-            hasNIter = False
-            hasTime = False
-            hasHeaders = False
-            
+        with open(self.filename, 'r') as f:            
             # arf, not beautiful, should read it more carefully
             lines = [l.replace('\n', '') for l in f]
 
