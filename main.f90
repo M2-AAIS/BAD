@@ -20,9 +20,9 @@ program black_hole_diffusion
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
-  delta_S_max = 1e-2
+  delta_S_max = 1e-4
   ! FIXME I love it
-  delta_T_max = 1e-2
+  delta_T_max = 1e-4
 
   ! Initial time = 0
   t = 0._x_precision
@@ -34,19 +34,24 @@ program black_hole_diffusion
   ! call s_curve(foo, bar)
 
   ! Copy the value of state_0 into state vector s
-     s%T = CI%T_ci / state_0%T_0
-     s%S = CI%Sig_ci / state_0%S_0 * x_state%x
-     ! H_over_r become H*
-     CI%H_over_r = CI%H_over_r * r_state%r
-     open(15, file="CI.dat", status="replace", iostat=ios)
-     if (ios /= 0) then
-        stop "Error while opening output file."
-     end if
-     write(15,*)'r x T* S* T Sigma H* '
-     do i= 1, n_cell
-        write(15,*)r_state%r(i), x_state%x(i), s%T(i), s%S(i), CI%T_ci(i), CI%Sig_ci(i), CI%H_over_r(i)
-     enddo
-     close(15)
+  s%T = CI%T_ci / state_0%T_0
+  s%S = CI%Sig_ci / state_0%S_0 * x_state%x
+  
+  ! H_over_r become H*
+  CI%H_over_r = CI%H_over_r * r_state%r
+  open(15, file="CI.dat", status="replace", iostat=ios)
+  
+  if (ios /= 0) then
+     stop "Error while opening output file."
+  end if
+
+  ! Save initial conditions
+  write(15,*)'r x T* S* T Sigma H* '
+  do i= 1, n_cell
+     write(15,*)r_state%r(i), x_state%x(i), s%T(i), s%S(i), CI%T_ci(i), CI%Sig_ci(i), CI%H_over_r(i)
+  enddo
+  
+  close(15)
 
   call compute_variables(s)
 
