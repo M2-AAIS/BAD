@@ -21,7 +21,7 @@ parser.add_argument('--c-points', metavar='file',
 parser.add_argument('--i-conditions', metavar='file',
                     help='Initial conditions file (default: %(default)s).', default='CI.dat')
 parser.add_argument('--s-curves', metavar='n', nargs='+', type=int,
-                    help='S curves to plot (default: %(default)s).', default=[1, 10, 100, 200])
+                    help='S curves to plot (default: %(default)s).', default=[1, 10, 20, 255])
 parser.add_argument('--s-curves-dir', metavar='dir', nargs=1,
                     help='S curves directory (default: %(default)s).', default='s_curves')
 parser.add_argument('--reread', action='store_true', default=False,
@@ -246,7 +246,7 @@ def plotData(args):
 
     # ax11.legend()
 
-    fig.suptitle('$t = {}s$'.format(time))
+    fig.suptitle('$t = {:.2f}s$, iteration {}'.format(time, index))
     
 if __name__ == '__main__':
     print('Reading initial conditions')
