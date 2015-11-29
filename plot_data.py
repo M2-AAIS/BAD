@@ -44,7 +44,10 @@ class Data:
         '''Get a chunk (niter, time, headers + data)'''
         f = self.file
 
-        # first line to read == last line read at previous call
+        if self.lastLineRead == '':
+            return -1, -1, [], [], True
+
+        # first line to read == last line read at previous call            
         niter = int(self.lastLineRead.split('#')[1])
         time = float(f.readline().split('#')[1])
         headers = f.readline().split()
@@ -82,7 +85,7 @@ class Data:
             self.data[niter] = data
             self.times[niter] = time
             if noRestriction or niter in self.restrictTo:                
-                yield (niter, data)
+                yield (niter, time, data)
 
             # if we have a restriction list and the current iteration
             # is after the last accepted item, stop reading the file
@@ -100,7 +103,7 @@ class Data:
             dataKeys.sort()
             while True:
                 for key in dataKeys:
-                    yield (key, self.data[key])
+                    yield (key, self.times[key], self.data[key])
 
                     
 
@@ -139,41 +142,64 @@ class colorLooper:
         
 def init(ic, crit_pts, s_curves, initial_data):
     ''' Plot the initial conditions, the critical points and the s_curves'''
+    ## Top left panel
     ax11.plot(ic['r'], ic['T'], '--', label='Initial conditions')
-    ax11.plot(ic['r'], crit_pts['Temp_thin'], '--', label='critical')
+    ax11.plot(ic['r'], crit_pts['Temp_thick'], '--', label='critical')
     
     ax11.set_xlabel('$r\ (cm)$')
     ax11.set_ylabel('$T\ (K)$')
 
-    lines['r-T'] = ax11.plot(initial_data['r'], initial_data['T'], label='iteration 0')[0]
+    lines['r-T'] = ax11.plot(initial_data['r'], initial_data['T'])[0]
     
     ax11.set_yscale('log')
     ax11.grid()
-    ax11.legend()
+    # ax11.legend()
 
-    
+    # add ticks corresponding to the s_curve
+    ticks      = list(ax11.get_xticks())
+    ticklabels = list(ax11.get_xticklabels())
+    for ind, s_curve in s_curves:
+        ticks.append(ic['r'][ind])
+        ticklabels.append('$r_{'+str(ind)+'}$')
 
+    ax11.set_xticks(ticks)
+    ax11.set_xticklabels(ticklabels)
+
+
+    ## Top right panel
     ax12.set_xlabel('$r\ (cm)$')
     ax12.set_ylabel('$\Sigma\ (g.cm^{-2})$')
     ax12.plot(ic['r'], ic['Sigma'], '--')
-    ax12.plot(ic['r'], crit_pts['Sigma_thin'], '--')
+    ax12.plot(ic['r'], crit_pts['Sigma_thick'], '--')
 
     lines['r-Sigma'] = ax12.plot(initial_data['r'], initial_data['Sigma'])[0]
     
     ax12.grid()
     ax12.set_yscale('log')
-
     
     lines['r-Mdot'] = ax21.plot(initial_data['r'], initial_data['M_dot'])[0]
     
+    # add ticks corresponding to the s_curve
+    ticks      = list(ax12.get_xticks())
+    ticklabels = list(ax12.get_xticklabels())
+    for ind, s_curve in s_curves:
+        ticks.append(ic['r'][ind])
+        ticklabels.append('$r_{'+str(ind)+'}$')
+
+    ax12.set_xticks(ticks)
+    ax12.set_xticklabels(ticklabels)
+
+
+    ## Bottom left panel
     ax21.set_xlabel('$r\ (cm)$')
     ax21.set_ylabel('$\dot{M}$')
     ax21.grid()
-
+ 
+    ## Bottom right panel
     colorsIter = colorLooper()
     for ind, s_curve in s_curves:
         ax22.plot(s_curve['Surface_density'], s_curve['Temperature'],
-                  label='$x_{'+str(ind)+'}$',
+                  label='$r_{'+str(ind)+'}$',
                   c=colorsIter.__next__())
 
     # add the initial data on the s_curve plot
@@ -184,9 +210,9 @@ def init(ic, crit_pts, s_curves, initial_data):
                      for ind, foo in s_curves]
                              
 
-    ax22.set_xlabel('$\log\Sigma\ (g.cm^{-2})$')
-    ax22.set_ylabel('$\log T\ (K)$')
-    ax22.legend()
+    ax22.set_xlabel('$\Sigma\ (g.cm^{-2})$')
+    ax22.set_ylabel('$T\ (K)$')
+    ax22.legend(loc='best')
     ax22.grid()
 
 def plotData(args):
@@ -196,10 +222,10 @@ def plotData(args):
       data : the data
     '''
 
-    index, data = args
+    index, time, data = args
     print('Plotting {}'.format(index))
     lines['r-T'].set_ydata(data['T'])
-    lines['r-T'].set_label('iteration {}'.format(index))
+    # lines['r-T'].set_label('$t = {:.2}s$'.format(time))
 
     lines['r-Mdot'].set_ydata(data['M_dot'])
 
@@ -211,7 +237,9 @@ def plotData(args):
         line.set_xdata(x)
         line.set_ydata(y)
 
-    ax11.legend()
+    # ax11.legend()
+
+    fig.suptitle('$t = {}s$'.format(time))
     
 if __name__ == '__main__':
     print('Reading initial conditions')
@@ -236,7 +264,7 @@ if __name__ == '__main__':
 
     if len(args.plot) == 1:
         initFun()
-        plotData((0, data0))
+        plotData((0, data0, 0))
         plt.show()
     else:
         simulData.loop = args.loop
