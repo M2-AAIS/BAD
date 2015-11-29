@@ -167,8 +167,8 @@ def init(ic, crit_pts, s_curves, initial_data):
 
 
     ## Top right panel
-    ax12.set_xlabel('$r\ (cm)$')
-    ax12.set_ylabel('$\Sigma\ (g.cm^{-2})$')
+    ax12.set_xlabel('$r\ (\mathrm{cm})$')
+    ax12.set_ylabel('$\Sigma\ (\mathrm{g.cm^{-2}})$')
     ax12.plot(ic['r'], ic['Sigma'], '--')
     ax12.plot(ic['r'], crit_pts['Sigma_thick'], '--')
 
@@ -191,8 +191,8 @@ def init(ic, crit_pts, s_curves, initial_data):
 
 
     ## Bottom left panel
-    ax21.set_xlabel('$r\ (cm)$')
-    ax21.set_ylabel('$\dot{M}$')
+    ax21.set_xlabel('$r\ (\mathrm{cm})$')
+    ax21.set_ylabel('$\dot{M}\ (\mathrm{g.s^{-1}})$')
     ax21.grid()
  
     ## Bottom right panel
@@ -210,8 +210,8 @@ def init(ic, crit_pts, s_curves, initial_data):
                      for ind, foo in s_curves]
                              
 
-    ax22.set_xlabel('$\Sigma\ (g.cm^{-2})$')
-    ax22.set_ylabel('$T\ (K)$')
+    ax22.set_xlabel('$\Sigma\ (\mathrm{g.cm^{-2}})$')
+    ax22.set_ylabel('$T\ (\mathrm{K})$')
     ax22.legend(loc='best')
     ax22.grid()
 
