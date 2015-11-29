@@ -33,53 +33,58 @@ class Data:
         self.data = {}
         self.times = {}
 
-        i = 0
-        with open(self.filename, 'r') as f:
-            for chunk in self.chunkYielder(f):
-                dumpNumber, time, data = self.processChunk(chunk)
-                self.data[i] = data
-                self.times[i] = time
-                i += 1
+        self.file = open(self.filename, 'r')
+        # read ahead one line
+        self.lastLineRead = self.file.readline()
 
-    def chunkYielder(self, f):
-        '''Read the file, split it arround '#' and yields it piece by piece. '''
-        # arf, not beautiful, should read it more carefully
-        lines = [l.replace('\n', '') for l in f]
+    def getChunk(self):
+        '''Get a chunk (niter, time, headers + data)'''
+        f = self.file
 
-        i = 0
-        
-        while i < len(lines):
-            niter = int(lines[i].split('#')[1])
-            time = float(lines[i+1].split('#')[1])
-            headers = lines[i+2].split()
-            data = []
-            i += 3
+        # first line to read == last line read at previous call
+        niter = int(self.lastLineRead.split('#')[1])
+        time = float(f.readline().split('#')[1])
+        headers = f.readline().split()
+        eof = False # flag to set if end of file
 
-            while i < len(lines) and '#' not in lines[i]:
-                data.append([float(val) for val in lines[i].split()])
-                i += 1
-            yield niter, time, headers, data
-                    
-                    
-                
-                
-    def processChunk(self, chunk):
-        ''' Read the lines and get the following data in the lines:
-        1: dump number
-        2: time
-        3: headers
-        4+: data'''
+        data = []
+        line = f.readline()
+        # read until reaching a commented line
+        while '#' not in line:
+            if line == '':
+                eof = True
+                break
+            # remove last character ('\n')
+            data.append(line[:-1].split())
+            
+            line = f.readline()
 
-        dumpNumber = chunk[0]
-        time = chunk[1]
-        headers = chunk[2]
-        data = pd.DataFrame(data=chunk[3], columns=headers, dtype=float)
-        
-        return dumpNumber, time, data
+        pdData = pd.DataFrame(data=data, columns=headers, dtype=float)
+        # store the last line read
+        self.lastLineRead = line
+        return niter, time, headers, pdData, eof
 
     def __iter__(self):
-        for key in self.data:
-            yield (key, self.data[key])
+        ''' Iterator over the whole file'''
+        i = 0
+        niter, time, headers, data, eof = self.getChunk()
+        while not eof:
+            self.data[niter] = data
+            self.times[niter] = time
+            yield (niter, data)
+            niter, time, headers, data, eof = self.getChunk()
+
+    def get(self):
+        ''' Get a chunk of the file without moving the position of the reader in the file '''
+        pos = self.file.tell()
+        niter, time, headers, data, eof = self.getChunk()
+        self.file.seek(pos)
+        return niter, time, headers, data
+        
+    def __del__(self):
+        ''' Close the file reader'''
+        self.file.close()
+        
 
 
 lines = {'r-T': 0,
@@ -87,7 +92,7 @@ lines = {'r-T': 0,
          'Sigma-T': []}
 
 class colorLooper:
-    def __init__(self, colors= ['red', 'green', 'blue', 'yellow']):
+    def __init__(self, colors= ['red', 'green', 'blue', 'grey']):
         self.colors = colors
         self.i = 0
 
@@ -191,26 +196,24 @@ if __name__ == '__main__':
 
     print('Reading S_curves')
     s_curves_indexes = [1, 10, 100, 250]
-    s_curves = [ (ind, pd.read_csv(args.s_curves_dir + '/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
-                                   delim_whitespace=True, dtype=float, header=0))
+    s_curves = [ (ind,
+                  pd.read_csv(args.s_curves_dir + '/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
+                              delim_whitespace=True, dtype=float, header=0))
                  for ind in args.s_curves]
     
 
-    initFun = lambda: init(ic, crit_pts, s_curves, simulData.data[0])
+    data0 = simulData.get()[-1]
+    initFun = lambda: init(ic, crit_pts, s_curves, data0)
 
-    if len(simulData.data) == 1 or len(args.plot) == 1:
+    if len(args.plot) == 1:
         initFun()
-        plotData((0, simulData.data[args.plot[0]]))
+        plotData((0, data0))
         plt.show()
     else:
         if (len(args.plot) > 0):
-            nFrames = len(args.plot)
-            data = [(i, d) for i, d in simulData if i in args.plot]
+            data = ((i, d) for i, d in simulData if i in args.plot)
         else:
-            nFrames = len(simulData.data)
             data = simulData
-            
-        print('Go take a coffee, still {} frames to go.'.format(nFrames))
 
         ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun, interval=10)
         if not args.no_video:
