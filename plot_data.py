@@ -24,6 +24,8 @@ parser.add_argument('--s-curves', metavar='n', nargs='+', type=int,
                     help='S curves to plot (default: %(default)s).', default=[1, 10, 100, 200])
 parser.add_argument('--s-curves-dir', metavar='dir', nargs=1,
                     help='S curves directory (default: %(default)s).', default='s_curves')
+parser.add_argument('--reread', action='store_true', default=False,
+                    help='Reread file when fully read.')
 args = parser.parse_args()
 
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
@@ -92,6 +94,12 @@ class Data:
             if not noRestriction and niter > self.restrictTo[-1]:
                 break
             niter, time, headers, data, eof = self.getChunk()
+            if eof and self.reread:
+                self.file.close()
+                self.file = open(self.filename, 'r')
+                self.lastLineRead = self.file.readline()
+                eof = False
+                
 
         # if the loop flag is activated, loop over saved data
         if self.loop:
@@ -105,7 +113,6 @@ class Data:
                 for key in dataKeys:
                     yield (key, self.times[key], self.data[key])
 
-                    
 
     def get(self):
         ''' Get a chunk of the file without moving the position of the reader in the file '''
@@ -212,7 +219,7 @@ def init(ic, crit_pts, s_curves, initial_data):
 
     ax22.set_xlabel('$\Sigma\ (\mathrm{g.cm^{-2}})$')
     ax22.set_ylabel('$T\ (\mathrm{K})$')
-    ax22.legend(loc='best')
+    ax22.legend(loc='upper right')
     ax22.grid()
 
 def plotData(args):
@@ -268,13 +275,14 @@ if __name__ == '__main__':
         plt.show()
     else:
         simulData.loop = args.loop
+        simulData.reRead = args.reread
             
         if (len(args.plot) > 0):
             simulData.restrictTo = args.plot
 
         data = simulData
 
-        ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun, interval=10)
+        ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun, interval=1)
         if not args.no_video:
             # temporaly deactivate looping for the video
             simulData.loop = False
