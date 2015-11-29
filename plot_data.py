@@ -259,7 +259,6 @@ if __name__ == '__main__':
     crit_pts = pd.read_csv(args.c_points, delim_whitespace=True)
 
     print('Reading S_curves')
-    print(args.s_curves)
     s_curves = [ (ind,
                   pd.read_csv(args.s_curves_dir + '/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
                               delim_whitespace=True, dtype=float, header=0))
