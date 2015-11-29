@@ -9,6 +9,8 @@ from itertools import tee
 parser = argparse.ArgumentParser(description='Plot data from output of the black hole simulation.')
 parser.add_argument('--no-video', action='store_true',
                     help='do not save a video (faster)')
+parser.add_argument('--dont-loop', action='store_false', dest='loop', default=True,
+                    help='prevent from looping infinitely')
 parser.add_argument('--video-file', metavar='file', default='evolution.mp4',
                     help='save the video as (default: %(default)s).')
 parser.add_argument('--plot', metavar='dump_id', nargs='*', type=int, default=[],
@@ -32,6 +34,7 @@ class Data:
         self.filename = filename
         self.data = {}
         self.times = {}
+        self.restrictTo = [] # list of indexes to restrict to
 
         self.file = open(self.filename, 'r')
         # read ahead one line
@@ -65,14 +68,41 @@ class Data:
         return niter, time, headers, pdData, eof
 
     def __iter__(self):
-        ''' Iterator over the whole file'''
+        ''' Infinite iterator over the whole file'''
+        self.restrictTo.sort()
+        
+        if len(self.restrictTo) > 0:
+            noRestriction = False
+        else:
+            noRestriction = True
+            
         i = 0
         niter, time, headers, data, eof = self.getChunk()
         while not eof:
             self.data[niter] = data
             self.times[niter] = time
-            yield (niter, data)
+            if noRestriction or niter in self.restrictTo:                
+                yield (niter, data)
+
+            # if we have a restriction list and the current iteration
+            # is after the last accepted item, stop reading the file
+            if not noRestriction and niter > self.restrictTo[-1]:
+                break
             niter, time, headers, data, eof = self.getChunk()
+
+        # if the loop flag is activated, loop over saved data
+        if self.loop:
+            if noRestriction:
+                dataKeys = list(self.data.keys())
+            else:
+                dataKeys = [key for key in self.data.keys() if key in self.restrictTo]
+                
+            dataKeys.sort()
+            while True:
+                for key in dataKeys:
+                    yield (key, self.data[key])
+
+                    
 
     def get(self):
         ''' Get a chunk of the file without moving the position of the reader in the file '''
@@ -84,7 +114,6 @@ class Data:
     def __del__(self):
         ''' Close the file reader'''
         self.file.close()
-        
 
 
 lines = {'r-T': 0,
@@ -139,6 +168,7 @@ def init(ic, crit_pts, s_curves, initial_data):
     
     ax21.set_xlabel('$r\ (cm)$')
     ax21.set_ylabel('$\dot{M}$')
+    ax21.grid()
 
     colorsIter = colorLooper()
     for ind, s_curve in s_curves:
@@ -183,7 +213,6 @@ def plotData(args):
 
     ax11.legend()
     
-
 if __name__ == '__main__':
     print('Reading initial conditions')
     ic = pd.read_csv('CI.dat', delim_whitespace=True)
@@ -210,13 +239,22 @@ if __name__ == '__main__':
         plotData((0, data0))
         plt.show()
     else:
+        simulData.loop = args.loop
+            
         if (len(args.plot) > 0):
-            data = ((i, d) for i, d in simulData if i in args.plot)
-        else:
-            data = simulData
+            simulData.restrictTo = args.plot
+
+        data = simulData
 
         ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun, interval=10)
         if not args.no_video:
+            # temporaly deactivate looping for the video
+            simulData.loop = False
             ani.save(args.video_file, writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
+            simulData.loop = args.loop
 
+        # clear the axes
+        for ax in (ax11, ax12, ax21, ax22):
+            ax.axes.cla()
+        
         plt.show()
