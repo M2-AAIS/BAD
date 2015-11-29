@@ -113,7 +113,7 @@ program black_hole_diffusion
               
               ! Recompute variables
               call compute_variables(s)
-              if (mod(iteration, 10000) == 0) then
+              if (mod(iteration, output_freq) == 0) then
                  call snapshot(s, iteration, t, 13)
                  print*,'snapshot', iteration, t
               end if
@@ -121,7 +121,7 @@ program black_hole_diffusion
               iteration = iteration + 1
            end do
            ! Output things here
-           if (mod(iteration, 10000) == 0) then
+           if (mod(iteration, output_freq) == 0) then
               call snapshot(s, iteration, t, 13)
               print*,'snapshot', iteration, t
            end if
