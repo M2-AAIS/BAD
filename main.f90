@@ -8,13 +8,12 @@ program black_hole_diffusion
 
   implicit none
 
-  integer                                     :: iteration, ios, j, i
+  integer                                     :: iteration, ios, i
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
   real(kind = x_precision)                    :: t_V, t_T
   real(kind = x_precision)                    :: dt_V, dt_T
-  real(kind=x_precision)                      :: epst = 1.e-5_x_precision
   logical                                     :: T_converged
 
   ! FIXME
@@ -81,7 +80,7 @@ program black_hole_diffusion
 
   iteration = 0
   ! Start iterating
-  do while iteration < n_iterations
+  do while (iteration < n_iterations)
      ! Check that S is at a fixed point
      if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
         ! Check here that S < S_crit
@@ -93,8 +92,6 @@ program black_hole_diffusion
            prev_S = s%S
 
            ! Integrate S
-           print *, '#S integration'
-           call snapshot(s, iteration, t, 13)
            call do_timestep_S(s, dt_V)
            ! Increment time
            t = t + dt_V
@@ -110,21 +107,24 @@ program black_hole_diffusion
            do while (.not. T_converged)
               ! Integrate T
               ! print *, '# T integration'
-              call do_timestep_T(s, dt_T, T_converged, epst)
+              call do_timestep_T(s, dt_T, T_converged, delta_T_max)
               ! Increment time
               t = t + dt_T
               
               ! Recompute variables
               call compute_variables(s)
-              if (mod(j, 1000) == 0) then
+              if (mod(iteration, 10000) == 0) then
                  call snapshot(s, iteration, t, 13)
                  print*,'snapshot', iteration, t
               end if
-
               ! print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), t
               iteration = iteration + 1
            end do
            ! Output things here
+           if (mod(iteration, 10000) == 0) then
+              call snapshot(s, iteration, t, 13)
+              print*,'snapshot', iteration, t
+           end if
         end if
      else
        ! print*, 'Mdot kick'
