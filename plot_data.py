@@ -20,7 +20,7 @@ parser.add_argument('--c-points', metavar='file',
                     default='critical_points/file.dat')
 parser.add_argument('--i-conditions', metavar='file',
                     help='Initial conditions file (default: %(default)s).', default='CI.dat')
-parser.add_argument('--s-curves', metavar='n', nargs='+',
+parser.add_argument('--s-curves', metavar='n', nargs='+', type=int,
                     help='S curves to plot (default: %(default)s).', default=[1, 10, 100, 200])
 parser.add_argument('--s-curves-dir', metavar='dir', nargs=1,
                     help='S curves directory (default: %(default)s).', default='s_curves')
@@ -252,7 +252,7 @@ if __name__ == '__main__':
     crit_pts = pd.read_csv(args.c_points, delim_whitespace=True)
 
     print('Reading S_curves')
-    s_curves_indexes = [1, 10, 100, 250]
+    print(args.s_curves)
     s_curves = [ (ind,
                   pd.read_csv(args.s_curves_dir + '/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
                               delim_whitespace=True, dtype=float, header=0))
