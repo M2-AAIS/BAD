@@ -20,9 +20,9 @@ program black_hole_diffusion
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
-  delta_S_max = 1e-4
+  delta_S_max = 1e-5
   ! FIXME I love it
-  delta_T_max = 1e-4
+  delta_T_max = 1e-5
 
   ! Initial time = 0
   t = 0._x_precision
@@ -74,15 +74,14 @@ program black_hole_diffusion
   !  t_V = 1.3e4_x_precision / state_0%temps_0 
   !  t_T = 0.72_x_precision / state_0%temps_0
 
-  dt_V = t_V / 10._x_precision
-  dt_T = t_T / 10._x_precision
+  dt_V = t_V / 2._x_precision
+  dt_T = t_T / 2._x_precision
 
   write(*,*) 'dt_T, dt_V:', dt_T, dt_V
-  
-  ! call snapshot(s, iteration, t, 13)
 
+  iteration = 0
   ! Start iterating
-  do iteration = 1, n_iterations
+  do while iteration < n_iterations
      ! Check that S is at a fixed point
      if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
         ! Check here that S < S_crit
@@ -105,8 +104,8 @@ program black_hole_diffusion
            ! Recompute variables
            call compute_variables(s)
 
+           iteration = iteration + 1
            ! Iterate while T hasn't converged
-           j = 0
            T_converged = .false.
            do while (.not. T_converged)
               ! Integrate T
@@ -117,16 +116,13 @@ program black_hole_diffusion
               
               ! Recompute variables
               call compute_variables(s)
-              if (mod(j, 50) == 0) then
+              if (mod(j, 1000) == 0) then
                  call snapshot(s, iteration, t, 13)
-                 print*,'snapshot', j 
+                 print*,'snapshot', iteration, t
               end if
 
               ! print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), t
-              j = j+1
-
-              ! FIXME : increment time
-              print*, j
+              iteration = iteration + 1
            end do
            ! Output things here
         end if
