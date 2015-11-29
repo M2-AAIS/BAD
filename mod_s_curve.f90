@@ -84,7 +84,7 @@ contains
     character(len = 8)                                     :: number_of_cell
     character(len = 64)                                    :: fname_tot
     integer                                                :: fid_tot
-
+    integer                                                :: ios
  ! For the critical points
     integer                                                :: index_fcp
     real(kind = x_precision)                               :: sigma_c_thick
@@ -104,7 +104,7 @@ contains
  !____________________________________________________________________________________
 
     do k = 1, n_cell
-       file_length = 0
+      file_length = 0
 
        r     = r_state%r(k)
        omega = x_state%Omega(k)
@@ -159,6 +159,15 @@ contains
       write(number_of_cell,'(I5.5)') k
       fid_tot = 22 + k
       fname_tot = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_tot.dat'
+      
+      open(fid_tot,file  = fname_tot, action='write',&
+          status = 'replace', iostat = ios)
+      if (ios /= 0) then
+      write(*,*)"error while opening file", fname_tot
+      stop
+      endif
+
+      write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
 
       do j = 1, nb_it
         temp_real(j)  =  temp_real(j) * state_0%T_0
@@ -166,10 +175,14 @@ contains
 
         call variables(temp_real(j), sigma_real(j), omega, f, optical_depth, tau_eff)
 
-        call save_data(fid_tot, fname_tot, nb_it, file_length, sigma_real(j), temp_real(j), tau_eff)
+        ! call save_data(fid_tot, fname_tot, nb_it, file_length, sigma_real(j), temp_real(j), tau_eff)
+
+        write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
+
         file_length = file_length + 1
       enddo
-
+      
+      close(fid_tot)
 
       ! ADIMENSIONED critical T and S [OUTPUT]
 
