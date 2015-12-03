@@ -41,6 +41,11 @@ contains
             state_dim%S(i) / x_state%x(i), &
             state_dim%Fz(i), state_dim%Mdot(i), state_dim%Cv(i)
     end do
+    
+    open(15, file='S_T.dat', position='append')
+    write(15,*)time, state_dim%S(65), state_dim%T(65)
+    close(15)
+
   end subroutine snapshot
   
 end module mod_output
