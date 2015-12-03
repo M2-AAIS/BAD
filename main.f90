@@ -66,21 +66,26 @@ program black_hole_diffusion
   prev_S = 1.2*s%S
   
   ! FIXME
-  ! write(*,*) state_0%temps_0
-  t_T = params%t_T *state_0%temps_0 
-  t_V = params%t_nu*state_0%temps_0
+   write(*,*) state_0%temps_0
+   write(*,*)"t_T, t_V", params%t_T, params%t_nu
+  t_T = params%t_T  !* state_0%temps_0
+  t_V = params%t_nu !*  state_0%temps_0
+
+  write(*,*)t_T, t_V
   
   !  t_V = 1.3e4_x_precision / state_0%temps_0 
   !  t_T = 0.72_x_precision / state_0%temps_0
 
-  dt_V = t_V / 2._x_precision
-  dt_T = t_T / 2._x_precision
+  dt_V = t_V / 10._x_precision
+  dt_T = t_T / 10._x_precision
 
   write(*,*) 'dt_T, dt_V:', dt_T, dt_V
 
   iteration = 0
-  ! Start iterating
+  ! Start iterating 
+  call system("rm "//"S_T.dat")
   do while (iteration < n_iterations)
+
      ! Check that S is at a fixed point
      if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
         ! Check here that S < S_crit
@@ -134,8 +139,9 @@ program black_hole_diffusion
      ! Increase M_0_dot if stalled
      ! TODO : increase M_dot_0
      ! state_0%M_dot_0 = state_0%M_dot_0 + 
-  end do
 
+  end do
+       call system("rm "//"S_T.dat")
   close(13)
   
 end program black_hole_diffusion
