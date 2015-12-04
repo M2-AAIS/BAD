@@ -270,7 +270,7 @@ if __name__ == '__main__':
 
     if len(args.plot) == 1:
         initFun()
-        plotData((0, data0, 0))
+        plotData((0, 0, data0))
         plt.show()
     else:
         simulData.loop = args.loop
