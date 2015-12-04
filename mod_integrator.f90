@@ -13,23 +13,13 @@ module mod_integrator
   
 contains
   ! (T(t+dt) - T(t))/dt = f(s, dt)
-  function f (s, dt)
+  function f (s)
   !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     implicit none
     
     type(state), intent(in)                    :: s
-    real (kind=x_precision), intent(in)        :: dt
     real (kind=x_precision), dimension(n_cell) :: f
 
-    real (kind=x_precision)                    :: overdx, overdx2, overdt
-    real (kind=x_precision), dimension(n_cell) :: x2
-
-    x2 = x_state%x**2
-
-    overdx  = 1/params%dx
-    overdx2 = overdx**2
-    overdt  = 1/dt
-    
     ! Second member of the dT/dt equation
     f = (3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
          s%Fz * x_state%x / s%S) / s%Cv
@@ -48,16 +38,14 @@ contains
     real (kind=x_precision)                    :: overdx, overdx2, overdt
     real (kind=x_precision), dimension(n_cell) :: dS_over_dt, dS_over_x_over_dx, S_over_x, dT_over_dx, nuS
 
-    overdx  = 1/params%dx
+    overdx  = 1._x_precision / params%dx
     overdx2 = overdx**2
-    overdt  = 1/dt
-    nuS = s%nu*s%S
-
+    overdt  = 1._x_precision /dt
+    nuS     = s%nu * s%S
 
     ! Compute dT/dx as the right spatial derivative
     dT_over_dx(1:n_cell - 1) = (s%T(2:n_cell) - s%T(1:n_cell - 1)) * overdx
     dT_over_dx(n_cell)       = 0
-
 
     ! Compute d(S/x)/dx as the right spatial derivative 
     S_over_x                        = s%S / x_state%x
@@ -72,6 +60,9 @@ contains
                              * overdx2 / x_state%x(1:n_cell-1)**2 
     dS_over_dt(n_cell)     = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
                              ( x_state%x(n_cell)**2 * params%dx**2 )
+    ! FIX THIS : dS_over_dt is wrongly defined !
+
+
     !right term 
     f_exp = ( 3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 &
             - s%Fz * x_state%x / s%s &
@@ -96,13 +87,13 @@ contains
     real(kind = x_precision), dimension(n_cell)   :: diag, x2
     real(kind = x_precision), dimension(n_cell-1) :: diag_low, diag_up
     
-    overdx  = 1_x_precision/params%dx
-    overdx2 = overdx**2
+    overdx    = 1._x_precision / params%dx
+    overdx2   = overdx**2
     dtoverdx2 = dt*overdx2
 
     x2 = x_state%x**2
     
-    ! Create the diagonals
+    ! Create the diagonals NOT VERIFIED YET
     diag     =  1 + 2 * s%nu / x2 * dtoverdx2
     diag_up  = -s%nu(2:n_cell  ) / x2(1:n_cell-1) * dtoverdx2
     diag_low = -s%nu(1:n_cell-1) / x2(2:  n_cell) * dtoverdx2
@@ -122,7 +113,7 @@ contains
 
   subroutine do_timestep_S_exp (states, dt)
     !process the temporal evolution of S with an explicit algortyhm
-    !using only on the superior branch of the S curve
+    !using only on the superior branch of the S curve NOT VERIFIED YET
     implicit none
     
     type (state), intent(inout)                   :: states 
@@ -176,8 +167,8 @@ contains
 
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
     
-    f0 = f(s, dt)
-    f1 = (f(s_deriv, dt) - f(s, dt)) / dtemp
+    f0 = f(s)
+    f1 = (f(s_deriv) - f(s)) / dtemp
 
     rhs = dt*f0 * (1._x_precision + dt*f1)
     
