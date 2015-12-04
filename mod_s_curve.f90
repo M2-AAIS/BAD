@@ -58,19 +58,19 @@ contains
     integer                                                :: i     = 0
     integer                                                :: j     = 0
     integer                                                :: k     = 0
-    integer                                                :: file_length = 1        ! Number of lines of the data saving file
+    integer                                                :: file_length = 1       ! Number of lines of the data saving file
 
  ! For the temperature and s
-    real(kind = x_precision)                               :: temp  = 0.0d0
-    real(kind = x_precision)                               :: Smin  = 0.0d0
-    real(kind = x_precision)                               :: Smax  = 0.0d0
-    real(kind = x_precision)                               :: Sigma = 0.0d0          ! S
+    real(kind = x_precision)                               :: temp
+    real(kind = x_precision)                               :: Smin
+    real(kind = x_precision)                               :: Smax
+    real(kind = x_precision)                               :: Sigma                 ! S
 
-    real(kind = x_precision)                               :: omega = 0.0d0          ! Angular velocity
-    real(kind = x_precision)                               :: r     = 0.0d0          ! Radius
-    real(kind = x_precision)                               :: f     = 0.0d0          ! Q+ - Q-
-    real(kind=x_precision)                                 :: tau_eff = 0.0d0        ! Effective optical depth
-    integer                                                :: optical_depth = 0      ! Indicator for the optical thickness
+    real(kind = x_precision)                               :: omega                 ! Angular velocity
+    real(kind = x_precision)                               :: r                     ! Radius
+    real(kind = x_precision)                               :: f                     ! Q+ - Q-
+    real(kind=x_precision)                                 :: tau_eff               ! Effective optical depth
+    integer                                                :: optical_depth         ! Indicator for the optical thickness
 
  ! For the separate curves given the thickness
     real(kind = x_precision),dimension(nb_it)              :: temp_t_thick
@@ -362,46 +362,6 @@ contains
   end subroutine write_critical_points
 
 
-
-  !-------------------------------------------------------------------------
-  !Subroutine for resolving a quadratic equation as long as the solutions are a set of real numbers
-  !-------------------------------------------------------------------------
-  subroutine quadratic(coeff_a, coeff_b, coeff_c, sol)
-    implicit none
-
-    real(kind=x_precision), intent(in)  :: coeff_a,coeff_b,coeff_c
-    real(kind=x_precision), intent(out) :: sol
-    real(kind=x_precision)              :: sol_1 = 0.0d0
-    real(kind=x_precision)              :: sol_2 = 0.0d0
-    real(kind=x_precision)              :: delta = 0.0d0
-    !------------------------------------------------------------------------
-
-    delta          = coeff_b**2 - 4_x_precision * coeff_a * coeff_c
-
-    if (coeff_a < 0.0d-12) then
-      write(*,*)'Coefficient a in the quadratic equation is nought.'
-      stop
-    else
-
-      if (delta < 0.d0) then
-        write(*,*)'No solutions in the R field.'
-      else
-        sol_1         = -0.5_x_precision * (coeff_b + sign(sqrt(delta),coeff_b)) / coeff_a
-        if (sol_1 < 0.d-12) then
-          write(*,*)'Problem'
-          stop
-        end if
-        sol_2 = (coeff_c / (coeff_a * sol_1))
-        sol = max(sol_1,sol_2)
-        if (sol /= sol_1) then
-          write(*,*)'Quadratic :: The solution was the other one !'
-        end if
-      end if
-
-    end if
-  end subroutine quadratic
-
-
   !-------------------------------------------------------------------------
   !Subroutine in order to compute variables H, rho, cs, nu, Q_plus, Q_minus,
   !K_ff, K_e, tau_eff, E_ff,Fz given T, Sigma and Omega
@@ -413,6 +373,7 @@ contains
     integer, intent(in)                  :: optical_depth
     real(kind = x_precision),intent(out) :: f,tau_eff
     real(kind = x_precision)             :: coeff_a,coeff_b,coeff_c
+    real(kind = x_precision)             :: delta
 
     real(kind = x_precision)             :: H
     real(kind = x_precision)             :: rho
@@ -430,14 +391,15 @@ contains
     coeff_b = (-1._x_precision/3._x_precision) * cst_rad * (T * state_0%T_0)**4 / state_0%H_0
     coeff_c = - params%RTM * T * Sigma * state_0%S_0 / (2._x_precision * state_0%H_0**2)
 
-    call quadratic(coeff_a , coeff_b , coeff_c , H)
+    delta   = coeff_b**2 - 4._x_precision * coeff_a * coeff_c
+    H       = -0.5_x_precision * (coeff_b + sign(sqrt(delta),coeff_b)) / coeff_a
 
     rho     = Sigma / H
     cs      = Omega * H
     nu      = params%alpha * cs * H
-    K_ff    = 6.13d22 * state_0%rho_0 * rho * (state_0%T_0 * T)**(-3.5_x_precision)
+    K_ff    = 6.13e22_x_precision * state_0%rho_0 * rho * (state_0%T_0 * T)**(-3.5_x_precision)
     K_e     = params%kappa_e
-    E_ff    = 6.22d20 * (state_0%rho_0 * rho)**2 * sqrt(state_0%T_0 * T)
+    E_ff    = 6.22e20_x_precision * (state_0%rho_0 * rho)**2 * sqrt(state_0%T_0 * T)
     tau_eff = 0.5_x_precision * sqrt(K_e * K_ff) * Sigma * state_0%S_0
 
     !-------------------------------------------------------------------------
