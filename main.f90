@@ -12,8 +12,8 @@ program black_hole_diffusion
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
-  real(kind = x_precision)                    :: t_V, t_T
-  real(kind = x_precision)                    :: dt_V, dt_T
+  real(kind = x_precision)                    :: t_nu, t_T
+  real(kind = x_precision)                    :: dt_nu, dt_T
   logical                                     :: T_converged
 
   ! FIXME
@@ -63,25 +63,13 @@ program black_hole_diffusion
   ! we multiply delta to prevent the code from thinking it converged
   prev_S = 1.2*s%S
 
-  ! FIXME
-  ! write(*,*) state_0%temps_0
-  t_T = params%t_T *state_0%temps_0 
-  t_V = params%t_nu*state_0%temps_0
+  t_T  = params%t_T  !* state_0%temps_0
+  t_nu = params%t_nu !*  state_0%temps_0
 
-  write(*,*) state_0%temps_0
-  write(*,*)"t_T, t_V", params%t_T, params%t_nu
-  t_T = params%t_T  !* state_0%temps_0
-  t_V = params%t_nu !*  state_0%temps_0
+  dt_nu = t_nu / 100._x_precision
+  dt_T  = t_T / 100._x_precision
 
-  write(*,*)t_T, t_V
-  
-  !  t_V = 1.3e4_x_precision / state_0%temps_0 
-  !  t_T = 0.72_x_precision / state_0%temps_0
-
-  dt_V = t_V / 100._x_precision
-  dt_T = t_T / 100._x_precision
-
-  write(*,*) 'dt_T, dt_V:', dt_T, dt_V
+  write(*,*) 'dt_T, dt_nu:', dt_T, dt_nu
 
   ! Initial time = 0
   t = 0._x_precision
@@ -105,13 +93,13 @@ program black_hole_diffusion
         prev_S = s%S
 
         ! Integrate S
-        call do_timestep_S(s, dt_V)
+        call do_timestep_S(s, dt_nu)
 
         ! Recompute variables
         call compute_variables(s)
 
         ! Increment time, number of iterations
-        t = t + dt_V
+        t = t + dt_nu
         iteration = iteration + 1
 
         ! Output things here
