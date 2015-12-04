@@ -85,6 +85,7 @@ contains
     character(len = 64)                                    :: fname_tot
     integer                                                :: fid_tot
     integer                                                :: ios
+
  ! For the critical points
     integer                                                :: index_fcp
     real(kind = x_precision)                               :: sigma_c_thick
@@ -163,19 +164,20 @@ contains
       open(fid_tot,file  = fname_tot, action='write',&
           status = 'replace', iostat = ios)
       if (ios /= 0) then
-      write(*,*)"error while opening file", fname_tot
-      stop
+         write(*,*)"Error while opening the ", fname_tot," file."
+         stop
       endif
 
       write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
 
       do j = 1, nb_it
-        temp_real(j)  =  temp_real(j) * state_0%T_0
-        sigma_real(j) =  sigma_real(j) * state_0%S_0
+        temp_real(j)  =  temp_real(j) 
+        sigma_real(j) =  sigma_real(j) 
 
         call variables(temp_real(j), sigma_real(j), omega, f, optical_depth, tau_eff)
 
-        ! call save_data(fid_tot, fname_tot, nb_it, file_length, sigma_real(j), temp_real(j), tau_eff)
+        temp_real(j)  =  temp_real(j) * state_0%T_0
+        sigma_real(j) =  sigma_real(j) * state_0%S_0
 
         write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
 
@@ -187,7 +189,7 @@ contains
       ! ADIMENSIONED critical T and S [OUTPUT]
 
       temperature(k) = temp_c_thick
-      s(k)           = sigma_c_thick
+      s(k)           = sigma_c_thick 
 
       ! DIMENSIONED critical T and S
       temp_thick(k)  =  temp_c_thick * state_0%T_0
@@ -359,36 +361,6 @@ contains
 
   end subroutine write_critical_points
 
-
-  !-------------------------------------------------------------------------
-  ! Subroutine to save in a file two sets of data
-  !-------------------------------------------------------------------------
-  subroutine save_data(fid, filename, n, length, data_1, data_2, data_3)
-    implicit none
-
-    integer                                  ,intent(in):: fid
-    character(len =64)                       ,intent(in):: filename
-    integer                                  ,intent(in):: n
-    real(kind = x_precision)                 ,intent(in):: data_1
-    real(kind = x_precision)                 ,intent(in):: data_2
-    real(kind = x_precision)                 ,intent(in):: data_3
-
-    integer                               ,intent(inout):: length
-
-    !------------------------------------------------------------------------
-
-    if( length .eq. 1 ) then
-       open(fid,file  = filename, action='readwrite')
-       write(fid,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
-    end if
-
-    write(fid,'(3(e16.6e2))') data_1, data_2, data_3
-
-    if( length .eq. n ) then
-       close(fid)
-    end if
-
-  end subroutine save_data
 
 
   !-------------------------------------------------------------------------
