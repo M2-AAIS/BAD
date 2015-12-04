@@ -47,8 +47,8 @@ def draw_once(filename):
     arr = filename.split('/')[-1].split('_')
     number = int(arr[2])
 
-    axline.set_xdata(x)
-    axline.set_ydata(y)
+    axline.set_xdata(log(x)/log(10))
+    axline.set_ydata(log(y)/log(10))
     axline.set_label('$(T, \Sigma)_{'+str(number)+'}$')
     plt.legend(loc='upper left')
     return axline,
