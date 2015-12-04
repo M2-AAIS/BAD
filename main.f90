@@ -28,6 +28,7 @@ program black_hole_diffusion
 
   ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
+  call snapshot(s, 0, 0._x_precision, 13)
 
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
