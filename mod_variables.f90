@@ -71,6 +71,10 @@ contains
                      (1._x_precision - state_out%beta)) + state_out%beta) / &
                      (state_out%beta * (gammag - 1._x_precision))
 
+    ! Compute heating/cooling terms
+    state_out%Qplus  = 3._x_precision * state_0%v_0**2 * state_out%nu * x_state%Omega**2
+    state_out%Qminus = state_out%Fz * x_state%x / state_out%S
+
   end subroutine compute_variables
 
   ! Transform dimensions of variables

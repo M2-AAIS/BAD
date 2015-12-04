@@ -21,8 +21,7 @@ contains
     real (kind=x_precision), dimension(n_cell) :: f
 
     ! Second member of the dT/dt equation
-    f = (3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 - &
-         s%Fz * x_state%x / s%S) / s%Cv
+    f = (s%Qplus - s%Qminus) / s%Cv
     
   end function f
 

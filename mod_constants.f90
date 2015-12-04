@@ -33,20 +33,22 @@ module mod_constants
   end type parameters
 
   type state
-    real(kind = x_precision), dimension(n_cell) :: nu, v, cs, S, H, Mdot, rho, T, Fz, Cv, Pgaz, Prad, beta
-    ! nu   : Viscosity
-    ! v    : Local, radial accretion speed
-    ! cs   : Speed of sound
-    ! S    : Variable of density
-    ! H    : Disk half-height
-    ! Mdot : Accretion rate
-    ! rho  : Volume density
-    ! T    : Temperature
-    ! Fz   : Radiative flux
-    ! Cv   : Heat capacity at constant volume
-    ! Pgaz : Gaz pressure
-    ! Prad : Radiative pressure
-    ! beta : Pressure indicator
+    real(kind = x_precision), dimension(n_cell) :: nu, v, cs, S, H, Mdot, rho, T, Fz, Cv, Pgaz, Prad, beta, Qplus, Qminus
+    ! nu     : Viscosity
+    ! v      : Local, radial accretion speed
+    ! cs     : Speed of sound
+    ! S      : Variable of density
+    ! H      : Disk half-height
+    ! Mdot   : Accretion rate
+    ! rho    : Volume density
+    ! T      : Temperature
+    ! Fz     : Radiative flux
+    ! Cv     : Heat capacity at constant volume
+    ! Pgaz   : Gaz pressure
+    ! Prad   : Radiative pressure
+    ! beta   : Pressure indicator
+    ! Qplus  : Heating term
+    ! Qminus : Cooling term
   end type state
 
   type dim_state
