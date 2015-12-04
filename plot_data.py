@@ -211,7 +211,7 @@ def init(ic, crit_pts, s_curves, initial_data):
 
     # add the initial data on the s_curve plot
     colorsIter.reset()
-    lines['Sigma-T'] = [ (ind, ax22.plot(initial_data['S'][ind],
+    lines['Sigma-T'] = [ (ind, ax22.plot(initial_data['Sigma'][ind],
                                          initial_data['T'][ind], 'o',
                                          c=colorsIter.__next__())[0])
                      for ind, foo in s_curves]
@@ -239,7 +239,7 @@ def plotData(args):
     lines['r-Sigma'].set_ydata(data['Sigma'])
 
     for ind, line in lines['Sigma-T']:
-        x = data['S'][ind]
+        x = data['Sigma'][ind]
         y = data['T'][ind]
         line.set_xdata(x)
         line.set_ydata(y)
