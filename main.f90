@@ -33,7 +33,8 @@ program black_hole_diffusion
   ! call s_curve(foo, bar)
 
   ! Copy the value of state_0 into state vector s
-  s%T = CI%T_ci / state_0%T_0
+  !s%T = CI%T_ci / state_0%T_0
+  s%T = 10._x_precision * CI%T_ci / state_0%T_0
   s%S = CI%Sig_ci / state_0%S_0 * x_state%x
 
   ! H_over_r become H*
@@ -47,7 +48,7 @@ program black_hole_diffusion
   ! Save initial conditions
   write(15, *)'r x T* S* T Sigma H* '
   do i= 1, n_cell
-    write(15, *)r_state%r(i), x_state%x(i), s%T(i), s%S(i), CI%T_ci(i), CI%Sig_ci(i), CI%H_over_r(i)
+    write(15, *)r_state%r(i), x_state%x(i), s%T(i), s%S(i), s%T(i)*state_0%T_0, s%S(i) * state_0%s_0 / x_state%x(i), CI%H_over_r(i)
   enddo
 
   close(15)
@@ -73,8 +74,8 @@ program black_hole_diffusion
   !  t_V = 1.3e4_x_precision / state_0%temps_0 
   !  t_T = 0.72_x_precision / state_0%temps_0
 
-  dt_V = t_V / 10._x_precision
-  dt_T = t_T / 10._x_precision
+  dt_V = t_V / 100._x_precision
+  dt_T = t_T / 100._x_precision
 
   write(*,*) 'dt_T, dt_V:', dt_T, dt_V
 
