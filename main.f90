@@ -23,12 +23,8 @@ program black_hole_diffusion
   ! FIXME I love it
   delta_T_max = 1e-5
 
-  ! Initial time = 0
-  t = 0._x_precision
-
   ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
-  call snapshot(s, 0, 0._x_precision, 13)
 
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
@@ -72,6 +68,13 @@ program black_hole_diffusion
   t_T = params%t_T *state_0%temps_0 
   t_V = params%t_nu*state_0%temps_0
 
+  write(*,*) state_0%temps_0
+  write(*,*)"t_T, t_V", params%t_T, params%t_nu
+  t_T = params%t_T  !* state_0%temps_0
+  t_V = params%t_nu !*  state_0%temps_0
+
+  write(*,*)t_T, t_V
+  
   !  t_V = 1.3e4_x_precision / state_0%temps_0 
   !  t_T = 0.72_x_precision / state_0%temps_0
 
@@ -80,9 +83,16 @@ program black_hole_diffusion
 
   write(*,*) 'dt_T, dt_V:', dt_T, dt_V
 
+  ! Initial time = 0
+  t = 0._x_precision
+
+  ! Start
   iteration = 0
+
+  ! Write initial state
+  call snapshot(s, iteration, t, 13)
+
   ! Start iterating 
-  call system("rm "//"S_T.dat")
   do while (iteration < n_iterations)
     ! Check that S is at a fixed point
     if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
@@ -96,41 +106,40 @@ program black_hole_diffusion
 
         ! Integrate S
         call do_timestep_S(s, dt_V)
-        ! Increment time
-        t = t + dt_V
-
-        ! print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0)
 
         ! Recompute variables
         call compute_variables(s)
 
+        ! Increment time, number of iterations
+        t = t + dt_V
         iteration = iteration + 1
-        ! Iterate while T hasn't converged
-        T_converged = .false.
-        do while (.not. T_converged)
-          ! Integrate T
-          ! print *, '# T integration'
-          call do_timestep_T(s, dt_T, T_converged, delta_T_max)
-          ! Increment time
-          t = t + dt_T
-
-          ! Recompute variables
-          call compute_variables(s)
-          if (mod(iteration, output_freq) == 0) then
-            call snapshot(s, iteration, t, 13)
-            print*,'snapshot', iteration, t
-          end if
-
-          ! print *, j, log10(s%T(50)*state_0%T_0), log10(s%S(50)*state_0%S_0), t
-          iteration = iteration + 1
-
-        end do
 
         ! Output things here
         if (mod(iteration, output_freq) == 0) then
           call snapshot(s, iteration, t, 13)
           print*,'snapshot', iteration, t
         end if
+
+        ! Iterate while T hasn't converged
+        T_converged = .false.
+        do while (.not. T_converged)
+          ! Integrate T
+          call do_timestep_T(s, dt_T, T_converged, delta_T_max)
+
+          ! Recompute variables
+          call compute_variables(s)
+
+          ! Increment time, number of iterations
+          t = t + dt_T
+          iteration = iteration + 1
+
+          if (mod(iteration, output_freq) == 0) then
+            call snapshot(s, iteration, t, 13)
+            print*,'snapshot', iteration, t
+          end if
+
+        end do
+
       end if
     else
       ! print*, 'Mdot kick'
@@ -142,8 +151,6 @@ program black_hole_diffusion
     ! state_0%M_dot_0 = state_0%M_dot_0 + 
   end do
 
-  end do
-       call system("rm "//"S_T.dat")
   close(13)
 
 end program black_hole_diffusion
