@@ -251,6 +251,8 @@ def init(ic, crit_pts, s_curves, initial_data):
     ax22.grid()
 
 prevTime = 0
+prevIndex = 0
+prevDt = 0
 
 def plotData(args):
     ''' Update with the new data. Parameters:
@@ -258,7 +260,9 @@ def plotData(args):
       index: the indexes of the datadump
       data : the data
     '''
+    global prevDt
     global prevTime
+    
     index, time, data = args
     
     print('Plotting {}'.format(index))
@@ -269,18 +273,25 @@ def plotData(args):
 
     lines['r-Sigma'].set_ydata(data['Sigma'])
 
+    newDt = time - prevTime
+    prevTime = time
+    if newDt == 0:
+        dt = prevDt
+    else:
+        dt = newDt
+        prevDt = dt
+    
+    print('dt: ', dt)
     for ind, line in lines['Sigma-T']:
         x = data['Sigma'][ind]
         y = data['T'][ind]
         line.set_xdata(x)
         line.set_ydata(y)
-        
-        print(ind, (time - prevTime) * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
+
+        print(ind, dt * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
 
     # ax11.legend()
     fig.suptitle('$t = {:.2f}s$, iteration {}'.format(time, index))
-    # update prevTime
-    prevTime = time
 
 def onClick(data, event):
     data.pause ^= True
