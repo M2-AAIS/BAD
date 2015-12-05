@@ -286,6 +286,9 @@ def onKey(data, event):
         data.offset -= 1
     elif event.key == 'right':
         data.offset += 1
+    elif event.key == 'space':
+        data.pause ^= True
+        data.offset = 0
     else:
         print('Unsupported key', event.key)
         
