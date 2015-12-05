@@ -250,14 +250,17 @@ def init(ic, crit_pts, s_curves, initial_data):
     ax22.legend(loc='upper right')
     ax22.grid()
 
+prevTime = 0
+
 def plotData(args):
     ''' Update with the new data. Parameters:
     args: array that contains
       index: the indexes of the datadump
       data : the data
     '''
-
+    global prevTime
     index, time, data = args
+    
     print('Plotting {}'.format(index))
     lines['r-T'].set_ydata(data['T'])
     # lines['r-T'].set_label('$t = {:.2}s$'.format(time))
@@ -271,10 +274,13 @@ def plotData(args):
         y = data['T'][ind]
         line.set_xdata(x)
         line.set_ydata(y)
-        print(ind, 1.38e-3 * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
+        
+        print(ind, (time - prevTime) * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
 
     # ax11.legend()
     fig.suptitle('$t = {:.2f}s$, iteration {}'.format(time, index))
+    # update prevTime
+    prevTime = time
 
 def onClick(data, event):
     data.pause ^= True
