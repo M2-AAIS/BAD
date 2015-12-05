@@ -155,8 +155,10 @@ contains
     real(kind = x_precision), intent(in)        :: dt
 
     real(kind = x_precision), dimension(n_cell) :: dtemp, rhs
-    real(kind = x_precision), dimension(n_cell) :: f0, f1
+    real(kind = x_precision), dimension(n_cell) :: f0, fT
     real(kind = x_precision) :: maxi
+
+    
 
     dtemp     = s%T * 1.e-3_x_precision
     s_deriv   = s
@@ -167,9 +169,10 @@ contains
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
     
     f0 = f(s)
-    f1 = (f(s_deriv) - f(s)) / dtemp
+    fT = (f(s_deriv) - f(s)) / dtemp
 
-    rhs = dt*f0 * (1._x_precision + dt*f1)
+    ! rhs = f0 / fT * (exp(fT*dt) - 1)
+    rhs = dt*f0 * (1._x_precision + 0.5_x_precision*dt*fT)
     
     s%T = s%T + rhs
 
