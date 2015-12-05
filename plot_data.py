@@ -26,6 +26,8 @@ parser.add_argument('--s-curves-dir', metavar='dir', nargs=1,
                     help='S curves directory (default: %(default)s).', default='s_curves')
 parser.add_argument('--reread', action='store_true', default=False,
                     help='Reread file when fully read.')
+parser.add_argument('--interval', default=0, type=int,
+                    help='Interval (in ms) between each frames (default %(default)s)')
 args = parser.parse_args()
 
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
@@ -41,6 +43,9 @@ class Data:
         self.file = open(self.filename, 'r')
         # read ahead one line
         self.lastLineRead = self.file.readline()
+        self.pause = False
+        self.reread = False
+        self.offset = None
 
     def getChunk(self):
         '''Get a chunk (niter, time, headers + data)'''
@@ -86,14 +91,18 @@ class Data:
         while not eof:
             self.data[niter] = data
             self.times[niter] = time
-            if noRestriction or niter in self.restrictTo:                
+            
+            if self.pause:
+                i = niter - 1 + self.offset
+                yield (i, self.times[i], self.data[i])
+            elif noRestriction or niter in self.restrictTo:
                 yield (niter, time, data)
 
-            # if we have a restriction list and the current iteration
-            # is after the last accepted item, stop reading the file
-            if not noRestriction and niter > self.restrictTo[-1]:
-                break
-            niter, time, headers, data, eof = self.getChunk()
+                # if we have a restriction list and the current iteration
+                # is after the last accepted item, stop reading the file
+                if not noRestriction and niter > self.restrictTo[-1]:
+                    break
+                niter, time, headers, data, eof = self.getChunk()
             if eof and self.reread:
                 self.file.close()
                 self.file = open(self.filename, 'r')
@@ -109,9 +118,16 @@ class Data:
                 dataKeys = [key for key in self.data.keys() if key in self.restrictTo]
                 
             dataKeys.sort()
+            
             while True:
+                prevKey = dataKeys[-1]
                 for key in dataKeys:
-                    yield (key, self.times[key], self.data[key])
+                    if self.pause:
+                        i = niter - 1 + self.offset
+                        yield (i, self.times[i], self.data[i])
+                    else:
+                        yield (key, self.times[key], self.data[key])
+                    prevKey = key
 
 
     def get(self):
@@ -243,11 +259,25 @@ def plotData(args):
         y = data['T'][ind]
         line.set_xdata(x)
         line.set_ydata(y)
+        print(ind, data['Q_+'][ind] - data['Q_-'][ind])
 
     # ax11.legend()
-
     fig.suptitle('$t = {:.2f}s$, iteration {}'.format(time, index))
+
+def onClick(data, event):
+    data.pause ^= True
+    data.offset = 0
+    print(data.pause)
     
+def onKey(data, event):
+    if event.key == 'left':
+        data.offset -= 1
+    elif event.key == 'right':
+        data.offset += 1
+    else:
+        print('Unsupported key', event.key)
+        
+
 if __name__ == '__main__':
     print('Reading initial conditions')
     ic = pd.read_csv('CI.dat', delim_whitespace=True)
@@ -281,7 +311,13 @@ if __name__ == '__main__':
 
         data = simulData
 
-        ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun, interval=1)
+        onClickHandler = lambda event: onClick(data, event)
+        onKeyHandler = lambda event: onKey(data, event)
+        
+        fig.canvas.mpl_connect('button_press_event', onClickHandler)
+        fig.canvas.mpl_connect('key_press_event', onKeyHandler)
+        ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun,
+                                      interval=args.interval)
         if not args.no_video:
             # temporaly deactivate looping for the video
             simulData.loop = False
