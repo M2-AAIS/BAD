@@ -7,8 +7,8 @@ import numpy as np
 from itertools import tee
 
 parser = argparse.ArgumentParser(description='Plot data from output of the black hole simulation.')
-parser.add_argument('--no-video', action='store_true',
-                    help='do not save a video (faster)')
+parser.add_argument('--video', action='store_true',
+                    help='save a video (MUCH slower)')
 parser.add_argument('--dont-loop', action='store_false', dest='loop', default=True,
                     help='prevent from looping infinitely')
 parser.add_argument('--video-file', metavar='file', default='evolution.mp4',
@@ -271,7 +271,7 @@ def plotData(args):
         y = data['T'][ind]
         line.set_xdata(x)
         line.set_ydata(y)
-        print(ind, data['Q_+'][ind] - data['Q_-'][ind])
+        print(ind, 1.38e-3 * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
 
     # ax11.legend()
     fig.suptitle('$t = {:.2f}s$, iteration {}'.format(time, index))
@@ -290,7 +290,9 @@ def onKey(data, event):
         'right': lambda: mod(+1),
         ' ': lambda: onClick(data, ''),
         'ctrl+left': lambda: mod(-10),
-        'ctrl+right': lambda: mod(+10)
+        'ctrl+right': lambda: mod(+10),
+        'shift+ctrl+left': lambda: mod(-1000),
+        'shift+ctrl+right': lambda: mod(+1000),
         }
     if event.key in behaviour:
         behaviour[event.key]()
@@ -338,7 +340,7 @@ if __name__ == '__main__':
         fig.canvas.mpl_connect('key_press_event', onKeyHandler)
         ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun,
                                       interval=args.interval)
-        if not args.no_video:
+        if args.video:
             # temporaly deactivate looping for the video
             simulData.loop = False
             ani.save(args.video_file, writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
