@@ -282,13 +282,18 @@ def onClick(data, event):
     print(data.pause)
     
 def onKey(data, event):
-    if event.key == 'left':
-        data.offset -= 1
-    elif event.key == 'right':
-        data.offset += 1
-    elif event.key == ' ':
-        data.pause ^= True
-        data.offset = 0
+    def mod(amount):
+        data.offset += amount
+        
+    behaviour = {
+        'left': lambda: mod(-1),
+        'right': lambda: mod(+1),
+        ' ': lambda: onClick(data, ''),
+        'ctrl+left': lambda: mod(-10),
+        'ctrl+right': lambda: mod(+10)
+        }
+    if event.key in behaviour:
+        behaviour[event.key]()
     else:
         print('Unsupported key "{}"'.format(event.key))
         
