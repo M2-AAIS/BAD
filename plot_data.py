@@ -88,27 +88,39 @@ class Data:
             
         i = 0
         niter, time, headers, data, eof = self.getChunk()
-        while not eof:
-            self.data[niter] = data
-            self.times[niter] = time
-            
+        while not eof:            
             if self.pause:
-                i = niter - 1 + self.offset
+                i = max(0, niter - 1 + self.offset)
                 yield (i, self.times[i], self.data[i])
             elif noRestriction or niter in self.restrictTo:
                 yield (niter, time, data)
 
+            readAhead = 0
+            if self.pause and self.offset:
+                readAhead += self.offset
+            elif not self.pause:
+                readAhead = 1
+
+            while readAhead > 0 and not eof:
                 # if we have a restriction list and the current iteration
                 # is after the last accepted item, stop reading the file
                 if not noRestriction and niter > self.restrictTo[-1]:
                     break
+
                 niter, time, headers, data, eof = self.getChunk()
-            if eof and self.reread:
-                self.file.close()
-                self.file = open(self.filename, 'r')
-                self.lastLineRead = self.file.readline()
-                eof = False
+                self.data[niter] = data
+                self.times[niter] = time
+
+                self.offset = 0
                 
+                readAhead -= 1
+
+                if eof and self.reread:
+                    self.file.close()
+                    self.file = open(self.filename, 'r')
+                    self.lastLineRead = self.file.readline()
+                    eof = False
+
 
         # if the loop flag is activated, loop over saved data
         if self.loop:
