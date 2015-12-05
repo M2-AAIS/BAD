@@ -29,7 +29,7 @@ contains
     write(unit, fmt=*) '# ', time
     write(unit, fmt='(19(a16))') 'r', 'Omega*', 'nu', 'v', 'T', 'P_rad',&
          'P_gas', 'beta', 'cs', 'H', 'rho', 'S', 'Sigma', 'Fz', 'M_dot', 'Cv',&
-         'Q_+', 'Q_−', 'f'
+         'Q_+', 'Q_-', 'f'
 
     state_dim = s
     call dim_adim(1, state_dim)
