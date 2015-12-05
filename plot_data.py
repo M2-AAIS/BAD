@@ -90,7 +90,7 @@ class Data:
         niter, time, headers, data, eof = self.getChunk()
         while not eof:            
             if self.pause:
-                i = max(0, niter - 1 + self.offset)
+                i = max(0, niter + self.offset)
                 yield (i, self.times[i], self.data[i])
             elif noRestriction or niter in self.restrictTo:
                 yield (niter, time, data)
@@ -286,11 +286,11 @@ def onKey(data, event):
         data.offset -= 1
     elif event.key == 'right':
         data.offset += 1
-    elif event.key == 'space':
+    elif event.key == ' ':
         data.pause ^= True
         data.offset = 0
     else:
-        print('Unsupported key', event.key)
+        print('Unsupported key "{}"'.format(event.key))
         
 
 if __name__ == '__main__':
