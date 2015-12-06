@@ -5,12 +5,19 @@ module mod_s_curve
   implicit none
 
   real(kind = x_precision), dimension(nb_it) :: temperature ! Temperatures for which we need to solve the dichotomy
+  real(kind = x_precision)                   :: eps         ! Precision required for the dichotomy
+  real(kind = x_precision)                   :: S_min       ! Minimum surface density limit
+  real(kind = x_precision)                   :: S_max       ! Maximum surface density limit
 
 contains
   !-------------------------------------------------------------------------
   ! SUBROUTINES :
   !               make_temperature      : : Create the temperature array needed for everyone else
   !                                     <-- input : Lower and upper bound for the temperature coordinate of the S curve 
+  !                                         --> output :
+
+  !               set_conditions        : : Set conditions for the resolution
+  !                                     <-- input : Resolution treshold, lower and upper bound for the Sigma coordinate of the S curve
   !                                         --> output :
 
   !               curve                 : : fake main
@@ -42,30 +49,42 @@ contains
 
   !-------------------------------------------------------------------------
 
-  subroutine make_temperature(T_min, T_max)
+  subroutine make_temperature(Tmin, Tmax)
     implicit none
 
-    real(kind = x_precision), intent(in) :: T_min
-    real(kind = x_precision), intent(in) :: T_max
+    real(kind = x_precision), intent(in) :: Tmin
+    real(kind = x_precision), intent(in) :: Tmax
     !------------------------------------------------------------------------
 
     real(kind = x_precision) :: dt
     integer                  :: i
 
-    dt = (T_max - T_min) / (nb_it - 1)
+    dt = (Tmax - Tmin) / (nb_it - 1)
 
     do i = 1, nb_it
-      temperature(i) = dt * (i-1) + T_min
+      temperature(i) = dt * (i-1) + Tmin
     enddo
 
   end subroutine make_temperature
 
-  subroutine curve(eps, S_min, S_max, temperature_c, sigma_c)
+
+  subroutine set_conditions(eps_in, Smin, Smax)
     implicit none
 
-    real(kind = x_precision),                    intent(in)  :: eps            ! Precision required for the dichotomy
-    real(kind = x_precision),                    intent(in)  :: S_min          ! Minimum surface density limit
-    real(kind = x_precision),                    intent(in)  :: S_max          ! Maximum surface density limit
+    real(kind = x_precision), intent(in) :: eps_in
+    real(kind = x_precision), intent(in) :: Smin
+    real(kind = x_precision), intent(in) :: Smax
+    !------------------------------------------------------------------------
+
+    eps   = eps_in
+    S_min = Smin
+    S_max = Smax
+
+  end subroutine set_conditions
+
+
+  subroutine curve(temperature_c, sigma_c)
+    implicit none
 
     real(kind = x_precision), dimension(n_cell), intent(out) :: temperature_c  ! Temperature for the critical point
     real(kind = x_precision), dimension(n_cell), intent(out) :: sigma_c        ! Surface density for the critical point
@@ -113,13 +132,13 @@ contains
         optical_depth = 1
 
         ! S found with the dichotomy approach
-        sigma_t_thick(i) = dichotomy(k, S_min, S_max, eps, temperature(i), optical_depth)
+        sigma_t_thick(i) = dichotomy(k, i, optical_depth)
 
         ! Optical thin case (tau < 1)
         optical_depth = 0
 
         ! S found with the dichotomy approach
-        sigma_t_thin(i)  = dichotomy(k, S_min, S_max, eps, temperature(i), optical_depth)
+        sigma_t_thin(i)  = dichotomy(k, i, optical_depth)
       enddo
 
       ! For the first critical point (the one at the right of the S shape)
@@ -399,16 +418,15 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind = x_precision) function dichotomy(k, S_min, S_max, eps, T, optical_depth)
+  real(kind = x_precision) function dichotomy(k, i, optical_depth)
     implicit none
 
-    real(kind = x_precision), intent(in) :: S_min, S_max
-    real(kind = x_precision), intent(in) :: eps ! Required precision
-    real(kind = x_precision), intent(in) :: T ! Temperature for which to solve the dichotomy
-    integer,                  intent(in) :: k
+    integer,                  intent(in) :: k ! Position in the disk, to get r/Omega
+    integer,                  intent(in) :: i ! Iteration counter, to get the temperature
     integer,                  intent(in) :: optical_depth
     !-------------------------------------------------------------------------
     integer                  :: j
+    real(kind = x_precision) :: T ! Temperature for which to solve the dichotomy
     real(kind = x_precision) :: tau_eff
     real(kind = x_precision) :: Smin     ! Low point
     real(kind = x_precision) :: Smax     ! High point
@@ -417,6 +435,8 @@ contains
     real(kind = x_precision) :: f_max    ! Q+ − Q− at the high point
     real(kind = x_precision) :: f_center ! Q+ − Q− at the middle point
     !-------------------------------------------------------------------------
+
+    T = temperature(i)
 
     Smin                 = S_min
     Smax                 = S_max
