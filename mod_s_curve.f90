@@ -190,7 +190,7 @@ contains
     integer :: i
 
     i = 1
-    do while (sigma_real_thick(i) < sigma_real_thick(i+1) .and. i < nb_it - 1)
+    do while (sigma_real_thick(i) < sigma_real_thick(i+1))
       index_fcp     = i
       sigma_c_thick = sigma_real_thick(i)
       i             = i + 1
@@ -220,7 +220,7 @@ contains
     i = max(1, index_fcp)
 
     ! The change occurs when the difference of sigma changes its sign
-    do while (sigma_t_thick(i) > sigma_t_thin(i) .and. i < nb_it)
+    do while (sigma_t_thick(i) > sigma_t_thin(i))
       i = i + 1
     end do
 
