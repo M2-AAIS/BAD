@@ -110,13 +110,13 @@ contains
     real(kind = x_precision)                    :: temp_c_thick
     real(kind = x_precision), dimension(n_cell) :: sigma_thick
     real(kind = x_precision), dimension(n_cell) :: temp_thick
-    real(kind = x_precision), dimension(nb_it)  :: tau_thick      ! Optical thickness for the first critical point
+    real(kind = x_precision), dimension(n_cell) :: tau_thick      ! Optical thickness for the first critical point
     integer                                     :: index_scp
     real(kind = x_precision)                    :: sigma_c_thin
     real(kind = x_precision)                    :: temp_c_thin
     real(kind = x_precision), dimension(n_cell) :: sigma_thin
     real(kind = x_precision), dimension(n_cell) :: temp_thin
-    real(kind = x_precision), dimension(nb_it)  :: tau_thin       ! Optical thickness for the second critical point
+    real(kind = x_precision), dimension(n_cell) :: tau_thin       ! Optical thickness for the second critical point
 
     !------------------------------------------------------------------------
     ! Loop over values of r/x (radius)
