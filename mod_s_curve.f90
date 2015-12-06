@@ -173,7 +173,7 @@ contains
 
     enddo
 
-    call write_critical_points(sigma_thin, temp_thin, sigma_thick, temp_thick, tau_thin, tau_thick)
+    call write_critical_points(sigma_thin, temp_thin, tau_thin, sigma_thick, temp_thick, tau_thick)
 
   end subroutine curve
 
@@ -292,15 +292,15 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine to save in a file the critical points
   !-------------------------------------------------------------------------
-  subroutine write_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, tau_thin, tau_thick)
+  subroutine write_critical_points(sigma_c_thin, temp_c_thin, tau_thin, sigma_c_thick, temp_c_thick, tau_thick)
 
     implicit none
 
     real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thin
     real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thin
+    real(kind = x_precision),dimension(n_cell),intent(in) :: tau_thin
     real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thick
     real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thick
-    real(kind = x_precision),dimension(n_cell),intent(in) :: tau_thin
     real(kind = x_precision),dimension(n_cell),intent(in) :: tau_thick
     !-----------------------------------------------------------------------
     integer             :: i
@@ -316,8 +316,8 @@ contains
                                      'Temp_thick','Sigma_thick','Tau_thin','Tau_thick'
 
     do i=1, n_cell
-      write(fid_4,'(7(e16.6e2))') r_state%r(i), temp_c_thin(i),sigma_c_thin(i),&
-                                                 temp_c_thick(i),sigma_c_thick(i),tau_thin(i),tau_thick(i)
+      write(fid_4,'(7(e16.6e2))') r_state%r(i), temp_c_thin(i), sigma_c_thin(i), tau_thin(i),&
+                                                temp_c_thick(i), sigma_c_thick(i), tau_thick(i)
     end do
 
     close(fid_4)
