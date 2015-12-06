@@ -54,106 +54,104 @@ contains
 
     real(kind = x_precision),dimension(n_cell),intent(out) :: temperature    ! Temperature for the critical point
     real(kind = x_precision),dimension(n_cell),intent(out) :: s              ! Surface density for the critical point
- !  __________________________________________________________________________
-    integer                                                :: i     = 0
-    integer                                                :: j     = 0
-    integer                                                :: k     = 0
-    integer                                                :: file_length = 1       ! Number of lines of the data saving file
+    !------------------------------------------------------------------------
+    integer                                                :: i,j,k
+    integer                                                :: file_length    ! Number of lines of the data saving file
 
- ! For the temperature and s
+    ! For the temperature and s
     real(kind = x_precision)                               :: temp
     real(kind = x_precision)                               :: Smin
     real(kind = x_precision)                               :: Smax
-    real(kind = x_precision)                               :: Sigma                 ! S
+    real(kind = x_precision)                               :: Sigma          ! S
 
-    real(kind = x_precision)                               :: omega                 ! Angular velocity
-    real(kind = x_precision)                               :: r                     ! Radius
-    real(kind = x_precision)                               :: f                     ! Q+ - Q-
-    real(kind=x_precision)                                 :: tau_eff               ! Effective optical depth
-    integer                                                :: optical_depth         ! Indicator for the optical thickness
+    real(kind = x_precision)                               :: omega          ! Angular velocity
+    real(kind = x_precision)                               :: r              ! Radius
+    real(kind = x_precision)                               :: f              ! Q+ - Q-
+    real(kind = x_precision)                               :: tau_eff        ! Effective optical depth
+    integer                                                :: optical_depth  ! Indicator for the optical thickness
 
- ! For the separate curves given the thickness
+    ! For the separate curves given the thickness
     real(kind = x_precision),dimension(nb_it)              :: temp_t_thick
     real(kind = x_precision),dimension(nb_it)              :: sigma_t_thick
     real(kind = x_precision),dimension(nb_it)              :: temp_t_thin
     real(kind = x_precision),dimension(nb_it)              :: sigma_t_thin
-    real(kind = x_precision),dimension(nb_it)              :: temp_real             ! Temperature for the S curve
-    real(kind = x_precision),dimension(nb_it)              :: sigma_real            ! Surface density for the S curve
+    real(kind = x_precision),dimension(nb_it)              :: temp_real      ! Temperature for the S curve
+    real(kind = x_precision),dimension(nb_it)              :: sigma_real     ! Surface density for the S curve
 
- ! For the output file
+    ! For the output file
     character(len = 8)                                     :: number_of_cell
     character(len = 64)                                    :: fname_tot
     integer                                                :: fid_tot
     integer                                                :: ios
 
- ! For the critical points
+    ! For the critical points
     integer                                                :: index_fcp
     real(kind = x_precision)                               :: sigma_c_thick
     real(kind = x_precision)                               :: temp_c_thick
     real(kind = x_precision),dimension(n_cell)             :: sigma_thick
     real(kind = x_precision),dimension(n_cell)             :: temp_thick
-    real(kind = x_precision),dimension(nb_it)              :: tau_thick             ! Optical thickness for the first critical point
+    real(kind = x_precision),dimension(nb_it)              :: tau_thick      ! Optical thickness for the first critical point
     integer                                                :: index_scp
     real(kind = x_precision)                               :: sigma_c_thin
     real(kind = x_precision)                               :: temp_c_thin
     real(kind = x_precision),dimension(n_cell)             :: sigma_thin
     real(kind = x_precision),dimension(n_cell)             :: temp_thin
-    real(kind = x_precision),dimension(nb_it)              :: tau_thin              ! Optical thickness for the second critical point
- !____________________________________________________________________________________
+    real(kind = x_precision),dimension(nb_it)              :: tau_thin       ! Optical thickness for the second critical point
 
- ! Loop for n_cell values of x (radius)
- !____________________________________________________________________________________
+    !------------------------------------------------------------------------
+    ! Loop for n_cell values of x (radius)
+    !------------------------------------------------------------------------
 
     do k = 1, n_cell
       file_length = 0
 
-       r     = r_state%r(k)
-       omega = x_state%Omega(k)
+      r     = r_state%r(k)
+      omega = x_state%Omega(k)
 
-       ! For each point of the S curve
-       do i = 1, nb_it
-          temp          = dt * (i-1) + t_min   ! Chosing the temperature value
+      ! For each point of the S curve
+      do i = 1, nb_it
+        temp          = dt * (i-1) + t_min   ! Chosing the temperature value
 
-          ! Optical thick case (tau >= 1)
-          optical_depth = 1
+        ! Optical thick case (tau >= 1)
+        optical_depth = 1
 
-          ! S range
-          Smin          = S_min
-          Smax          = S_max
+        ! S range
+        Smin          = S_min
+        Smax          = S_max
 
-          ! S found with the dichotomy approach
-          sigma         = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
+        ! S found with the dichotomy approach
+        sigma         = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
 
-          temp_t_thick(i)  = temp
-          sigma_t_thick(i) = sigma
+        temp_t_thick(i)  = temp
+        sigma_t_thick(i) = sigma
 
 
-          ! Optical thin case (tau < 1)
-          optical_depth = 0
+        ! Optical thin case (tau < 1)
+        optical_depth = 0
 
-          ! S range
-          Smin          = S_min
-          Smax          = S_max
+        ! S range
+        Smin          = S_min
+        Smax          = S_max
 
-          ! S found with the dichotomy approach
-          sigma         = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
+        ! S found with the dichotomy approach
+        sigma         = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
 
-          temp_t_thin(i)   =  temp
-          sigma_t_thin(i)  =  sigma
+        temp_t_thin(i)   =  temp
+        sigma_t_thin(i)  =  sigma
 
-        enddo
+      enddo
 
-       ! For the first critical point (the one one the right of the S shape)
-       call first_critical_point(sigma_t_thick, temp_t_thick, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
+      ! For the first critical point (the one one the right of the S shape)
+      call first_critical_point(sigma_t_thick, temp_t_thick, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
 
-       ! For the second critical point (the one one the left of the S shape)
-       call second_critical_point(sigma_t_thick, sigma_t_thin, temp_t_thick,&
-        index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
+      ! For the second critical point (the one one the left of the S shape)
+      call second_critical_point(sigma_t_thick, sigma_t_thin, temp_t_thick,&
+       index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
 
-       ! Combining the two separate curves into one that forms the S shape
-       call build_s_curve(sigma_t_thick, sigma_t_thin, temp_t_thick, nb_it, index_scp, sigma_real, temp_real)
+      ! Combining the two separate curves into one that forms the S shape
+      call build_s_curve(sigma_t_thick, sigma_t_thin, temp_t_thick, nb_it, index_scp, sigma_real, temp_real)
 
-       call display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, k)
+      call display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, k)
 
 
       ! Saving the DIMENSIONED values of S and T for the S curve in a file
@@ -164,8 +162,8 @@ contains
       open(fid_tot,file  = fname_tot, action='write',&
           status = 'replace', iostat = ios)
       if (ios /= 0) then
-         write(*,*)"Error while opening the ", fname_tot," file."
-         stop
+        write(*,*)"Error while opening the ", fname_tot," file."
+        stop
       endif
 
       write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
@@ -201,7 +199,7 @@ contains
       call variables(temp_c_thick, sigma_c_thick, omega, f, optical_depth, tau_eff)
       tau_thick(k)   = tau_eff
       call variables(temp_c_thin, sigma_c_thin, omega, f, optical_depth, tau_eff)
-      tau_thin(k)      = tau_eff
+      tau_thin(k)    = tau_eff
 
     enddo
 
@@ -224,7 +222,7 @@ contains
     integer                                  ,intent(out) :: index_fcp
     real(kind = x_precision)                 ,intent(out) :: sigma_c_thick
     real(kind = x_precision)                 ,intent(out) :: temp_c_thick
- !____________________________________________________________________________________
+    !-----------------------------------------------------------------------
 
     integer                                               :: i
 
@@ -255,7 +253,8 @@ contains
     integer                                  ,intent(out) :: index_scp
     real(kind = x_precision)                 ,intent(out) :: sigma_c_thin
     real(kind = x_precision)                 ,intent(out) :: temp_c_thin
- !____________________________________________________________________________________
+    !-----------------------------------------------------------------------
+
     integer                                               :: i
 
 
@@ -287,8 +286,9 @@ contains
 
     real(kind = x_precision),dimension(nb_it),intent(out) :: sigma_real
     real(kind = x_precision),dimension(nb_it),intent(out) :: temp_real
- !____________________________________________________________________________________
-    integer::i = 0
+    !-----------------------------------------------------------------------
+
+    integer                                               :: i
 
     do i = 1,index_scp
       sigma_real(i) = sigma_real_thick(i)
@@ -340,24 +340,24 @@ contains
     real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thick
     real(kind = x_precision),dimension(n)    ,intent(in):: tau_thin
     real(kind = x_precision),dimension(n)    ,intent(in):: tau_thick
- !____________________________________________________________________________________
+    !-----------------------------------------------------------------------
     integer                                             :: i
     integer                                             :: fid_4 = 11
     character(len = 64)                                 :: fname_4
 
-    !------------------------------------------------------------------------
+    !-----------------------------------------------------------------------
 
-     fname_4 = 'critical_points/file.dat'
+    fname_4 = 'critical_points/file.dat'
 
-     open(fid_4,file  = fname_4, status='unknown',action='readwrite')
-     write(fid_4,'(7(A16))') 'Radius','Temp_thin','Sigma_thin',&
-                                      'Temp_thick','Sigma_thick','Tau_thin','Tau_thick'
+    open(fid_4,file  = fname_4, status='unknown',action='readwrite')
+    write(fid_4,'(7(A16))') 'Radius','Temp_thin','Sigma_thin',&
+                                     'Temp_thick','Sigma_thick','Tau_thin','Tau_thick'
 
-        do i=1, n
-           write(fid_4,'(7(e16.6e2))') radius(i), temp_c_thin(i),sigma_c_thin(i),&
-                                                  temp_c_thick(i),sigma_c_thick(i),tau_thin(i),tau_thick(i)
-        end do
-     close(fid_4)
+      do i=1, n
+        write(fid_4,'(7(e16.6e2))') radius(i), temp_c_thin(i),sigma_c_thin(i),&
+                                                 temp_c_thick(i),sigma_c_thick(i),tau_thin(i),tau_thick(i)
+      end do
+    close(fid_4)
 
   end subroutine write_critical_points
 
@@ -446,7 +446,7 @@ contains
     real(kind=x_precision)               :: f_min
     real(kind=x_precision)               :: f_max
     real(kind=x_precision)               :: f_center
-    real(kind=x_precision)               :: S_center = 0._x_precision
+    real(kind=x_precision)               :: S_center
 
 
     !-------------------------------------------------------------------------
@@ -459,8 +459,10 @@ contains
     Smin                 = S_min
     Smax                 = S_max
 
-    S_center             = (Smin+Smax)/2.
+    S_center             = (Smin + Smax) / 2._x_precision
+
     j = 0
+
     call variables(T, Smin, Omega, f_min, optical_depth, tau_eff)
 
     call variables(T, Smax, Omega, f_max, optical_depth, tau_eff)
@@ -491,7 +493,7 @@ contains
 
         endif
 
-        S_center = (Smin + Smax) * 1._x_precision / 2._x_precision
+        S_center = (Smin + Smax) / 2._x_precision
         j = j + 1
 
       end do iteration
