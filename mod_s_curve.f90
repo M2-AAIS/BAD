@@ -53,7 +53,6 @@ contains
     real(kind = x_precision)                               :: Smin
     real(kind = x_precision)                               :: Smax
 
-    real(kind = x_precision)                               :: omega          ! Angular velocity
     real(kind = x_precision)                               :: f              ! Q+ - Q-
     real(kind = x_precision)                               :: tau_eff        ! Effective optical depth
     integer                                                :: optical_depth  ! Indicator for the optical thickness
@@ -89,8 +88,6 @@ contains
     !------------------------------------------------------------------------
 
     do k = 1, n_cell
-      omega = x_state%Omega(k)
-
       ! For each point of the S curve
       do i = 1, nb_it
         ! Optical thick case (tau >= 1)
@@ -101,7 +98,7 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma_t_thick(i) = dichotomy(Smin, Smax, eps, temperature(i), omega, optical_depth)
+        sigma_t_thick(i) = dichotomy(k, Smin, Smax, eps, temperature(i), optical_depth)
 
         ! Optical thin case (tau < 1)
         optical_depth = 0
@@ -111,7 +108,7 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma_t_thin(i)  = dichotomy(Smin, Smax, eps, temperature(i), omega, optical_depth)
+        sigma_t_thin(i)  = dichotomy(k, Smin, Smax, eps, temperature(i), optical_depth)
 
       enddo
 
@@ -144,7 +141,7 @@ contains
         temp_real(j)  =  temp_real(j)
         sigma_real(j) =  sigma_real(j)
 
-        call variables(temp_real(j), sigma_real(j), omega, f, optical_depth, tau_eff)
+        call variables(k, temp_real(j), sigma_real(j), f, optical_depth, tau_eff)
 
         temp_real(j)  =  temp_real(j) * state_0%T_0
         sigma_real(j) =  sigma_real(j) * state_0%S_0
@@ -164,9 +161,9 @@ contains
       temp_thin(k)   =  temp_c_thin * state_0%T_0
       sigma_thin(k)  =  sigma_c_thin * state_0%S_0
 
-      call variables(temp_c_thick, sigma_c_thick, omega, f, optical_depth, tau_eff)
+      call variables(k, temp_c_thick, sigma_c_thick, f, optical_depth, tau_eff)
       tau_thick(k)   = tau_eff
-      call variables(temp_c_thin, sigma_c_thin, omega, f, optical_depth, tau_eff)
+      call variables(k, temp_c_thin, sigma_c_thin, f, optical_depth, tau_eff)
       tau_thin(k)    = tau_eff
 
     enddo
@@ -326,17 +323,19 @@ contains
 
   !-------------------------------------------------------------------------
   !Subroutine in order to compute variables H, rho, cs, nu, Q_plus, Q_minus,
-  !K_ff, K_e, tau_eff, E_ff,Fz given T, Sigma and Omega
+  !K_ff, K_e, tau_eff, E_ff,Fz given T, Sigma and k, the position
   !------------------------------------------------------------------------
-  subroutine variables(T, Sigma, Omega, f, optical_depth, tau_eff)
+  subroutine variables(k, T, Sigma, f, optical_depth, tau_eff)
     implicit none
 
-    real(kind = x_precision),intent(in)  :: T,Sigma,Omega
+    real(kind = x_precision),intent(in)  :: T,Sigma
     integer, intent(in)                  :: optical_depth
+    integer, intent(in)                  :: k
     real(kind = x_precision),intent(out) :: f,tau_eff
     real(kind = x_precision)             :: coeff_a,coeff_b,coeff_c
     real(kind = x_precision)             :: delta
 
+    real(kind = x_precision)             :: Omega
     real(kind = x_precision)             :: H
     real(kind = x_precision)             :: rho
     real(kind = x_precision)             :: cs
@@ -349,6 +348,7 @@ contains
     real(kind = x_precision)             :: Q_minus
     !------------------------------------------------------------------------
 
+    Omega   = x_state%Omega(k)
     coeff_a = (Omega * state_0%Omega_0)**2 * Sigma * state_0%S_0 / 2._x_precision
     coeff_b = (-1._x_precision/3._x_precision) * cst_rad * (T * state_0%T_0)**4 / state_0%H_0
     coeff_c = - params%RTM * T * Sigma * state_0%S_0 / (2._x_precision * state_0%H_0**2)
@@ -392,14 +392,14 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind = x_precision) function dichotomy(S_min, S_max, eps, T, omega, optical_depth)
+  real(kind = x_precision) function dichotomy(k, S_min, S_max, eps, T, optical_depth)
     implicit none
 
     real(kind = x_precision),intent(inout) :: S_min,S_max
     real(kind = x_precision),intent(in)    :: eps
     real(kind = x_precision),intent(in)    :: T
-    real(kind = x_precision),intent(in)    :: omega
-    integer,intent(in)                     :: optical_depth
+    integer,                 intent(in)    :: k
+    integer,                 intent(in)    :: optical_depth
 
     integer                                :: j
     real(kind = x_precision)               :: tau_eff
@@ -424,9 +424,9 @@ contains
 
     j = 0
 
-    call variables(T, Smin, Omega, f_min, optical_depth, tau_eff)
+    call variables(k, T, Smin, f_min, optical_depth, tau_eff)
 
-    call variables(T, Smax, Omega, f_max, optical_depth, tau_eff)
+    call variables(k, T, Smax, f_max, optical_depth, tau_eff)
 
     !write(*,*)'fmin = ',f_min
     !write(*,*)'fmax = ',f_max
@@ -437,11 +437,11 @@ contains
     else if( f_max * f_min < 0.) then
       iteration:do while (dabs(Smax - Smin) >= eps .and. j < max_it)
 
-        call variables(T, Smin, Omega, f_min, optical_depth, tau_eff)
+        call variables(k, T, Smin, f_min, optical_depth, tau_eff)
 
-        call variables(T, Smax, Omega, f_max, optical_depth, tau_eff)
+        call variables(k, T, Smax, f_max, optical_depth, tau_eff)
 
-        call variables(T, S_center, Omega, f_center, optical_depth, tau_eff)
+        call variables(k, T, S_center, f_center, optical_depth, tau_eff)
 
         if (f_min * f_center > 0.) then
 
