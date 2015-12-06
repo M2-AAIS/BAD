@@ -305,8 +305,8 @@ contains
     fname_4 = 'critical_points/file.dat'
 
     open(fid_4,file  = fname_4, status='unknown',action='readwrite')
-    write(fid_4,'(7(A16))') 'Radius','Temp_thin','Sigma_thin',&
-                                     'Temp_thick','Sigma_thick','Tau_thin','Tau_thick'
+    write(fid_4,'(7(A16))') 'Radius','Temp_thin','Sigma_thin','Tau_thin',&
+                                     'Temp_thick','Sigma_thick','Tau_thick'
 
     do i=1, n_cell
       write(fid_4,'(7(e16.6e2))') r_state%r(i), temp_c_thin(i), sigma_c_thin(i), tau_thin(i),&
