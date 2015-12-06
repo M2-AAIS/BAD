@@ -155,12 +155,11 @@ contains
       
       close(fid_tot)
 
-      ! ADIMENSIONED critical T and S [OUTPUT]
-
+      ! ADIMENSIONED critical T and Sigma [OUTPUT]
       temperature_c(k) = temp_c_thick
       sigma_c(k)       = sigma_c_thick 
 
-      ! DIMENSIONED critical T and S
+      ! DIMENSIONED critical T and Sigma
       temp_thick(k)  =  temp_c_thick * state_0%T_0
       sigma_thick(k) =  sigma_c_thick * state_0%S_0
       temp_thin(k)   =  temp_c_thin * state_0%T_0
@@ -174,8 +173,7 @@ contains
 
     enddo
 
-    call write_critical_points(n_cell, r_state%r, sigma_thin, temp_thin, sigma_thick, temp_thick,&
-                                                  tau_thin, tau_thick)
+    call write_critical_points(sigma_thin, temp_thin, sigma_thick, temp_thick, tau_thin, tau_thick)
 
   end subroutine curve
 
@@ -286,7 +284,6 @@ contains
     write(*,*)'****************************************'
     write(*,"(' Optically thin (T,sigma) :',1p,E12.4,4x,1p,E12.4)")temp_c_thin,sigma_c_thin
     write(*,"(' Optically thick (T,sigma):',1p,E12.4,4x,1p,E12.4)")temp_c_thick,sigma_c_thick
-
     write(*,*)'****************************************'
 
   end subroutine display_critical_points
@@ -295,23 +292,20 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine to save in a file the critical points
   !-------------------------------------------------------------------------
-  subroutine write_critical_points(n,radius, sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick,&
-                                             tau_thin, tau_thick)
+  subroutine write_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, tau_thin, tau_thick)
 
     implicit none
 
-    integer                                  ,intent(in) :: n
-    real(kind = x_precision),dimension(n)    ,intent(in) :: radius
-    real(kind = x_precision),dimension(n)    ,intent(in) :: sigma_c_thin
-    real(kind = x_precision),dimension(n)    ,intent(in) :: temp_c_thin
-    real(kind = x_precision),dimension(n)    ,intent(in) :: sigma_c_thick
-    real(kind = x_precision),dimension(n)    ,intent(in) :: temp_c_thick
-    real(kind = x_precision),dimension(n)    ,intent(in) :: tau_thin
-    real(kind = x_precision),dimension(n)    ,intent(in) :: tau_thick
+    real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thin
+    real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thin
+    real(kind = x_precision),dimension(n_cell),intent(in) :: sigma_c_thick
+    real(kind = x_precision),dimension(n_cell),intent(in) :: temp_c_thick
+    real(kind = x_precision),dimension(n_cell),intent(in) :: tau_thin
+    real(kind = x_precision),dimension(n_cell),intent(in) :: tau_thick
     !-----------------------------------------------------------------------
-    integer                                             :: i
-    integer                                             :: fid_4 = 11
-    character(len = 64)                                 :: fname_4
+    integer             :: i
+    integer             :: fid_4 = 11
+    character(len = 64) :: fname_4
 
     !-----------------------------------------------------------------------
 
@@ -321,10 +315,11 @@ contains
     write(fid_4,'(7(A16))') 'Radius','Temp_thin','Sigma_thin',&
                                      'Temp_thick','Sigma_thick','Tau_thin','Tau_thick'
 
-      do i=1, n
-        write(fid_4,'(7(e16.6e2))') radius(i), temp_c_thin(i),sigma_c_thin(i),&
+    do i=1, n_cell
+      write(fid_4,'(7(e16.6e2))') r_state%r(i), temp_c_thin(i),sigma_c_thin(i),&
                                                  temp_c_thick(i),sigma_c_thick(i),tau_thin(i),tau_thick(i)
-      end do
+    end do
+
     close(fid_4)
 
   end subroutine write_critical_points
