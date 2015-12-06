@@ -36,11 +36,9 @@ contains
 
   !-------------------------------------------------------------------------
 
-  subroutine curve(nb_it, max_it, eps, temperature, S_min, S_max, temperature_c, sigma_c)
+  subroutine curve(eps, temperature, S_min, S_max, temperature_c, sigma_c)
     implicit none
 
-    integer                                   ,intent(in)  :: nb_it          ! Number of points for the S curve
-    integer                                   ,intent(in)  :: max_it         ! Maximum number of dichotomy iterations
     real(kind = x_precision)                  ,intent(in)  :: eps            ! Precision required for the dichotomy
     real(kind = x_precision)                  ,intent(in)  :: S_min          ! Minimum surface density limit
     real(kind = x_precision)                  ,intent(in)  :: S_max          ! Maximum surface density limit
@@ -103,7 +101,7 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma_t_thick(i) = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
+        sigma_t_thick(i) = dichotomy(Smin, Smax, eps, temperature(i), omega, optical_depth)
 
         ! Optical thin case (tau < 1)
         optical_depth = 0
@@ -113,19 +111,19 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma_t_thin(i)  = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
+        sigma_t_thin(i)  = dichotomy(Smin, Smax, eps, temperature(i), omega, optical_depth)
 
       enddo
 
       ! For the first critical point (the one at the right of the S shape)
-      call first_critical_point(sigma_t_thick, temperature, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
+      call first_critical_point(sigma_t_thick, temperature, index_fcp, sigma_c_thick, temp_c_thick)
 
       ! For the second critical point (the one at the left of the S shape)
       call second_critical_point(sigma_t_thick, sigma_t_thin, temperature,&
-       index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
+       index_fcp, index_scp, sigma_c_thin, temp_c_thin)
 
       ! Combining the two separate curves into one that forms the S shape
-      call build_s_curve(sigma_t_thick, sigma_t_thin, temperature, nb_it, index_scp, sigma_real, temp_real)
+      call build_s_curve(sigma_t_thick, sigma_t_thin, temperature, index_scp, sigma_real, temp_real)
 
       call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
 
@@ -185,10 +183,9 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine in order to find the first critical point
   !-------------------------------------------------------------------------
-  subroutine first_critical_point(sigma_real_thick, temp_real_thick, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
+  subroutine first_critical_point(sigma_real_thick, temp_real_thick, index_fcp, sigma_c_thick, temp_c_thick)
     implicit none
 
-    integer                                  ,intent(in)  :: nb_it
     real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in)  :: temp_real_thick
 
@@ -214,10 +211,9 @@ contains
   ! Subroutine in order to find the second critical point
   !-------------------------------------------------------------------------
   subroutine second_critical_point(sigma_real_thick, sigma_real_thin, temp_real_thick,&
-         index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
+         index_fcp, index_scp, sigma_c_thin, temp_c_thin)
     implicit none
 
-    integer                                  ,intent(in)  :: nb_it
     real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in)  :: temp_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thin
@@ -248,10 +244,9 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine in order to build the S curve
   !-------------------------------------------------------------------------
-  subroutine build_s_curve(sigma_real_thick, sigma_real_thin, temp_real_thick, nb_it, index_scp, sigma_real, temp_real)
+  subroutine build_s_curve(sigma_real_thick, sigma_real_thin, temp_real_thick, index_scp, sigma_real, temp_real)
     implicit none
 
-    integer                                  ,intent(in)  :: nb_it
     integer                                  ,intent(in)  :: index_scp
     real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thick
     real(kind = x_precision),dimension(nb_it),intent(in)  :: sigma_real_thin
@@ -403,14 +398,13 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind = x_precision) function dichotomy(S_min, S_max, max_it, eps, T, omega, optical_depth)
+  real(kind = x_precision) function dichotomy(S_min, S_max, eps, T, omega, optical_depth)
     implicit none
 
     real(kind = x_precision),intent(inout) :: S_min,S_max
     real(kind = x_precision),intent(in)    :: eps
     real(kind = x_precision),intent(in)    :: T
     real(kind = x_precision),intent(in)    :: omega
-    integer,intent(in)                     :: max_it
     integer,intent(in)                     :: optical_depth
 
     integer                                :: j

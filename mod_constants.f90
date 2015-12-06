@@ -5,9 +5,14 @@ module mod_constants
 
   integer, parameter, public :: x_precision  = selected_real_kind(15) ! Numerical precision
   integer, parameter, public :: n_cell       = 256                    ! Number of cells along the disk radius
+  ! Specific to main program
   integer, parameter, public :: n_iterations = 2000000                ! Number of iterations to run
-  integer, parameter, public :: output_freq  =    1000                ! Frequency of the outputs
+  integer, parameter, public :: output_freq  = 1000                   ! Frequency of the outputs
+  ! Specific to s_curve
+  integer, parameter, public :: nb_it        = 1000                   ! Number of points for the S curve
+  integer, parameter, public :: max_it       = 10000000               ! Maximum number of s_curve dichotomy iterations, limit: 1e9
 
+  ! Physical constants
   real(kind = x_precision), parameter, public :: G       = 6.67408e-8_x_precision ! Gravitationnal cst in cgs
   real(kind = x_precision), parameter, public :: c       = 2.99792458e10_x_precision ! Speed of light in cgs
   real(kind = x_precision), parameter, public :: pi      = 4.0_x_precision*atan(1.0_x_precision)
