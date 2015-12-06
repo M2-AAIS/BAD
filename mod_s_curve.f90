@@ -49,10 +49,7 @@ contains
     !------------------------------------------------------------------------
     integer                                                :: i,j,k
 
-    ! For Sigma
-    real(kind = x_precision)                               :: Smin
-    real(kind = x_precision)                               :: Smax
-
+    ! For variables
     real(kind = x_precision)                               :: f              ! Q+ - Q-
     real(kind = x_precision)                               :: tau_eff        ! Effective optical depth
     integer                                                :: optical_depth  ! Indicator for the optical thickness
@@ -93,22 +90,14 @@ contains
         ! Optical thick case (tau >= 1)
         optical_depth = 1
 
-        ! S range
-        Smin          = S_min
-        Smax          = S_max
-
         ! S found with the dichotomy approach
-        sigma_t_thick(i) = dichotomy(k, Smin, Smax, eps, temperature(i), optical_depth)
+        sigma_t_thick(i) = dichotomy(k, S_min, S_max, eps, temperature(i), optical_depth)
 
         ! Optical thin case (tau < 1)
         optical_depth = 0
 
-        ! S range
-        Smin          = S_min
-        Smax          = S_max
-
         ! S found with the dichotomy approach
-        sigma_t_thin(i)  = dichotomy(k, Smin, Smax, eps, temperature(i), optical_depth)
+        sigma_t_thin(i)  = dichotomy(k, S_min, S_max, eps, temperature(i), optical_depth)
 
       enddo
 
@@ -262,7 +251,7 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine in order to display the critical points
   !-------------------------------------------------------------------------
-  subroutine display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick,k)
+  subroutine display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick,k)
     implicit none
 
     real(kind = x_precision),intent(in) :: sigma_c_thin
@@ -275,8 +264,8 @@ contains
 
     write(*,*)'**** Critical Point',k,'********'
     write(*,*)'****************************************'
-    write(*,"(' Optically thin (T,sigma) :',1p,E12.4,4x,1p,E12.4)")temp_c_thin,sigma_c_thin
-    write(*,"(' Optically thick (T,sigma):',1p,E12.4,4x,1p,E12.4)")temp_c_thick,sigma_c_thick
+    write(*,"(' Optically thin (T,sigma) :',1p,E12.4,4x,1p,E12.4)")temp_c_thin, sigma_c_thin
+    write(*,"(' Optically thick (T,sigma):',1p,E12.4,4x,1p,E12.4)")temp_c_thick, sigma_c_thick
     write(*,*)'****************************************'
 
   end subroutine display_critical_points
@@ -392,20 +381,20 @@ contains
   real(kind = x_precision) function dichotomy(k, S_min, S_max, eps, T, optical_depth)
     implicit none
 
-    real(kind = x_precision),intent(inout) :: S_min,S_max
-    real(kind = x_precision),intent(in)    :: eps
-    real(kind = x_precision),intent(in)    :: T
-    integer,                 intent(in)    :: k
-    integer,                 intent(in)    :: optical_depth
+    real(kind = x_precision),intent(in) :: S_min, S_max
+    real(kind = x_precision),intent(in) :: eps
+    real(kind = x_precision),intent(in) :: T
+    integer,                 intent(in) :: k
+    integer,                 intent(in) :: optical_depth
 
-    integer                                :: j
-    real(kind = x_precision)               :: tau_eff
-    real(kind = x_precision)               :: Smin
-    real(kind = x_precision)               :: Smax
-    real(kind = x_precision)               :: f_min
-    real(kind = x_precision)               :: f_max
-    real(kind = x_precision)               :: f_center
-    real(kind = x_precision)               :: S_center
+    integer                             :: j
+    real(kind = x_precision)            :: tau_eff
+    real(kind = x_precision)            :: Smin
+    real(kind = x_precision)            :: Smax
+    real(kind = x_precision)            :: f_min
+    real(kind = x_precision)            :: f_max
+    real(kind = x_precision)            :: f_center
+    real(kind = x_precision)            :: S_center
 
     !-------------------------------------------------------------------------
     ! N-> Number of iterations for the dichotomy
