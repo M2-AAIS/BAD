@@ -8,7 +8,7 @@ contains
   !-------------------------------------------------------------------------
   ! SUBROUTINES :
   !               curve                 : : fake main
-  !                                         --> output : 2 arrays for the coordinates (Temperature, S ) of the first critical point
+  !                                         --> output : 2 arrays for the coordinates (Temperature, Sigma) of the first critical point
 
   !               first_critical_point  : :
   !                                     <-- input : T and Sigma for the optically thick medium + number of points
@@ -36,24 +36,22 @@ contains
 
   !-------------------------------------------------------------------------
 
-  subroutine curve(nb_it, max_it, eps, t_min, dt, s_min, s_max, temperature, s)
+  subroutine curve(nb_it, max_it, eps, temperature, S_min, S_max, temperature_c, sigma_c)
     implicit none
 
     integer                                   ,intent(in)  :: nb_it          ! Number of points for the S curve
     integer                                   ,intent(in)  :: max_it         ! Maximum number of dichotomy iterations
     real(kind = x_precision)                  ,intent(in)  :: eps            ! Precision required for the dichotomy
-    real(kind = x_precision)                  ,intent(in)  :: t_min          ! Minimum temperature limit
-    real(kind = x_precision)                  ,intent(in)  :: dt             ! Temperature step
     real(kind = x_precision)                  ,intent(in)  :: S_min          ! Minimum surface density limit
     real(kind = x_precision)                  ,intent(in)  :: S_max          ! Maximum surface density limit
 
-    real(kind = x_precision),dimension(n_cell),intent(out) :: temperature    ! Temperature for the critical point
-    real(kind = x_precision),dimension(n_cell),intent(out) :: s              ! Surface density for the critical point
+    real(kind = x_precision),dimension(nb_it) ,intent(out) :: temperature    ! Temperatures for which we need a solution
+    real(kind = x_precision),dimension(n_cell),intent(out) :: temperature_c  ! Temperature for the critical point
+    real(kind = x_precision),dimension(n_cell),intent(out) :: sigma_c        ! Surface density for the critical point
     !------------------------------------------------------------------------
     integer                                                :: i,j,k
 
-    ! For the temperature and s
-    real(kind = x_precision)                               :: temp
+    ! For Sigma
     real(kind = x_precision)                               :: Smin
     real(kind = x_precision)                               :: Smax
     real(kind = x_precision)                               :: Sigma          ! Sigma
@@ -65,9 +63,7 @@ contains
     integer                                                :: optical_depth  ! Indicator for the optical thickness
 
     ! For the separate curves given the thickness
-    real(kind = x_precision),dimension(nb_it)              :: temp_t_thick
     real(kind = x_precision),dimension(nb_it)              :: sigma_t_thick
-    real(kind = x_precision),dimension(nb_it)              :: temp_t_thin
     real(kind = x_precision),dimension(nb_it)              :: sigma_t_thin
     real(kind = x_precision),dimension(nb_it)              :: temp_real      ! Temperature for the S curve
     real(kind = x_precision),dimension(nb_it)              :: sigma_real     ! Surface density for the S curve
@@ -102,8 +98,6 @@ contains
 
       ! For each point of the S curve
       do i = 1, nb_it
-        temp          = dt * (i-1) + t_min   ! Chosing the temperature value
-
         ! Optical thick case (tau >= 1)
         optical_depth = 1
 
@@ -112,9 +106,8 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma         = dichotomy(Smin, Smax, max_it, eps, temp, omega, optical_depth)
+        sigma         = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
 
-        temp_t_thick(i)  = temp
         sigma_t_thick(i) = sigma
 
 
@@ -126,22 +119,21 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma         = dichotomy(Smin, Smax, max_it, eps, temp, omega, optical_depth)
+        sigma         = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
 
-        temp_t_thin(i)   =  temp
         sigma_t_thin(i)  =  sigma
 
       enddo
 
       ! For the first critical point (the one at the right of the S shape)
-      call first_critical_point(sigma_t_thick, temp_t_thick, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
+      call first_critical_point(sigma_t_thick, temperature, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
 
       ! For the second critical point (the one at the left of the S shape)
-      call second_critical_point(sigma_t_thick, sigma_t_thin, temp_t_thick,&
+      call second_critical_point(sigma_t_thick, sigma_t_thin, temperature,&
        index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
 
       ! Combining the two separate curves into one that forms the S shape
-      call build_s_curve(sigma_t_thick, sigma_t_thin, temp_t_thick, nb_it, index_scp, sigma_real, temp_real)
+      call build_s_curve(sigma_t_thick, sigma_t_thin, temperature, nb_it, index_scp, sigma_real, temp_real)
 
       call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
 
@@ -175,8 +167,8 @@ contains
 
       ! ADIMENSIONED critical T and S [OUTPUT]
 
-      temperature(k) = temp_c_thick
-      s(k)           = sigma_c_thick 
+      temperature_c(k) = temp_c_thick
+      sigma_c(k)       = sigma_c_thick 
 
       ! DIMENSIONED critical T and S
       temp_thick(k)  =  temp_c_thick * state_0%T_0
