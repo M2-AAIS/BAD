@@ -138,9 +138,6 @@ contains
       write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
 
       do j = 1, nb_it
-        temp_real(j)  =  temp_real(j)
-        sigma_real(j) =  sigma_real(j)
-
         call variables(k, temp_real(j), sigma_real(j), f, optical_depth, tau_eff)
 
         temp_real(j)  =  temp_real(j) * state_0%T_0
