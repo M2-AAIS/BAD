@@ -14,7 +14,7 @@ contains
   !-------------------------------------------------------------------------
   ! SUBROUTINES :
   !               make_temperature      : : Create the temperature array needed for everyone else
-  !                                     <-- input : Lower and upper bound for the temperature coordinate of the S curve 
+  !                                     <-- input : Lower and upper bound for the temperature coordinate of the S curve
   !                                         --> output :
 
   !               set_conditions        : : Set conditions for the resolution
@@ -350,11 +350,13 @@ contains
     write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
 
     do j = 1, nb_it
-      call variables(k, temperature(j), sigma(j), f, optical_depth, tau_eff)
+      if (sigma(j) /= 0) then
+        call variables(k, temperature(j), sigma(j), f, optical_depth, tau_eff)
 
-      sigma_real(j) = sigma(j) * state_0%S_0
+        sigma_real(j) = sigma(j) * state_0%S_0
 
-      write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
+        write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
+      endif
     enddo
 
     close(fid_tot)
@@ -467,7 +469,7 @@ contains
     call variables(k, T, Smax, f_max, optical_depth, tau_eff)
 
     if ( f_max * f_min > 0.) then
-      !dichotomy = 0
+      dichotomy = 0
 
     else if( f_max * f_min < 0.) then
       iteration:do while (dabs(Smax - Smin) >= eps .and. j < max_it)
