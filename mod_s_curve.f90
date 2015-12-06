@@ -4,9 +4,15 @@ module mod_s_curve
   use mod_variables
   implicit none
 
+  real(kind = x_precision), dimension(nb_it) :: temperature ! Temperatures for which we need to solve the dichotomy
+
 contains
   !-------------------------------------------------------------------------
   ! SUBROUTINES :
+  !               make_temperature      : : Create the temperature array needed for everyone else
+  !                                     <-- input : Lower and upper bound for the temperature coordinate of the S curve 
+  !                                         --> output :
+
   !               curve                 : : fake main
   !                                         --> output : 2 arrays for the coordinates (Temperature, Sigma) of the first critical point
 
@@ -36,14 +42,31 @@ contains
 
   !-------------------------------------------------------------------------
 
-  subroutine curve(eps, temperature, S_min, S_max, temperature_c, sigma_c)
+  subroutine make_temperature(T_min, T_max)
+    implicit none
+
+    real(kind = x_precision), intent(in) :: T_min
+    real(kind = x_precision), intent(in) :: T_max
+    !------------------------------------------------------------------------
+
+    real(kind = x_precision) :: dt
+    integer                  :: i
+
+    dt = (T_max - T_min) / (nb_it - 1)
+
+    do i = 1, nb_it
+      temperature(i) = dt * (i-1) + T_min
+    enddo
+
+  end subroutine make_temperature
+
+  subroutine curve(eps, S_min, S_max, temperature_c, sigma_c)
     implicit none
 
     real(kind = x_precision),                    intent(in)  :: eps            ! Precision required for the dichotomy
     real(kind = x_precision),                    intent(in)  :: S_min          ! Minimum surface density limit
     real(kind = x_precision),                    intent(in)  :: S_max          ! Maximum surface density limit
 
-    real(kind = x_precision), dimension(nb_it) , intent(out) :: temperature    ! Temperatures for which we need a solution
     real(kind = x_precision), dimension(n_cell), intent(out) :: temperature_c  ! Temperature for the critical point
     real(kind = x_precision), dimension(n_cell), intent(out) :: sigma_c        ! Surface density for the critical point
     !------------------------------------------------------------------------
