@@ -127,12 +127,11 @@ contains
 
       call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
 
-
       ! Saving the DIMENSIONED values of Sigma and T for the S curve in a file
       write(number_of_cell,'(I5.5)') k
       fid_tot = 22 + k
       fname_tot = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_tot.dat'
-      
+
       open(fid_tot,file  = fname_tot, action='write', status = 'replace', iostat = ios)
       if (ios /= 0) then
         write(*,*)"Error while opening the ", fname_tot," file."
@@ -142,8 +141,8 @@ contains
       write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
 
       do j = 1, nb_it
-        temp_real(j)  =  temp_real(j) 
-        sigma_real(j) =  sigma_real(j) 
+        temp_real(j)  =  temp_real(j)
+        sigma_real(j) =  sigma_real(j)
 
         call variables(temp_real(j), sigma_real(j), omega, f, optical_depth, tau_eff)
 
@@ -152,19 +151,18 @@ contains
 
         write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
       enddo
-      
+
       close(fid_tot)
 
       ! ADIMENSIONED critical T and Sigma [OUTPUT]
       temperature_c(k) = temp_c_thick
-      sigma_c(k)       = sigma_c_thick 
+      sigma_c(k)       = sigma_c_thick
 
       ! DIMENSIONED critical T and Sigma
       temp_thick(k)  =  temp_c_thick * state_0%T_0
       sigma_thick(k) =  sigma_c_thick * state_0%S_0
       temp_thin(k)   =  temp_c_thin * state_0%T_0
       sigma_thin(k)  =  sigma_c_thin * state_0%S_0
-
 
       call variables(temp_c_thick, sigma_c_thick, omega, f, optical_depth, tau_eff)
       tau_thick(k)   = tau_eff
@@ -224,7 +222,6 @@ contains
 
     integer                                               :: i
 
-
     i = max(1, index_fcp)
 
     ! The change occurs when the difference of sigma changes its sign
@@ -279,7 +276,9 @@ contains
     real(kind = x_precision),intent(in) :: sigma_c_thick
     real(kind = x_precision),intent(in) :: temp_c_thick
     integer                 ,intent(in) :: k
+
     !------------------------------------------------------------------------
+
     write(*,*)'**** Critical Point',k,'********'
     write(*,*)'****************************************'
     write(*,"(' Optically thin (T,sigma) :',1p,E12.4,4x,1p,E12.4)")temp_c_thin,sigma_c_thin
