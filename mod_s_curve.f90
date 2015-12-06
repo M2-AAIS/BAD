@@ -190,6 +190,11 @@ contains
     integer :: i
 
     i = 1
+
+    do while (sigma_real_thick(i) == 0)
+      i = i + 1
+    enddo
+
     do while (sigma_real_thick(i) < sigma_real_thick(i+1))
       index_fcp     = i
       sigma_c_thick = sigma_real_thick(i)
