@@ -56,7 +56,6 @@ contains
     real(kind = x_precision)                               :: Smax
 
     real(kind = x_precision)                               :: omega          ! Angular velocity
-    real(kind = x_precision)                               :: r              ! Radius
     real(kind = x_precision)                               :: f              ! Q+ - Q-
     real(kind = x_precision)                               :: tau_eff        ! Effective optical depth
     integer                                                :: optical_depth  ! Indicator for the optical thickness
@@ -92,7 +91,6 @@ contains
     !------------------------------------------------------------------------
 
     do k = 1, n_cell
-      r     = r_state%r(k)
       omega = x_state%Omega(k)
 
       ! For each point of the S curve
