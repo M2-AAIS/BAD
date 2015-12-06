@@ -4,11 +4,6 @@ module mod_s_curve
   use mod_variables
   implicit none
 
-! _____________________________________________________________________________________________
-
-  ! BE SURE TO CREATE TWO FOLDERS IN YOUR WORKING DIRECTORY : s_curves  & critical_points
-!_____________________________________________________________________________________________
-
 contains
   !-------------------------------------------------------------------------
   ! SUBROUTINES :
@@ -56,13 +51,12 @@ contains
     real(kind = x_precision),dimension(n_cell),intent(out) :: s              ! Surface density for the critical point
     !------------------------------------------------------------------------
     integer                                                :: i,j,k
-    integer                                                :: file_length    ! Number of lines of the data saving file
 
     ! For the temperature and s
     real(kind = x_precision)                               :: temp
     real(kind = x_precision)                               :: Smin
     real(kind = x_precision)                               :: Smax
-    real(kind = x_precision)                               :: Sigma          ! S
+    real(kind = x_precision)                               :: Sigma          ! Sigma
 
     real(kind = x_precision)                               :: omega          ! Angular velocity
     real(kind = x_precision)                               :: r              ! Radius
@@ -103,8 +97,6 @@ contains
     !------------------------------------------------------------------------
 
     do k = 1, n_cell
-      file_length = 0
-
       r     = r_state%r(k)
       omega = x_state%Omega(k)
 
@@ -141,26 +133,25 @@ contains
 
       enddo
 
-      ! For the first critical point (the one one the right of the S shape)
-      call first_critical_point(sigma_t_thick, temp_t_thick, index_fcp,sigma_c_thick, temp_c_thick, nb_it)
+      ! For the first critical point (the one at the right of the S shape)
+      call first_critical_point(sigma_t_thick, temp_t_thick, index_fcp, sigma_c_thick, temp_c_thick, nb_it)
 
-      ! For the second critical point (the one one the left of the S shape)
+      ! For the second critical point (the one at the left of the S shape)
       call second_critical_point(sigma_t_thick, sigma_t_thin, temp_t_thick,&
        index_fcp, index_scp, sigma_c_thin, temp_c_thin, nb_it)
 
       ! Combining the two separate curves into one that forms the S shape
       call build_s_curve(sigma_t_thick, sigma_t_thin, temp_t_thick, nb_it, index_scp, sigma_real, temp_real)
 
-      call display_critical_points(sigma_c_thin, temp_c_thin,sigma_c_thick, temp_c_thick, k)
+      call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
 
 
-      ! Saving the DIMENSIONED values of S and T for the S curve in a file
+      ! Saving the DIMENSIONED values of Sigma and T for the S curve in a file
       write(number_of_cell,'(I5.5)') k
       fid_tot = 22 + k
       fname_tot = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_tot.dat'
       
-      open(fid_tot,file  = fname_tot, action='write',&
-          status = 'replace', iostat = ios)
+      open(fid_tot,file  = fname_tot, action='write', status = 'replace', iostat = ios)
       if (ios /= 0) then
         write(*,*)"Error while opening the ", fname_tot," file."
         stop
@@ -178,8 +169,6 @@ contains
         sigma_real(j) =  sigma_real(j) * state_0%S_0
 
         write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
-
-        file_length = file_length + 1
       enddo
       
       close(fid_tot)
@@ -332,14 +321,14 @@ contains
 
     implicit none
 
-    integer                                  ,intent(in):: n
-    real(kind = x_precision),dimension(n)    ,intent(in):: radius
-    real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thin
-    real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thin
-    real(kind = x_precision),dimension(n)    ,intent(in):: sigma_c_thick
-    real(kind = x_precision),dimension(n)    ,intent(in):: temp_c_thick
-    real(kind = x_precision),dimension(n)    ,intent(in):: tau_thin
-    real(kind = x_precision),dimension(n)    ,intent(in):: tau_thick
+    integer                                  ,intent(in) :: n
+    real(kind = x_precision),dimension(n)    ,intent(in) :: radius
+    real(kind = x_precision),dimension(n)    ,intent(in) :: sigma_c_thin
+    real(kind = x_precision),dimension(n)    ,intent(in) :: temp_c_thin
+    real(kind = x_precision),dimension(n)    ,intent(in) :: sigma_c_thick
+    real(kind = x_precision),dimension(n)    ,intent(in) :: temp_c_thick
+    real(kind = x_precision),dimension(n)    ,intent(in) :: tau_thin
+    real(kind = x_precision),dimension(n)    ,intent(in) :: tau_thick
     !-----------------------------------------------------------------------
     integer                                             :: i
     integer                                             :: fid_4 = 11
@@ -430,25 +419,24 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind=x_precision) function dichotomy(S_min, S_max, max_it, eps, T, omega, optical_depth)
+  real(kind = x_precision) function dichotomy(S_min, S_max, max_it, eps, T, omega, optical_depth)
     implicit none
 
-    real(kind=x_precision),intent(inout) :: S_min,S_max
-    real(kind=x_precision),intent(in)    :: eps
-    real(kind=x_precision),intent(in)    :: T
-    real(kind=x_precision),intent(in)    :: omega
-    integer,intent(in)                   :: max_it
-    integer,intent(in)                   :: optical_depth
+    real(kind = x_precision),intent(inout) :: S_min,S_max
+    real(kind = x_precision),intent(in)    :: eps
+    real(kind = x_precision),intent(in)    :: T
+    real(kind = x_precision),intent(in)    :: omega
+    integer,intent(in)                     :: max_it
+    integer,intent(in)                     :: optical_depth
 
-    integer                              :: j
-    real(kind=x_precision)               :: tau_eff
-    real(kind=x_precision)               :: Smin
-    real(kind=x_precision)               :: Smax
-    real(kind=x_precision)               :: f_min
-    real(kind=x_precision)               :: f_max
-    real(kind=x_precision)               :: f_center
-    real(kind=x_precision)               :: S_center
-
+    integer                                :: j
+    real(kind = x_precision)               :: tau_eff
+    real(kind = x_precision)               :: Smin
+    real(kind = x_precision)               :: Smax
+    real(kind = x_precision)               :: f_min
+    real(kind = x_precision)               :: f_max
+    real(kind = x_precision)               :: f_center
+    real(kind = x_precision)               :: S_center
 
     !-------------------------------------------------------------------------
     ! N-> Number of iterations for the dichotomy
