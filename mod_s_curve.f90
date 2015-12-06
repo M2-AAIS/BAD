@@ -89,7 +89,7 @@ contains
     real(kind = x_precision), dimension(n_cell), intent(out) :: temperature_c  ! Temperature for the critical point
     real(kind = x_precision), dimension(n_cell), intent(out) :: sigma_c        ! Surface density for the critical point
     !------------------------------------------------------------------------
-    integer                                     :: i,j,k
+    integer                                     :: i,j,k          ! Iteration counters
 
     ! For variables
     real(kind = x_precision)                    :: f              ! Q+ - Q-
@@ -99,8 +99,9 @@ contains
     ! For the separate curves given the thickness
     real(kind = x_precision), dimension(nb_it)  :: sigma_t_thick
     real(kind = x_precision), dimension(nb_it)  :: sigma_t_thin
-    real(kind = x_precision), dimension(nb_it)  :: temp_real      ! Temperature for the S curve
-    real(kind = x_precision), dimension(nb_it)  :: sigma_real     ! Surface density for the S curve
+    real(kind = x_precision), dimension(nb_it)  :: temp_real      ! Dimensioned temperature for the S curve
+    real(kind = x_precision), dimension(nb_it)  :: sigma          ! Surface density for the S curve
+    real(kind = x_precision), dimension(nb_it)  :: sigma_real     ! Dimensioned surface density for the S curve
 
     ! For the output file
     character(len = 8)                          :: number_of_cell
@@ -142,17 +143,15 @@ contains
       enddo
 
       ! For the first critical point (the one at the right of the S shape)
-      call first_critical_point(sigma_t_thick, temperature, index_fcp, sigma_c_thick, temp_c_thick)
+      call first_critical_point(sigma_t_thick, index_fcp, sigma_c_thick, temp_c_thick)
 
       ! For the second critical point (the one at the left of the S shape)
-      call second_critical_point(sigma_t_thick, sigma_t_thin, temperature,&
-       index_fcp, index_scp, sigma_c_thin, temp_c_thin)
+      call second_critical_point(sigma_t_thick, sigma_t_thin, index_fcp, index_scp, sigma_c_thin, temp_c_thin)
 
       ! Combining the two separate curves into one that forms the S shape
-      call build_s_curve(sigma_t_thick, sigma_t_thin, index_scp, sigma_real)
+      call build_s_curve(sigma_t_thick, sigma_t_thin, index_scp, sigma)
 
-      temp_real = temperature
-
+      ! Display the two critical points
       call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
 
       ! Saving the DIMENSIONED values of Sigma and T for the S curve in a file
@@ -169,10 +168,10 @@ contains
       write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
 
       do j = 1, nb_it
-        call variables(k, temp_real(j), sigma_real(j), f, optical_depth, tau_eff)
+        call variables(k, temperature(j), sigma(j), f, optical_depth, tau_eff)
 
-        temp_real(j)  =  temp_real(j) * state_0%T_0
-        sigma_real(j) =  sigma_real(j) * state_0%S_0
+        temp_real(j)  = temperature(j) * state_0%T_0
+        sigma_real(j) = sigma(j) * state_0%S_0
 
         write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
       enddo
@@ -204,11 +203,10 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine in order to find the first critical point
   !-------------------------------------------------------------------------
-  subroutine first_critical_point(sigma_real_thick, temp_real_thick, index_fcp, sigma_c_thick, temp_c_thick)
+  subroutine first_critical_point(sigma_real_thick, index_fcp, sigma_c_thick, temp_c_thick)
     implicit none
 
     real(kind = x_precision), dimension(nb_it), intent(in)  :: sigma_real_thick
-    real(kind = x_precision), dimension(nb_it), intent(in)  :: temp_real_thick
 
     integer,                                    intent(out) :: index_fcp
     real(kind = x_precision),                   intent(out) :: sigma_c_thick
@@ -223,7 +221,7 @@ contains
       sigma_c_thick = sigma_real_thick(i)
       i             = i + 1
     enddo
-    temp_c_thick  = temp_real_thick(i)
+    temp_c_thick  = temperature(i)
 
   end subroutine first_critical_point
 
@@ -231,13 +229,11 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine in order to find the second critical point
   !-------------------------------------------------------------------------
-  subroutine second_critical_point(sigma_real_thick, sigma_real_thin, temp_real_thick,&
-         index_fcp, index_scp, sigma_c_thin, temp_c_thin)
+  subroutine second_critical_point(sigma_t_thick, sigma_t_thin, index_fcp, index_scp, sigma_c_thin, temp_c_thin)
     implicit none
 
-    real(kind = x_precision), dimension(nb_it), intent(in)  :: sigma_real_thick
-    real(kind = x_precision), dimension(nb_it), intent(in)  :: temp_real_thick
-    real(kind = x_precision), dimension(nb_it), intent(in)  :: sigma_real_thin
+    real(kind = x_precision), dimension(nb_it), intent(in)  :: sigma_t_thick
+    real(kind = x_precision), dimension(nb_it), intent(in)  :: sigma_t_thin
     integer,                                    intent(in)  :: index_fcp
 
     integer,                                    intent(out) :: index_scp
@@ -250,13 +246,13 @@ contains
     i = max(1, index_fcp)
 
     ! The change occurs when the difference of sigma changes its sign
-    do while ( (sigma_real_thick(i) > sigma_real_thin(i)) .and. i < nb_it)
+    do while (sigma_t_thick(i) > sigma_t_thin(i) .and. i < nb_it)
       i = i + 1
     end do
 
-    index_scp = i - 1
-    sigma_c_thin = sigma_real_thin(index_scp)
-    temp_c_thin = temp_real_thick(index_scp)
+    index_scp    = i - 1
+    sigma_c_thin = sigma_t_thin(index_scp)
+    temp_c_thin  = temperature(index_scp)
 
   endsubroutine second_critical_point
 
@@ -264,23 +260,23 @@ contains
   !-------------------------------------------------------------------------
   ! Subroutine in order to build the S curve
   !-------------------------------------------------------------------------
-  subroutine build_s_curve(sigma_real_thick, sigma_real_thin, index_scp, sigma_real)
+  subroutine build_s_curve(sigma_real_thick, sigma_real_thin, index_scp, sigma)
     implicit none
 
     real(kind = x_precision), dimension(nb_it), intent(in)  :: sigma_real_thick
     real(kind = x_precision), dimension(nb_it), intent(in)  :: sigma_real_thin
     integer,                                    intent(in)  :: index_scp
 
-    real(kind = x_precision), dimension(nb_it), intent(out) :: sigma_real
+    real(kind = x_precision), dimension(nb_it), intent(out) :: sigma
     !-----------------------------------------------------------------------
 
     integer :: i
 
     do i = 1, index_scp
-      sigma_real(i) = sigma_real_thick(i)
+      sigma(i) = sigma_real_thick(i)
     enddo
     do i = index_scp + 1, nb_it
-      sigma_real(i) = sigma_real_thin(i)
+      sigma(i) = sigma_real_thin(i)
     enddo
 
   end subroutine build_s_curve
@@ -358,20 +354,20 @@ contains
 
     real(kind = x_precision), intent(out) :: f,tau_eff
     !-----------------------------------------------------------------------
-    real(kind = x_precision)             :: coeff_a,coeff_b,coeff_c
-    real(kind = x_precision)             :: delta
+    real(kind = x_precision) :: coeff_a,coeff_b,coeff_c
+    real(kind = x_precision) :: delta
 
-    real(kind = x_precision)             :: Omega
-    real(kind = x_precision)             :: H
-    real(kind = x_precision)             :: rho
-    real(kind = x_precision)             :: cs
-    real(kind = x_precision)             :: nu
-    real(kind = x_precision)             :: K_ff
-    real(kind = x_precision)             :: K_e
-    real(kind = x_precision)             :: E_ff
-    real(kind = x_precision)             :: Fz
-    real(kind = x_precision)             :: Q_plus
-    real(kind = x_precision)             :: Q_minus
+    real(kind = x_precision) :: Omega
+    real(kind = x_precision) :: H
+    real(kind = x_precision) :: rho
+    real(kind = x_precision) :: cs
+    real(kind = x_precision) :: nu
+    real(kind = x_precision) :: K_ff
+    real(kind = x_precision) :: K_e
+    real(kind = x_precision) :: E_ff
+    real(kind = x_precision) :: Fz
+    real(kind = x_precision) :: Q_plus
+    real(kind = x_precision) :: Q_minus
     !------------------------------------------------------------------------
 
     Omega   = x_state%Omega(k)
@@ -421,9 +417,9 @@ contains
   real(kind = x_precision) function dichotomy(k, i, optical_depth)
     implicit none
 
-    integer,                  intent(in) :: k ! Position in the disk, to get r/Omega
-    integer,                  intent(in) :: i ! Iteration counter, to get the temperature
-    integer,                  intent(in) :: optical_depth
+    integer, intent(in) :: k ! Position in the disk, to get r/Omega
+    integer, intent(in) :: i ! Iteration counter, to get the temperature
+    integer, intent(in) :: optical_depth
     !-------------------------------------------------------------------------
     integer                  :: j
     real(kind = x_precision) :: T ! Temperature for which to solve the dichotomy
