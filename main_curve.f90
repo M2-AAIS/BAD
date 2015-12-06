@@ -8,29 +8,20 @@ program black_hole_s_curve
 
   implicit none
 
- ! integer                                    :: i
-
-  integer                 ,parameter         :: nb_it = 1000
-  real(kind = x_precision),parameter         :: eps   = 1.0d-4
-  real(kind = x_precision),parameter         :: t_min = 2.0d-1
-  real(kind = x_precision),parameter         :: t_max = 4.49d0
-  real(kind = x_precision),parameter         :: dt    = (t_max-t_min) / (nb_it-1)
-  real(kind = x_precision),parameter         :: S_min = 4.5d1 ! Greater values lead to FPE
-  real(kind = x_precision),parameter         :: S_max = 2.5d3
+  integer                 ,parameter         :: nb_it  = 1000
+  integer                 ,parameter         :: max_it = 10000000 ! Maximum number of dichotomy iterations, max 1e9
+  real(kind = x_precision),parameter         :: eps    = 1.e-8_x_precision ! Precision required for the dichotomy
+  real(kind = x_precision),parameter         :: t_min  = 2.e-1_x_precision
+  real(kind = x_precision),parameter         :: t_max  = 4.49e0_x_precision
+  real(kind = x_precision),parameter         :: dt     = (t_max - t_min) / (nb_it - 1)
+  real(kind = x_precision),parameter         :: S_min  = 4.5e1_x_precision ! Greater values lead to FPE
+  real(kind = x_precision),parameter         :: S_max  = 2.5e3_x_precision
 
   real(kind = x_precision),dimension(n_cell) :: temperature
   real(kind = x_precision),dimension(n_cell) :: s
 
-
   call get_parameters()
 
-  call curve( nb_it, eps, t_min, t_max, dt, s_min, s_max, temperature, s)
-
-  !do i = 1, n_cell
-     write(*,*)'**********************************'
-   !  write(*,*)'T = ',temperature(i)
-   !  write(*,*)'S = ',s(i)
-     write(*,*)'**********************************'
-  !enddo
+  call curve(nb_it, max_it, eps, t_min, dt, s_min, s_max, temperature, s)
 
 end program black_hole_s_curve

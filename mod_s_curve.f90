@@ -41,13 +41,13 @@ contains
 
   !-------------------------------------------------------------------------
 
-  subroutine curve(nb_it, eps, t_min, t_max, dt, s_min, s_max, temperature, s)
+  subroutine curve(nb_it, max_it, eps, t_min, dt, s_min, s_max, temperature, s)
     implicit none
 
     integer                                   ,intent(in)  :: nb_it          ! Number of points for the S curve
-    real(kind = x_precision)                  ,intent(in)  :: eps            ! Precision for the dichotomy
+    integer                                   ,intent(in)  :: max_it         ! Maximum number of dichotomy iterations
+    real(kind = x_precision)                  ,intent(in)  :: eps            ! Precision required for the dichotomy
     real(kind = x_precision)                  ,intent(in)  :: t_min          ! Minimum temperature limit
-    real(kind = x_precision)                  ,intent(in)  :: t_max          ! Maximum temperature limit
     real(kind = x_precision)                  ,intent(in)  :: dt             ! Temperature step
     real(kind = x_precision)                  ,intent(in)  :: S_min          ! Minimum surface density limit
     real(kind = x_precision)                  ,intent(in)  :: S_max          ! Maximum surface density limit
@@ -120,7 +120,7 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma         = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
+        sigma         = dichotomy(Smin, Smax, max_it, eps, temp, omega, optical_depth)
 
         temp_t_thick(i)  = temp
         sigma_t_thick(i) = sigma
@@ -134,7 +134,7 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma         = dichotomy(Smin, Smax, eps, temp, omega, optical_depth)
+        sigma         = dichotomy(Smin, Smax, max_it, eps, temp, omega, optical_depth)
 
         temp_t_thin(i)   =  temp
         sigma_t_thin(i)  =  sigma
@@ -430,16 +430,17 @@ contains
   ! Dichotomic function in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(kind=x_precision) function dichotomy(S_min, S_max, eps, T, omega, optical_depth)
+  real(kind=x_precision) function dichotomy(S_min, S_max, max_it, eps, T, omega, optical_depth)
     implicit none
 
     real(kind=x_precision),intent(inout) :: S_min,S_max
     real(kind=x_precision),intent(in)    :: eps
     real(kind=x_precision),intent(in)    :: T
     real(kind=x_precision),intent(in)    :: omega
+    integer,intent(in)                   :: max_it
     integer,intent(in)                   :: optical_depth
 
-    integer                              :: j = 0
+    integer                              :: j
     real(kind=x_precision)               :: tau_eff
     real(kind=x_precision)               :: Smin
     real(kind=x_precision)               :: Smax
@@ -471,11 +472,10 @@ contains
     !write(*,*)'fmax = ',f_max
 
     if ( f_max * f_min > 0.) then
-      !write(*,*)'This function image does not switch its sign in this particular interval.'
       !dichotomy = 0
 
     else if( f_max * f_min < 0.) then
-      iteration:do while ( dabs( Smax - Smin ) >= eps .and. j < 10000)
+      iteration:do while (dabs(Smax - Smin) >= eps .and. j < max_it)
 
         call variables(T, Smin, Omega, f_min, optical_depth, tau_eff)
 
