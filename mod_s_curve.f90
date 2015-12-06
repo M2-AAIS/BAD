@@ -5,6 +5,7 @@ module mod_s_curve
   implicit none
 
   real(kind = x_precision), dimension(nb_it) :: temperature ! Temperatures for which we need to solve the dichotomy
+  real(kind = x_precision), dimension(nb_it) :: temp_real   ! Dimensioned version
   real(kind = x_precision)                   :: eps         ! Precision required for the dichotomy
   real(kind = x_precision)                   :: S_min       ! Minimum surface density limit
   real(kind = x_precision)                   :: S_max       ! Maximum surface density limit
@@ -65,6 +66,8 @@ contains
       temperature(i) = dt * (i-1) + Tmin
     enddo
 
+    temp_real  = temperature * state_0%T_0
+
   end subroutine make_temperature
 
 
@@ -89,7 +92,7 @@ contains
     real(kind = x_precision), dimension(n_cell), intent(out) :: temperature_c  ! Temperature for the critical point
     real(kind = x_precision), dimension(n_cell), intent(out) :: sigma_c        ! Surface density for the critical point
     !------------------------------------------------------------------------
-    integer                                     :: i,j,k          ! Iteration counters
+    integer                                     :: i,k            ! Iteration counters
 
     ! For variables
     real(kind = x_precision)                    :: f              ! Q+ - Q-
@@ -99,15 +102,7 @@ contains
     ! For the separate curves given the thickness
     real(kind = x_precision), dimension(nb_it)  :: sigma_t_thick
     real(kind = x_precision), dimension(nb_it)  :: sigma_t_thin
-    real(kind = x_precision), dimension(nb_it)  :: temp_real      ! Dimensioned temperature for the S curve
     real(kind = x_precision), dimension(nb_it)  :: sigma          ! Surface density for the S curve
-    real(kind = x_precision), dimension(nb_it)  :: sigma_real     ! Dimensioned surface density for the S curve
-
-    ! For the output file
-    character(len = 8)                          :: number_of_cell
-    character(len = 64)                         :: fname_tot
-    integer                                     :: fid_tot
-    integer                                     :: ios
 
     ! For the critical points
     integer                                     :: index_fcp
@@ -155,28 +150,7 @@ contains
       call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
 
       ! Saving the DIMENSIONED values of Sigma and T for the S curve in a file
-      write(number_of_cell,'(I5.5)') k
-      fid_tot = 22 + k
-      fname_tot = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_tot.dat'
-
-      open(fid_tot,file  = fname_tot, action='write', status = 'replace', iostat = ios)
-      if (ios /= 0) then
-        write(*,*)"Error while opening the ", fname_tot," file."
-        stop
-      endif
-
-      write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
-
-      do j = 1, nb_it
-        call variables(k, temperature(j), sigma(j), f, optical_depth, tau_eff)
-
-        temp_real(j)  = temperature(j) * state_0%T_0
-        sigma_real(j) = sigma(j) * state_0%S_0
-
-        write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
-      enddo
-
-      close(fid_tot)
+      call save_data(k, sigma)
 
       ! ADIMENSIONED critical T and Sigma [OUTPUT]
       temperature_c(k) = temp_c_thick
@@ -339,6 +313,53 @@ contains
     close(fid_c)
 
   end subroutine write_critical_points
+
+  !-------------------------------------------------------------------------
+  ! Subroutine to save in a file the S curve
+  !-------------------------------------------------------------------------
+  subroutine save_data(k, sigma)
+    implicit none
+
+    integer,                                    intent(in) :: k
+    real(kind = x_precision), dimension(nb_it), intent(in) :: sigma
+
+    !------------------------------------------------------------------------
+    ! For the output file
+    character(len = 8)                         :: number_of_cell
+    character(len = 64)                        :: fname_tot
+    integer                                    :: fid_tot
+    integer                                    :: ios
+
+    real(kind = x_precision), dimension(nb_it) :: sigma_real ! Dimensioned surface density
+    real(kind = x_precision)                   :: f
+    real(kind = x_precision)                   :: tau_eff
+    integer                                    :: optical_depth
+    integer                                    :: j
+    !------------------------------------------------------------------------
+
+    write(number_of_cell,'(I5.5)') k
+    fid_tot = 22 + k
+    fname_tot = 's_curves/Temperature_Sigma_'//trim(number_of_cell)//'_tot.dat'
+
+    open(fid_tot,file  = fname_tot, action='write', status = 'replace', iostat = ios)
+    if (ios /= 0) then
+      write(*,*)"Error while opening the ", fname_tot," file."
+      stop
+    endif
+
+    write(fid_tot,'(3(A16))') 'Surface_density', 'Temperature', 'Optical_depth'
+
+    do j = 1, nb_it
+      call variables(k, temperature(j), sigma(j), f, optical_depth, tau_eff)
+
+      sigma_real(j) = sigma(j) * state_0%S_0
+
+      write(fid_tot,fmt = '(3(e16.6e2))') sigma_real(j), temp_real(j), tau_eff
+    enddo
+
+    close(fid_tot)
+
+  end subroutine save_data
 
 
   !-------------------------------------------------------------------------
