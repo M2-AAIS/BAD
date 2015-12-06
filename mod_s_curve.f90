@@ -54,7 +54,6 @@ contains
     ! For Sigma
     real(kind = x_precision)                               :: Smin
     real(kind = x_precision)                               :: Smax
-    real(kind = x_precision)                               :: Sigma          ! Sigma
 
     real(kind = x_precision)                               :: omega          ! Angular velocity
     real(kind = x_precision)                               :: r              ! Radius
@@ -106,10 +105,7 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma         = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
-
-        sigma_t_thick(i) = sigma
-
+        sigma_t_thick(i) = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
 
         ! Optical thin case (tau < 1)
         optical_depth = 0
@@ -119,9 +115,7 @@ contains
         Smax          = S_max
 
         ! S found with the dichotomy approach
-        sigma         = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
-
-        sigma_t_thin(i)  =  sigma
+        sigma_t_thin(i)  = dichotomy(Smin, Smax, max_it, eps, temperature(i), omega, optical_depth)
 
       enddo
 
