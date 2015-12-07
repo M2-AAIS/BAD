@@ -38,7 +38,7 @@ module mod_constants
   end type parameters
 
   type state
-    real(kind = x_precision), dimension(n_cell) :: nu, v, cs, S, H, Mdot, rho, T, Fz, Cv, Pgaz, Prad, beta, Qplus, Qminus
+    real(kind = x_precision), dimension(n_cell) :: nu, v, cs, S, H, Mdot, rho, T, Fz, Cv, Pgaz, Prad, beta, Qplus, Qminus, tau
     ! nu     : Viscosity
     ! v      : Local, radial accretion speed
     ! cs     : Speed of sound
@@ -54,6 +54,7 @@ module mod_constants
     ! beta   : Pressure indicator
     ! Qplus  : Heating term
     ! Qminus : Cooling term
+    ! tau    : Opacity
   end type state
 
   type dim_state
