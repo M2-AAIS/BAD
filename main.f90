@@ -19,7 +19,7 @@ program black_hole_diffusion
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
-  delta_S_max = 1e-2
+  delta_S_max = 1e-3
   ! FIXME I love it
   delta_T_max = 1e-2
 
