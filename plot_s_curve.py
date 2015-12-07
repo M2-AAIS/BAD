@@ -57,8 +57,8 @@ def init():
     print('Initialisation')
     plt.ylabel('$\log T$')
     plt.xlabel('$\log \Sigma$')
-    plt.xlim(1.8, 3.2)
-    plt.ylim(6, 8)
+    plt.xlim(0.9, 3.1)
+    plt.ylim(5.5, 8)
     plt.grid()
     plt.legend()
 
