@@ -4,7 +4,7 @@ module mod_s_curve
   use mod_variables
   implicit none
 
-  real(kind = x_precision), dimension(nb_it) :: temperature ! Temperatures for which we need to solve the dichotomy
+  real(kind = x_precision), dimension(nb_it) :: temperature ! Temperatures used for the dichotomy
   real(kind = x_precision), dimension(nb_it) :: temp_real   ! Dimensioned version
   real(kind = x_precision)                   :: eps         ! Precision required for the dichotomy
   real(kind = x_precision)                   :: S_min       ! Minimum surface density limit
@@ -13,39 +13,33 @@ module mod_s_curve
 contains
   !-------------------------------------------------------------------------
   ! SUBROUTINES :
-  !               make_temperature      : : Create the temperature array needed for everyone else
-  !                                     <-- input : Lower and upper bound for the temperature coordinate of the S curve
-  !                                         --> output :
+  !               make_temperature      : : Creates the required temperature array
+  !                                     <-- input : Lower and upper limit for the temperature coordinate of the S curve
 
   !               set_conditions        : : Set conditions for the resolution
-  !                                     <-- input : Resolution treshold, lower and upper bound for the Sigma coordinate of the S curve
-  !                                         --> output :
+  !                                     <-- input : Resolution threshold, lower and upper limits for the Sigma coordinate of the S curve
 
   !               curve                 : : fake main
-  !                                         --> output : 2 arrays for the coordinates (Temperature, Sigma) of the first critical point
+  !                                         --> output : Coordinates (Temperature, Sigma) of the first critical point
 
   !               first_critical_point  : :
-  !                                     <-- input : T and Sigma for the optically thick medium + number of points
+  !                                     <-- input : Sigma for the optically thick medium
   !                                         --> output : (Temperature, Sigma) of the first critical point + index of the point
 
   !               second_critical_point : :
-  !                                     <-- input : T and Sigma for the optically thin medium + T for the thick one + number of points + index of the thick critical point + precision
+  !                                     <-- input : Sigma for the optically thin medium + number of points + index of the thick critical point
   !                                         --> output : (Temperature, Sigma) of the second critical point + index of the point
 
   !               build_s_curve         : : combining both thin and thick media
-  !                                     <-- input : T and Sigma for both media + index of the thin critical point
-  !                                         --> output : array for (Temperature, Sigma)
-
-  !               quadratic             : : For a positive real solution of a quadratic equation ax^2 + bx + c =0
-  !                                     <-- input : factors a, b, c
-  !                                         --> output : positive solution
+  !                                     <-- input : Sigma for both media + index of the thin critical point
+  !                                         --> output : Sigma
 
   !               variables             : : Computing all the variables for Q+ and Q-
-  !                                     <-- input : Temperature, Sigma, Omega + optical depth indicator (0 or 1) + more
-  !                                         --> output : f = Q+ - Q-
+  !                                     <-- input : cell index, Temperature, Sigma, + optical depth indicator (0 or 1)
+  !                                         --> output : f = Q+ - Q- , tau_eff
 
   !               dichotomy             : : In order to find the result of the equation Q+ - Q- = 0
-  !                                     <-- input : Temperature, Sigma, Omega + optical depth indicator (0 or 1) + precision
+  !                                     <-- input : cell index, temperature index + optical depth indicator (0 or 1)
   !                                         --> output : Sigma between a computed range of surface density [Smin, Smax] for a given temperature
 
   !-------------------------------------------------------------------------
@@ -162,6 +156,7 @@ contains
       temp_thin(k)   =  temp_c_thin * state_0%T_0
       sigma_thin(k)  =  sigma_c_thin * state_0%S_0
 
+      ! Computing the tau_eff values for both critical points
       call variables(k, temp_c_thick, sigma_c_thick, f, optical_depth, tau_eff)
       tau_thick(k)   = tau_eff
       call variables(k, temp_c_thin, sigma_c_thin, f, optical_depth, tau_eff)
@@ -399,10 +394,10 @@ contains
     !------------------------------------------------------------------------
 
     Omega   = x_state%Omega(k)
+
     coeff_a = (Omega * state_0%Omega_0)**2 * Sigma * state_0%S_0 / 2._x_precision
     coeff_b = (-1._x_precision/3._x_precision) * cst_rad * (T * state_0%T_0)**4 / state_0%H_0
     coeff_c = - params%RTM * T * Sigma * state_0%S_0 / (2._x_precision * state_0%H_0**2)
-
     delta   = coeff_b**2 - 4._x_precision * coeff_a * coeff_c
     H       = -0.5_x_precision * (coeff_b + sign(sqrt(delta),coeff_b)) / coeff_a
 
@@ -450,14 +445,14 @@ contains
     integer, intent(in) :: optical_depth
     !-------------------------------------------------------------------------
     integer                  :: j
-    real(kind = x_precision) :: T ! Temperature for which to solve the dichotomy
+    real(kind = x_precision) :: T ! Temperature used for the dichotomy
     real(kind = x_precision) :: tau_eff
-    real(kind = x_precision) :: Smin     ! Low point
-    real(kind = x_precision) :: Smax     ! High point
-    real(kind = x_precision) :: S_center ! Middle point
-    real(kind = x_precision) :: f_min    ! Q+ − Q− at the low point
-    real(kind = x_precision) :: f_max    ! Q+ − Q− at the high point
-    real(kind = x_precision) :: f_center ! Q+ − Q− at the middle point
+    real(kind = x_precision) :: Smin     ! Lowest point
+    real(kind = x_precision) :: Smax     ! Highest point
+    real(kind = x_precision) :: S_center ! Intermediate point
+    real(kind = x_precision) :: f_min    ! Q+ − Q− at the lowest point
+    real(kind = x_precision) :: f_max    ! Q+ − Q− at the highest point
+    real(kind = x_precision) :: f_center ! Q+ − Q− at the intermediate point
     !-------------------------------------------------------------------------
 
     T = temperature(i)
@@ -477,7 +472,7 @@ contains
       dichotomy = 0
 
     else if( f_max * f_min < 0.) then
-      iteration:do while (dabs(Smax - Smin) >= eps .and. j < max_it)
+      do while (dabs(Smax - Smin) >= eps .and. j < max_it)
 
         call variables(k, T, Smin, f_min, optical_depth, tau_eff)
 
@@ -498,7 +493,7 @@ contains
         S_center = (Smin + Smax) / 2._x_precision
         j = j + 1
 
-      end do iteration
+      end do
 
       dichotomy = S_center
 
