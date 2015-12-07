@@ -1,8 +1,8 @@
 program black_hole_diffusion
   use mod_constants
-  use mod_variables
   use mod_read_parameters
-  use mod_s_curve
+  use mod_variables
+  !use mod_s_curve
   use mod_integrator
   use mod_output
 
@@ -19,9 +19,9 @@ program black_hole_diffusion
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
-  delta_S_max = 1e-5
+  delta_S_max = 1e-2
   ! FIXME I love it
-  delta_T_max = 1e-5
+  delta_T_max = 1e-2
 
   ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
@@ -30,8 +30,8 @@ program black_hole_diffusion
   ! call s_curve(foo, bar)
 
   ! Copy the value of state_0 into state vector s
-  !s%T = CI%T_ci / state_0%T_0
-  s%T = 10._x_precision * CI%T_ci / state_0%T_0
+  s%T = CI%T_ci / state_0%T_0
+  !s%T = 10._x_precision * CI%T_ci / state_0%T_0
   s%S = CI%Sig_ci / state_0%S_0 * x_state%x
 
   ! H_over_r become H*
@@ -66,8 +66,8 @@ program black_hole_diffusion
   t_T  = params%t_T  !* state_0%temps_0
   t_nu = params%t_nu !*  state_0%temps_0
 
-  dt_nu = t_nu / 100._x_precision
-  dt_T  = t_T / 100._x_precision
+  dt_nu = t_nu / 10._x_precision
+  dt_T  = t_T / 10._x_precision
 
   write(*,*) 'dt_T, dt_nu:', dt_T, dt_nu
 
@@ -130,13 +130,9 @@ program black_hole_diffusion
 
       end if
     else
-      ! print*, 'Mdot kick'
-      ! give a Mdot kick
-      iteration=iteration+1
+      iteration = n_iterations
+      !s%Mdot(n_cell) = s%Mdot(n_cell) * 1.01_x_precision
     end if
-    ! Increase M_0_dot if stalled
-    ! TODO : increase M_dot_0
-    ! state_0%M_dot_0 = state_0%M_dot_0 + 
   end do
 
   close(13)

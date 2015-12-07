@@ -7,7 +7,7 @@ module mod_constants
   integer, parameter, public :: n_cell       = 256                    ! Number of cells along the disk radius
   ! Specific to main program
   integer, parameter, public :: n_iterations = 2000000                ! Number of iterations to run
-  integer, parameter, public :: output_freq  = 1000                   ! Frequency of the outputs
+  integer, parameter, public :: output_freq  = 1                   ! Frequency of the outputs
   ! Specific to s_curve
   integer, parameter, public :: nb_it        = 1000                   ! Number of points for the S curve
   integer, parameter, public :: max_it       = 10000000               ! Maximum number of s_curve dichotomy iterations, limit: 1e9
