@@ -34,7 +34,7 @@ contains
     state_out%nu   = params%alpha * state_out%cs * state_out%H
     state_out%rho  = state_out%S / (state_out%H * x_state%x)
 
-    ! Compute v while taking care of limit conditions
+    ! Compute v while taking care of limit conditions. First version is mean derivative one (same upperbound condition), might be used later.
     !state_out%v(1)          = - state_out%nu(2) * state_out%S(2) / (state_out%S(1) * x_state%x(1) * 2 * params%dx)
     !state_out%v(2:n_cell-1) = - 1._x_precision / (state_out%S(2:n_cell-1) * x_state%x(2:n_cell-1)) * &
     !                          (state_out%nu(3:n_cell) * state_out%S(3:n_cell) - &
