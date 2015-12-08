@@ -6,8 +6,21 @@ program black_hole_diffusion
   use mod_integrator
   use mod_output
   use mod_timestep
+  use mod_s_curve
+  use mod_distance
 
   implicit none
+
+  !--------------------------- Parameters for s_curve-----------------------
+  real(kind = x_precision), parameter         :: eps_in = 1.e-8_x_precision  ! Precision required for the dichotomy
+  real(kind = x_precision), parameter         :: Tmin   = 2.5e-2_x_precision
+  real(kind = x_precision), parameter         :: Tmax   = 4.49e0_x_precision
+  real(kind = x_precision), parameter         :: Smin   = 2.36e1_x_precision
+  real(kind = x_precision), parameter         :: Smax   = 2.36e3_x_precision
+
+  real(kind = x_precision), dimension(n_cell) :: temperature_c
+  real(kind = x_precision), dimension(n_cell) :: sigma_c
+  !-------------------------------------------------------------------------
 
   integer                                     :: iteration, ios, i
   type(state)                                 :: s
@@ -16,6 +29,7 @@ program black_hole_diffusion
  ! real(kind = x_precision)                    :: t_nu, t_T
   real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
   logical                                     :: T_converged
+  real (kind = x_precision), dimension(n_cell):: dist
   
 
   ! FIXME
@@ -27,7 +41,9 @@ program black_hole_diffusion
 
   ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
-
+  call make_temperature(Tmin, Tmax)
+  call set_conditions(eps_in, Smin, Smax)
+  call curve(temperature_c, sigma_c)
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
 
@@ -128,6 +144,7 @@ program black_hole_diffusion
           ! Recompute variables when the system is stable
           call compute_variables(s)
           call timestep (s,dt_T, dt_nu)
+          call distance(s, dist, temperature_c, sigma_c)
        end if
     else
        iteration = n_iterations
