@@ -152,7 +152,7 @@ contains
     real(kind=x_precision),intent(in) :: epst
 
     type (state)                                :: s_deriv
-    real(kind = x_precision), intent(inout)        :: dt
+    real(kind = x_precision), intent(in)        :: dt
 
     real(kind = x_precision), dimension(n_cell) :: dtemp, rhs, newT
     real(kind = x_precision), dimension(n_cell) :: f0, fT
@@ -162,8 +162,8 @@ contains
     s_deriv   = s
     s_deriv%T = s%T + dtemp
     
-    call compute_variables(s_deriv, 1._x_precision)
-    call compute_variables(s, 1._x_precision)
+    call compute_variables(s_deriv)
+    call compute_variables(s)
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
     
     f0 = f(s)
@@ -174,12 +174,18 @@ contains
 
     newT = s%T + rhs
     ! When the minimum value of T is ≤0, reduce the timestep
-    do while (minval(newT) < 0)
-       print*, 'Convergence problem. Reducing dt', dt
-       dt = dt / 2 
-       rhs = f0 / fT * (exp(fT*dt) - 1)
-       newT = s%T + rhs
-    end do
+    if (minval(newT) < 0) then
+       converge = .false.
+       print*, 'Convergence problem!'
+       return
+    end if
+    
+    ! do while (minval(newT) < 0)
+    !    print*, 'Convergence problem. Reducing dt', dt
+    !    dt = dt / 2 
+    !    rhs = f0 / fT * (exp(fT*dt) - 1)
+    !    newT = s%T + rhs
+    ! end do
 
     s%T = newT
 

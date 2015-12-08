@@ -124,7 +124,7 @@ program black_hole_diffusion
         prev_S = s%S
 
         ! Do a single S integration
-        call do_timestep_S(s, dt_nu)
+        call do_timestep_S(s, minval(dt_nu))
 
         ! Update time, number of iterations
         t = t + dt_nu
@@ -142,7 +142,6 @@ program black_hole_diffusion
         !----------------------------------------------
         T_converged = .false.
         do while (.not. T_converged)
-           dt_tmp = dt_T
            ! Do a single T integration
            call do_timestep_T(s, dt_tmp, T_converged, delta_T_max)
 
@@ -166,11 +165,9 @@ program black_hole_diffusion
      if (maxval(abs((prev_S - s%S)/s%S)) < delta_S_max) then
         ! Mdot kick
         ! params%kick_factor = params%kick_factor * 1.5
-        print*, 'Mdot kick!', params%kick_factor
+        ! print*, 'Mdot kick!', params%kick_factor
+        iteration = n_iterations
      end if
-
-     ! Recompute variables and loop
-     call compute_variables(s)
   end do
 
   close(13)
