@@ -12,7 +12,7 @@ program black_hole_diffusion
   implicit none
 
   !--------------------------- Parameters for s_curve-----------------------
-  real(kind = x_precision), parameter         :: eps_in = 1.e-8_x_precision  ! Precision required for the dichotomy
+  real(kind = x_precision), parameter         :: eps_in = 1.e-7_x_precision  ! Precision required for the dichotomy
   real(kind = x_precision), parameter         :: Tmin   = 2.5e-2_x_precision
   real(kind = x_precision), parameter         :: Tmax   = 4.49e0_x_precision
   real(kind = x_precision), parameter         :: Smin   = 2.36e1_x_precision
@@ -29,7 +29,7 @@ program black_hole_diffusion
  ! real(kind = x_precision)                    :: t_nu, t_T
   real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
   logical                                     :: T_converged
-  real (kind = x_precision), dimension(n_cell):: dist
+  real (kind = x_precision), dimension(n_cell):: dist, dist_crit
   
 
   ! FIXME
@@ -150,6 +150,12 @@ program black_hole_diffusion
           call compute_variables(s)
           call timestep (s,dt_T, dt_nu)
           call distance(s, dist, temperature_c, sigma_c)
+          ! Condition to slow dt
+          dist_crit = 1. !FIXME
+          if (maxval(dist) .ge. maxval(dist_crit)) then 
+             dt_T  = dist / dist_crit * dt_nu
+             dt_nu = dist / dist_crit * dt_T
+          endif
        end if
     else
        iteration = n_iterations
