@@ -5,6 +5,7 @@ program black_hole_diffusion
   !use mod_s_curve
   use mod_integrator
   use mod_output
+  use mod_timestep
 
   implicit none
 
@@ -12,9 +13,10 @@ program black_hole_diffusion
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
-  real(kind = x_precision)                    :: t_nu, t_T
-  real(kind = x_precision)                    :: dt_nu, dt_T
+ ! real(kind = x_precision)                    :: t_nu, t_T
+  real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
   logical                                     :: T_converged
+  
 
   ! FIXME
   S_crit = 1.e99_x_precision
@@ -51,6 +53,7 @@ program black_hole_diffusion
   close(15)
 
   call compute_variables(s)
+  call timestep (s,dt_T, dt_nu)
 
   ! Open unit 13 to write
   ! do it more safely
@@ -63,11 +66,11 @@ program black_hole_diffusion
   ! we multiply delta to prevent the code from thinking it converged
   prev_S = 1.2*s%S
 
-  t_T  = params%t_T  !* state_0%temps_0
-  t_nu = params%t_nu !*  state_0%temps_0
+ ! t_T  = params%t_T  !* state_0%temps_0
+ ! t_nu = params%t_nu !*  state_0%temps_0
 
-  dt_nu = t_nu / cst_dt
-  dt_T  = t_T / cst_dt
+ ! dt_nu = t_nu / cst_dt
+ ! dt_T  = t_T / cst_dt
 
   write(*,*) 'dt_T, dt_nu:', dt_T, dt_nu
 
@@ -93,10 +96,11 @@ program black_hole_diffusion
           prev_S = s%S
           
           ! Integrate S
-          call do_timestep_S(s, dt_nu)
+          
+          call do_timestep_S(s, minval(dt_nu))
           
           ! Increment time, number of iterations
-          t = t + dt_nu
+          t = t + minval(dt_nu)
           iteration = iteration + 1
           ! Output things here
           if (mod(iteration, output_freq) == 0) then
@@ -108,10 +112,10 @@ program black_hole_diffusion
           T_converged = .false.
           do while (.not. T_converged)
              ! Integrate T
-             call do_timestep_T(s, dt_T, T_converged, delta_T_max)
+             call do_timestep_T(s, minval(dt_T), T_converged, delta_T_max)
                          
              ! Increment time, number of iterations
-             t = t + dt_T
+             t = t + minval(dt_T)
              iteration = iteration + 1
              
              if (mod(iteration, output_freq) == 0) then
@@ -122,6 +126,7 @@ program black_hole_diffusion
           end do
           ! Recompute variables when the system is stable
           call compute_variables(s)
+          call timestep (s,dt_T, dt_nu)
        end if
     else
        iteration = n_iterations
