@@ -18,8 +18,7 @@ contains
 
     real(kind = x_precision), dimension(n_cell) :: coeff_a, coeff_b, coeff_c
     real(kind = x_precision), dimension(n_cell) :: Delta
-    real(kind = x_precision), dimension(n_cell) :: kappa_ff, tau, epsilo
-    real(kind=x_precision) :: truc
+    real(kind = x_precision), dimension(n_cell) :: kappa_ff, epsilo
 
     type(state), intent(inout)                  :: state_out
 
