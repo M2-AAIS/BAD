@@ -9,3 +9,8 @@
 
 # Output video files
 *.mp4
+
+# Executables
+simul
+s_curve
+map
