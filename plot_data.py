@@ -28,6 +28,8 @@ parser.add_argument('--reread', action='store_true', default=False,
                     help='Reread file when fully read.')
 parser.add_argument('--interval', default=0, type=int,
                     help='Interval (in ms) between each frames (default %(default)s)')
+parser.add_argument('--plot-Qs', default=False, action='store_true', dest='plot_Qs',
+                    help='Plot Q⁺ and Q⁻ instead of Mdot')
 args = parser.parse_args()
 
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
@@ -211,8 +213,13 @@ def init(ic, crit_pts, s_curves, initial_data):
     
     ax12.grid()
     ax12.set_yscale('log')
-    
-    lines['r-Mdot'] = ax21.plot(initial_data['r'], initial_data['M_dot'])[0]
+
+    if args.plot_Qs:
+        lines['r-Q+'] = ax21.plot(initial_data['r'], initial_data['Q_+'], label='$Q^+$')[0]
+        lines['r-Q-'] = ax21.plot(initial_data['r'], initial_data['Q_-'], label='$Q^-$')[0]
+        ax21.legend()
+    else:
+        lines['r-Mdot'] = ax21.plot(initial_data['r'], initial_data['M_dot'])[0]
     
     # add ticks corresponding to the s_curve
     ticks      = list(ax12.get_xticks())
@@ -227,7 +234,10 @@ def init(ic, crit_pts, s_curves, initial_data):
 
     ## Bottom left panel
     ax21.set_xlabel('$r\ (\mathrm{cm})$')
-    ax21.set_ylabel('$\dot{M}\ (\mathrm{g.s^{-1}})$')
+    if args.plot_Qs:
+        ax21.set_ylabel('$Q$')
+    else:
+        ax21.set_ylabel('$\dot{M}\ (\mathrm{g.s^{-1}})$')
     ax21.grid()
  
     ## Bottom right panel
@@ -254,7 +264,7 @@ prevTime = 0
 prevIndex = 0
 prevDt = 0
 
-def plotData(args):
+def plotData(plotArgs):
     ''' Update with the new data. Parameters:
     args: array that contains
       index: the indexes of the datadump
@@ -263,13 +273,17 @@ def plotData(args):
     global prevDt
     global prevTime
     
-    index, time, data = args
+    index, time, data = plotArgs
     
     print('Plotting {}'.format(index))
     lines['r-T'].set_ydata(data['T'])
     # lines['r-T'].set_label('$t = {:.2}s$'.format(time))
 
-    lines['r-Mdot'].set_ydata(data['M_dot'])
+    if args.plot_Qs:
+        lines['r-Q+'].set_ydata(data['Q_+'])
+        lines['r-Q-'].set_ydata(data['Q_-'])
+    else:
+        lines['r-Mdot'].set_ydata(data['M_dot'])
 
     lines['r-Sigma'].set_ydata(data['Sigma'])
 
