@@ -84,57 +84,51 @@ program black_hole_diffusion
   do while (iteration < n_iterations)
     ! Check that S is at a fixed point
     if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
-      ! Check here that S < S_crit
-      if (maxval(s%S - S_crit) > 0) then
-        print*, 'Exiting because of S'
-        ! Switch to explicit scheme
-      else
-        ! Switch to implicit scheme
-        prev_S = s%S
-
-        ! Integrate S
-        call do_timestep_S(s, dt_nu)
-
-        ! Recompute variables
-        call compute_variables(s)
-
-        ! Increment time, number of iterations
-        t = t + dt_nu
-        iteration = iteration + 1
-
-        ! Output things here
-        if (mod(iteration, output_freq) == 0) then
-          call snapshot(s, iteration, t, 13)
-          print*,'snapshot', iteration, t
-        end if
-
-        ! Iterate while T hasn't converged
-        T_converged = .false.
-        do while (.not. T_converged)
-          ! Integrate T
-          call do_timestep_T(s, dt_T, T_converged, delta_T_max)
-
-          ! Recompute variables
-          call compute_variables(s)
-
+       ! Check here that S < S_crit
+       if (maxval(s%S - S_crit) > 0) then
+          print*, 'Exiting because of S'
+          ! Switch to explicit scheme
+       else
+          ! Switch to implicit scheme
+          prev_S = s%S
+          
+          ! Integrate S
+          call do_timestep_S(s, dt_nu)
+          
           ! Increment time, number of iterations
-          t = t + dt_T
+          t = t + dt_nu
           iteration = iteration + 1
-
+          ! Output things here
           if (mod(iteration, output_freq) == 0) then
-            call snapshot(s, iteration, t, 13)
-            print*,'snapshot', iteration, t
+             call snapshot(s, iteration, t, 13)
+             print*,'snapshot', iteration, t
           end if
 
-        end do
-
-      end if
+          ! Iterate while T hasn't converged
+          T_converged = .false.
+          do while (.not. T_converged)
+             ! Integrate T
+             call do_timestep_T(s, dt_T, T_converged, delta_T_max)
+                         
+             ! Increment time, number of iterations
+             t = t + dt_T
+             iteration = iteration + 1
+             
+             if (mod(iteration, output_freq) == 0) then
+                call snapshot(s, iteration, t, 13)
+                print*,'snapshot', iteration, t
+             end if
+             
+          end do
+          ! Recompute variables when the system is stable
+          call compute_variables(s)
+       end if
     else
-      iteration = n_iterations
-      !s%Mdot(n_cell) = s%Mdot(n_cell) * 1.01_x_precision
+       iteration = n_iterations
+       !s%Mdot(n_cell) = s%Mdot(n_cell) * 1.01_x_precision
     end if
-  end do
-
-  close(13)
+ end do
+  
+ close(13)
 
 end program black_hole_diffusion
