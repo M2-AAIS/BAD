@@ -29,8 +29,8 @@ program black_hole_diffusion
   real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
   real(kind = x_precision)                    :: min_dt_nu, min_dt_T
   logical                                     :: T_converged
-  real (kind = x_precision), dimension(n_cell):: dist, dist_crit
-  
+  real (kind = x_precision), dimension(n_cell):: dist
+
 
   ! FIXME
   S_crit = 1.e99_x_precision
@@ -50,7 +50,7 @@ program black_hole_diffusion
   ! Pass to T*_crit and S*_crit
   temperature_c  = temperature_c / state_0%T_0
   sigma_c = sigma_c / state_0%S_0 * x_state%x
-  
+
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
 
@@ -65,13 +65,13 @@ program black_hole_diffusion
   open(15, file="CI.dat", status="replace", iostat=ios)
 
   if (ios /= 0) then
-    stop "Error while opening output file."
+     stop "Error while opening output file."
   end if
 
   ! Save initial conditions
   write(15, *)'r x T* S* T Sigma H* '
   do i= 1, n_cell
-    write(15, *)r_state%r(i), x_state%x(i), s%T(i), s%S(i), s%T(i)*state_0%T_0, s%S(i) * state_0%s_0 / x_state%x(i), CI%H_over_r(i)
+     write(15, *)r_state%r(i), x_state%x(i), s%T(i), s%S(i), s%T(i)*state_0%T_0, s%S(i) * state_0%s_0 / x_state%x(i), CI%H_over_r(i)
   enddo
   close(15)
 
@@ -88,7 +88,7 @@ program black_hole_diffusion
   !----------------------------------------------
   open(13, file="output.dat", status="replace", iostat=ios)
   if (ios /= 0) then
-    stop "Error while opening output file."
+     stop "Error while opening output file."
   end if
 
   !----------------------------------------------
