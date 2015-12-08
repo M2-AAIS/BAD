@@ -1,7 +1,6 @@
 module mod_s_curve
   use mod_constants
   use mod_read_parameters
-  use mod_variables
   implicit none
 
   real(kind = x_precision), dimension(nb_it) :: temperature ! Temperatures used for the dichotomy
@@ -141,7 +140,7 @@ contains
       call build_s_curve(sigma_t_thick, sigma_t_thin, index_scp, sigma)
 
       ! Display the two critical points
-      call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
+      !call display_critical_points(sigma_c_thin, temp_c_thin, sigma_c_thick, temp_c_thick, k)
 
       ! Saving the DIMENSIONED values of Sigma and T for the S curve in a file
       call save_data(k, sigma)
@@ -270,11 +269,11 @@ contains
 
     !------------------------------------------------------------------------
 
-   ! write(*,*)'**** Critical Point',k,'********'
-   ! write(*,*)'****************************************'
-   ! write(*,"(' Optically thin (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thin, sigma_c_thin
-   ! write(*,"(' Optically thick (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thick, sigma_c_thick
-   ! write(*,*)'****************************************'
+    write(*,*)'**** Critical Point',k,'********'
+    write(*,*)'****************************************'
+    write(*,"(' Optically thin (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thin, sigma_c_thin
+    write(*,"(' Optically thick (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thick, sigma_c_thick
+    write(*,*)'****************************************'
 
   end subroutine display_critical_points
 
