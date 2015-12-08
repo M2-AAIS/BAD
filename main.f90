@@ -26,18 +26,20 @@ program black_hole_diffusion
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
- ! real(kind = x_precision)                    :: t_nu, t_T
-  real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
+  real(kind = x_precision)                    :: t_nu, t_T
+  real(kind = x_precision)                    :: dt_nu, dt_T, dt_tmp
   logical                                     :: T_converged
   real (kind = x_precision), dimension(n_cell):: dist, dist_crit
   
 
   ! FIXME
   S_crit = 1.e99_x_precision
-  ! FIXME
-  delta_S_max = 1e-4
-  ! FIXME I love it
-  delta_T_max = 1e-3
+
+  !----------------------------------------------
+  ! Convergence criterion for S and T
+  !----------------------------------------------
+  delta_S_max = 1e-6
+  delta_T_max = 1e-4
 
   ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
@@ -52,9 +54,10 @@ program black_hole_diffusion
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
 
-  ! Copy the value of state_0 into state vector s
+  !----------------------------------------------
+  ! Set the initial conditions for S, T
+  !----------------------------------------------
   s%T = CI%T_ci / state_0%T_0
-  !s%T = 10._x_precision * CI%T_ci / state_0%T_0
   s%S = CI%Sig_ci / state_0%S_0 * x_state%x
 
   ! H_over_r become H*
@@ -70,32 +73,31 @@ program black_hole_diffusion
   do i= 1, n_cell
     write(15, *)r_state%r(i), x_state%x(i), s%T(i), s%S(i), s%T(i)*state_0%T_0, s%S(i) * state_0%s_0 / x_state%x(i), CI%H_over_r(i)
   enddo
-
   close(15)
 
+  !----------------------------------------------
+  ! Do an initial computation of the variables
+  !----------------------------------------------
   call compute_variables(s)
   call timestep (s,dt_T, dt_nu)
 
-  ! Open unit 13 to write
-  ! do it more safely
+  !----------------------------------------------
+  ! Open file to write output to
+  !----------------------------------------------
   open(13, file="output.dat", status="replace", iostat=ios)
   if (ios /= 0) then
     stop "Error while opening output file."
   end if
 
-  ! Initialize prev_S
-  ! we multiply delta to prevent the code from thinking it converged
-  prev_S = 1.2*s%S
+  !----------------------------------------------
+  ! Initialize t, dt and iteration counter
+  !----------------------------------------------
+  t_T  = params%t_T  !* state_0%temps_0
+  t_nu = params%t_nu !*  state_0%temps_0
 
- ! t_T  = params%t_T  !* state_0%temps_0
- ! t_nu = params%t_nu !*  state_0%temps_0
-
- ! dt_nu = t_nu / cst_dt
- ! dt_T  = t_T / cst_dt
-
-  write(*,*) 'dt_T_min, dt_nu_min:', minval(dt_T), minval(dt_nu)
-  write(*,*) 'dt_T_max, dt_nu_max:', maxval(dt_T), maxval(dt_nu)
-
+  dt_nu = t_nu * 10._x_precision
+  dt_T  = t_T * 10._x_precision
+  
   ! Initial time = 0
   t = 0._x_precision
 
@@ -107,24 +109,36 @@ program black_hole_diffusion
 
   ! Start iterations
   do while (iteration < n_iterations)
-     
-     ! Check that S is at a fixed point
-     ! by computing the maximum difference between two consecutive S step
-     if (maxval(abs((prev_S - s%S)/s%S)) > delta_S_max) then
+     ! Check that we are not close to S_critical
+     if (maxval(s%S - S_crit) > 0) then
+        print*, 'Exiting because of S'
+        ! Switch to explicit scheme
+     else
+        ! Implicit schem
+        prev_S = s%S
 
-        ! Check that we are not close to S_critical
-        if (maxval(s%S - S_crit) > 0) then
-           print*, 'Exiting because of S'
-           ! Switch to explicit scheme
-        else
-           ! Implicit schem
-           prev_S = s%S
+        ! Do a single S integration
+        call do_timestep_S(s, dt_nu)
 
-           ! Do a single S integration
-           call do_timestep_S(s, dt_nu)
+        ! Increment time, number of iterations
+        t = t + dt_nu
+        iteration = iteration + 1
+
+        ! Do a snapshot
+        if (mod(iteration, output_freq) == 0) then
+           call snapshot(s, iteration, t, 13)
+           print*,'snapshot', iteration, t
+        end if
+
+        ! Do T integrations
+        T_converged = .false.
+        do while (.not. T_converged)
+           dt_tmp = dt_T
+           ! Do a single T integration
+           call do_timestep_T(s, dt_tmp, T_converged, delta_T_max)
 
            ! Increment time, number of iterations
-           t = t + dt_nu
+           t = t + dt_tmp
            iteration = iteration + 1
 
            ! Do a snapshot
@@ -132,27 +146,10 @@ program black_hole_diffusion
               call snapshot(s, iteration, t, 13)
               print*,'snapshot', iteration, t
            end if
+        end do
 
-           ! Do T integrations
-           T_converged = .false.
-           do while (.not. T_converged)
-              ! Do a single T integration
-              call do_timestep_T(s, dt_T, T_converged, delta_T_max)
-
-              ! Increment time, number of iterations
-              t = t + dt_T
-              iteration = iteration + 1
-
-              ! Do a snapshot
-              if (mod(iteration, output_freq) == 0) then
-                 call snapshot(s, iteration, t, 13)
-                 print*,'snapshot', iteration, t
-              end if
-
-           end do
-
-        end if
-     else
+     end if
+     if (maxval(abs((prev_S - s%S)/s%S)) < delta_S_max) then
         ! Mdot kick
         
         iteration = n_iterations
