@@ -173,7 +173,13 @@ program black_hole_diffusion
         call timestep (s, dt_T, dt_nu)
         call distance(s, dist, temperature_c, sigma_c)
         min_dt_T = minval(dt_T)
-        min_dt_nu = minval(dt_nu)
+        min_dt_nu = minval(dt_nu)         
+        ! Condition to slow dt
+        dist_crit = 1. !FIXME
+        if (maxval(dist) <= maxval(dist_crit)) then 
+          dt_T  = dist / dist_crit * dt_nu
+          dt_nu = dist / dist_crit * dt_T
+        endif
      end if
 
      !----------------------------------------------
