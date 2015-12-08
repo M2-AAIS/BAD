@@ -7,8 +7,12 @@
 # Data files
 *.dat
 
-# Output video files
+# Output video, image or pdf files
 *.mp4
+*.png
+*.jpeg
+*.jpg
+*.pdf
 
 # Executables
 simul
