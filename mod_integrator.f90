@@ -154,18 +154,16 @@ contains
     type (state)                                :: s_deriv
     real(kind = x_precision), intent(inout)        :: dt
 
-    real(kind = x_precision), dimension(n_cell) :: dtemp, rhs
+    real(kind = x_precision), dimension(n_cell) :: dtemp, rhs, newT
     real(kind = x_precision), dimension(n_cell) :: f0, fT
     real(kind = x_precision) :: maxi
-
-    
 
     dtemp     = s%T * 1.e-3_x_precision
     s_deriv   = s
     s_deriv%T = s%T + dtemp
     
-    call compute_variables(s_deriv)
-
+    call compute_variables(s_deriv, 1._x_precision)
+    call compute_variables(s, 1._x_precision)
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
     
     f0 = f(s)
