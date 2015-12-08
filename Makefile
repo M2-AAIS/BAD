@@ -5,7 +5,7 @@ OUT=simul
 OUTS=s_curve
 
 
-all: mod_constants.o mod_read_parameters.o mod_variables.o mod_output.o mod_timestep.o mod_integrator.o mod_s_curve.o main.o 
+all: mod_constants.o mod_read_parameters.o mod_distance.o mod_variables.o mod_output.o mod_timestep.o mod_integrator.o mod_s_curve.o main.o 
 	$(GC) $^ $(CFLAGS) -o $(OUT)
 
 s_curve: mod_constants.o mod_read_parameters.o mod_variables.o mod_s_curve.o main_curve.o
@@ -36,6 +36,9 @@ mod_output.o: mod_output.f90
 	$(GC) $(GFLAGS) -c $^
 
 mod_s_curve.o: mod_s_curve.f90
+	$(GC) $(GFLAGS) -c $^
+
+mod_distance.o: mod_distance.f90
 	$(GC) $(GFLAGS) -c $^
 
 clean:
