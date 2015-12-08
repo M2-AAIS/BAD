@@ -104,23 +104,29 @@ program black_hole_diffusion
   ! Start
   iteration = 0
 
-  ! Write initial state
+  !----------------------------------------------
+  ! Save initial snapshot
+  !----------------------------------------------
   call snapshot(s, iteration, t, 13)
 
+  !----------------------------------------------
   ! Start iterations
+  !----------------------------------------------
   do while (iteration < n_iterations)
      ! Check that we are not close to S_critical
      if (maxval(s%S - S_crit) > 0) then
         print*, 'Exiting because of S'
         ! Switch to explicit scheme
      else
-        ! Implicit schem
+        !----------------------------------------------
+        ! S integration
+        !----------------------------------------------
         prev_S = s%S
 
         ! Do a single S integration
         call do_timestep_S(s, dt_nu)
 
-        ! Increment time, number of iterations
+        ! Update time, number of iterations
         t = t + dt_nu
         iteration = iteration + 1
 
@@ -130,7 +136,10 @@ program black_hole_diffusion
            print*,'snapshot', iteration, t
         end if
 
-        ! Do T integrations
+        !----------------------------------------------
+        ! T integrations
+        ! iterate while t hasn't converged
+        !----------------------------------------------
         T_converged = .false.
         do while (.not. T_converged)
            dt_tmp = dt_T
@@ -149,11 +158,15 @@ program black_hole_diffusion
         end do
 
      end if
+
+     !----------------------------------------------
+     ! Mdot kick
+     ! increase Mdot at the boundaries if S is stalled
+     !----------------------------------------------
      if (maxval(abs((prev_S - s%S)/s%S)) < delta_S_max) then
         ! Mdot kick
-        
-        iteration = n_iterations
-        !s%Mdot(n_cell) = s%Mdot(n_cell) * 1.01_x_precision
+        ! params%kick_factor = params%kick_factor * 1.5
+        print*, 'Mdot kick!', params%kick_factor
      end if
 
      ! Recompute variables and loop
