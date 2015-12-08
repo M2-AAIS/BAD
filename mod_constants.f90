@@ -23,6 +23,7 @@ module mod_constants
   real(kind = x_precision), parameter, public :: R       = 8.3144598e7_x_precision ! Gas cst in csg = Boltzmann cst over proton mass
   real(kind = x_precision), parameter, public :: gammag  = 5._x_precision / 3._x_precision ! Adiabatic coefficient
   real(kind = x_precision), parameter, public :: thomson = 6.6524587158e-25_x_precision ! Thomson cross-section in cgs
+  real (kind = x_precision), parameter, public :: cst_dt = 10._x_precision
 
   type parameters
     real(kind = x_precision) :: M, Mdot, Mdot_crit, kappa_e, RTM, alpha, dx, t_nu, t_T
