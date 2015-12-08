@@ -176,7 +176,7 @@ program black_hole_diffusion
         min_dt_nu = minval(dt_nu)         
         ! Condition to slow dt
         dist_crit = 1. !FIXME
-        if (maxval(dist) <= maxval(dist_crit)) then 
+        if (maxval(dist) <= maxval(dist_crit)) then !FIXME
           dt_T  = dist / dist_crit * dt_nu
           dt_nu = dist / dist_crit * dt_T
         endif
