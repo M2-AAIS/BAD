@@ -270,11 +270,11 @@ contains
 
     !------------------------------------------------------------------------
 
-    write(*,*)'**** Critical Point',k,'********'
-    write(*,*)'****************************************'
-    write(*,"(' Optically thin (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thin, sigma_c_thin
-    write(*,"(' Optically thick (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thick, sigma_c_thick
-    write(*,*)'****************************************'
+   ! write(*,*)'**** Critical Point',k,'********'
+   ! write(*,*)'****************************************'
+   ! write(*,"(' Optically thin (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thin, sigma_c_thin
+   ! write(*,"(' Optically thick (T, Sigma):',1p,E12.4,4x,1p,E12.4)") temp_c_thick, sigma_c_thick
+   ! write(*,*)'****************************************'
 
   end subroutine display_critical_points
 
