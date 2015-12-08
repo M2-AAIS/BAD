@@ -152,7 +152,7 @@ contains
     real(kind=x_precision),intent(in) :: epst
 
     type (state)                                :: s_deriv
-    real(kind = x_precision), intent(in)        :: dt
+    real(kind = x_precision), intent(inout)        :: dt
 
     real(kind = x_precision), dimension(n_cell) :: dtemp, rhs
     real(kind = x_precision), dimension(n_cell) :: f0, fT
@@ -171,10 +171,19 @@ contains
     f0 = f(s)
     fT = (f(s_deriv) - f0) / dtemp
 
-    ! rhs = f0 / fT * (exp(fT*dt) - 1)
-    rhs = dt*f0 * (1._x_precision + 0.5_x_precision*dt*fT)
-    
-    s%T = s%T + rhs
+    rhs = f0 / fT * (exp(fT*dt) - 1._x_precision)
+    ! rhs = dt*f0 * (1._x_precision + 0.5_x_precision*dt*fT)
+
+    newT = s%T + rhs
+    ! When the minimum value of T is ≤0, reduce the timestep
+    do while (minval(newT) < 0)
+       print*, 'Convergence problem. Reducing dt', dt
+       dt = dt / 2 
+       rhs = f0 / fT * (exp(fT*dt) - 1)
+       newT = s%T + rhs
+    end do
+
+    s%T = newT
 
     maxi = maxval(abs(rhs / s%T))
     if (maxi < epst) then
