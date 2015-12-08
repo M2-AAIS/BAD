@@ -26,8 +26,8 @@ program black_hole_diffusion
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
   real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
-  real(kind = x_precision)                    :: t_nu, t_T
-  real(kind = x_precision)                    :: dt_nu, dt_T, dt_tmp
+  real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
+  real(kind = x_precision)                    :: min_dt_nu, min_dt_T
   logical                                     :: T_converged
   real (kind = x_precision), dimension(n_cell):: dist, dist_crit
   
@@ -79,7 +79,9 @@ program black_hole_diffusion
   ! Do an initial computation of the variables
   !----------------------------------------------
   call compute_variables(s)
-  call timestep (s,dt_T, dt_nu)
+  call timestep (s, dt_T, dt_nu)
+  min_dt_T = minval(dt_T)
+  min_dt_nu = minval(dt_nu)
 
   !----------------------------------------------
   ! Open file to write output to
@@ -95,9 +97,19 @@ program black_hole_diffusion
   t_T  = params%t_T  !* state_0%temps_0
   t_nu = params%t_nu !*  state_0%temps_0
 
-  dt_nu = t_nu * 10._x_precision
-  dt_T  = t_T * 10._x_precision
-  
+  ! Initialize prev_S
+  ! we multiply delta to prevent the code from thinking it converged
+  prev_S = 1.2*s%S
+
+  ! t_T  = params%t_T  !* state_0%temps_0
+  ! t_nu = params%t_nu !*  state_0%temps_0
+
+  ! dt_nu = t_nu / cst_dt
+  ! dt_T  = t_T / cst_dt
+
+  write(*,*) 'dt_T_min, dt_nu_min:', min_dt_T, min_dt_nu
+  write(*,*) 'dt_T_max, dt_nu_max:', maxval(dt_T), maxval(dt_nu)
+
   ! Initial time = 0
   t = 0._x_precision
 
@@ -124,10 +136,10 @@ program black_hole_diffusion
         prev_S = s%S
 
         ! Do a single S integration
-        call do_timestep_S(s, minval(dt_nu))
+        call do_timestep_S(s, min_dt_nu)
 
         ! Update time, number of iterations
-        t = t + dt_nu
+        t = t + min_dt_nu
         iteration = iteration + 1
 
         ! Do a snapshot
@@ -143,10 +155,10 @@ program black_hole_diffusion
         T_converged = .false.
         do while (.not. T_converged)
            ! Do a single T integration
-           call do_timestep_T(s, dt_tmp, T_converged, delta_T_max)
+           call do_timestep_T(s, min_dt_T, T_converged, delta_T_max)
 
            ! Increment time, number of iterations
-           t = t + dt_tmp
+           t = t + min_dt_T
            iteration = iteration + 1
 
            ! Do a snapshot
@@ -156,6 +168,12 @@ program black_hole_diffusion
            end if
         end do
 
+        ! Recompute variables when the system is stable
+        call compute_variables(s)
+        call timestep (s, dt_T, dt_nu)
+        call distance(s, dist, temperature_c, sigma_c)
+        min_dt_T = minval(dt_T)
+        min_dt_nu = minval(dt_nu)
      end if
 
      !----------------------------------------------
