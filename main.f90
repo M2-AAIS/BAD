@@ -2,7 +2,6 @@ program black_hole_diffusion
   use mod_constants
   use mod_read_parameters
   use mod_variables
-  !use mod_s_curve
   use mod_integrator
   use mod_output
   use mod_timestep
@@ -36,7 +35,7 @@ program black_hole_diffusion
   S_crit = 1.e99_x_precision
 
   !----------------------------------------------
-  ! Convergence criterion for S and T
+  ! Convergence criteria for S and T
   !----------------------------------------------
   delta_S_max = 1e-6
   delta_T_max = 1e-4
@@ -47,7 +46,7 @@ program black_hole_diffusion
   call set_conditions(eps_in, Smin, Smax)
   call curve(temperature_c, sigma_c)
 
-  ! Pass to T*_crit and S*_crit
+  ! Conversion into T*_crit and S*_crit
   temperature_c  = temperature_c / state_0%T_0
   sigma_c = sigma_c / state_0%S_0 * x_state%x
 
@@ -60,7 +59,7 @@ program black_hole_diffusion
   s%T = CI%T_ci / state_0%T_0
   s%S = CI%Sig_ci / state_0%S_0 * x_state%x
 
-  ! H_over_r become H*
+  ! H_over_r becoming H*
   CI%H_over_r = CI%H_over_r * r_state%r
   open(15, file="CI.dat", status="replace", iostat=ios)
 
@@ -69,9 +68,10 @@ program black_hole_diffusion
   end if
 
   ! Save initial conditions
-  write(15, *)'r x T* S* T Sigma H* '
+  write(15, '(7(A16))')'r', 'x', 'T*', 'S*', 'T', 'Sigma', 'H*'
   do i= 1, n_cell
-     write(15, *)r_state%r(i), x_state%x(i), s%T(i), s%S(i), s%T(i)*state_0%T_0, s%S(i) * state_0%s_0 / x_state%x(i), CI%H_over_r(i)
+     write(15, '(7(e16.6e2))')r_state%r(i), x_state%x(i), s%T(i), s%S(i),&
+                                            s%T(i)*state_0%T_0, s%S(i) * state_0%s_0 / x_state%x(i), CI%H_over_r(i)
   enddo
   close(15)
 

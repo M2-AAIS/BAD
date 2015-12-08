@@ -12,7 +12,7 @@ module mod_variables
 
 contains
 
-  ! Compute all variables for a given state, i.e. a new S and/or T
+  ! Compute all the variables for a given state, i.e. a new S and/or T
   subroutine compute_variables(state_out)
     implicit none
 
@@ -50,16 +50,17 @@ contains
     kappa_ff      = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
                     (state_0%T_0 * state_out%T)**(-3.5_x_precision)
 
-    
+
     state_out%tau = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * (state_0%S_0 * state_out%S / x_state%x)
 
     epsilo        = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho)**2 * sqrt(state_0%T_0 * state_out%T)
-    
-    ! Compute Fz depending on optical thickness
+
+    ! Compute Fz depending on the optical thickness
     !FIXME: use code bellow when optically thick
     state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
          sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
 
+    !FIXME: try 0.0006 instead of 1.0
     ! where (state_out%tau >= 1.0)
     !    state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
     !         sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
