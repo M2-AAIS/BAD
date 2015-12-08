@@ -37,35 +37,48 @@ fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
 class Data:
     ''' Class that opens filename and reads it. You can directly iterate over it.'''
     def __init__(self, filename):
-        self.filename = filename
-        self.data = {}
-        self.times = {}
-        self.restrictTo = [] # list of indexes to restrict to
+        self.filename = filename # holds the filename
+        self.data = {}           # holds the file data
+        self.times = {}          # holds the data
+        self.indexes = []        # holds a list of each snapshot
+        self.restrictTo = []     # list of indexes to restrict to
 
         self.file = open(self.filename, 'r')
         # read ahead one line
         self.lastLineRead = self.file.readline()
-        self.pause = False
-        self.reread = False
-        self.offset = None
+        self.pause = False       # bool flag if paused (activates left<>right navigation
+        self.reread = False      # 
+        self.offset = None       # Number of indexes to jump back or forth
 
     def getChunk(self):
-        '''Get a chunk (niter, time, headers + data)'''
+        '''Get a chunk (niter, time, headers + data)
+        starting at last line read.
+        In the end, reloads the last line read and not 
+        returned into self.lastlineread'''
+        
         f = self.file
 
+        ###########################################
+        # Check not end of file
+        ###########################################
         if self.lastLineRead == '':
             return -1, -1, [], [], True
 
-        # first line to read == last line read at previous call            
+        ###########################################
+        # preload first lines
+        ###########################################
         niter = int(self.lastLineRead.split('#')[1])
         time = float(f.readline().split('#')[1])
         headers = f.readline().split()
         eof = False # flag to set if end of file
 
+        ###########################################
+        # read until reaching a commented line
+        ###########################################
         data = []
         line = f.readline()
-        # read until reaching a commented line
         while '#' not in line:
+            # if eof reached
             if line == '':
                 eof = True
                 break
@@ -79,24 +92,49 @@ class Data:
         self.lastLineRead = line
         return niter, time, headers, pdData, eof
 
+    def getPosition(self, _from, offset):
+        ''' Given an initial position, returns the 
+        index of the n'th position after and the effective offset applied.'''
+        indexOfNiter = self.indexes.index(_from)
+        
+        tmpIndex = indexOfNiter - 1 + offset
+        if tmpIndex >= len(self.indexes):
+            effectiveOffset = len(self.indexes) - indexOfNiter
+        elif tmpIndex < 0:
+            effectiveOffset = -indexOfNiter + 1
+        else:
+            effectiveOffset = offset
+
+        index = indexOfNiter - 1 + effectiveOffset
+        return effectiveOffset, self.indexes[index]
+
     def __iter__(self):
         ''' Infinite iterator over the whole file'''
         self.restrictTo.sort()
-        
+
+        # Convert the restriction into a boolean
         if len(self.restrictTo) > 0:
             noRestriction = False
         else:
             noRestriction = True
-            
+
+        ###########################################
+        # First read the whole file chunk by chunk
+        ###########################################
         i = 0
         niter, time, headers, data, eof = self.getChunk()
         while not eof:            
             if self.pause:
-                i = max(0, niter + self.offset)
+                self.offset, i = self.getPosition(niter, self.offset)
+                print('i:', self.indexes, self.offset)
+
                 yield (i, self.times[i], self.data[i])
             elif noRestriction or niter in self.restrictTo:
                 yield (niter, time, data)
 
+            ###########################################
+            # load the missing lines ahead
+            ###########################################
             readAhead = 0
             if self.pause and self.offset:
                 readAhead += self.offset
@@ -104,6 +142,7 @@ class Data:
                 readAhead = 1
 
             while readAhead > 0 and not eof:
+                print('reading ahead')
                 # if we have a restriction list and the current iteration
                 # is after the last accepted item, stop reading the file
                 if not noRestriction and niter > self.restrictTo[-1]:
@@ -112,32 +151,35 @@ class Data:
                 niter, time, headers, data, eof = self.getChunk()
                 self.data[niter] = data
                 self.times[niter] = time
+                self.indexes.append(niter)
+                self.indexes.sort()
 
                 self.offset = 0
                 
                 readAhead -= 1
-
+                # if reread flag activated, close and reopen the file
                 if eof and self.reread:
                     self.file.close()
                     self.file = open(self.filename, 'r')
                     self.lastLineRead = self.file.readline()
                     eof = False
 
-
-        # if the loop flag is activated, loop over saved data
+        ###########################################
+        # If looping, pop back the data already read
+        ###########################################
         if self.loop:
+            # dataKeys holds the keys where to find the data
             if noRestriction:
                 dataKeys = list(self.data.keys())
             else:
                 dataKeys = [key for key in self.data.keys() if key in self.restrictTo]
                 
             dataKeys.sort()
-            
             while True:
                 prevKey = dataKeys[-1]
                 for key in dataKeys:
                     if self.pause:
-                        i = niter - 1 + self.offset
+                        self.offset, i = self.getPosition(niter, self.offset)
                         yield (i, self.times[i], self.data[i])
                     else:
                         yield (key, self.times[key], self.data[key])
