@@ -21,9 +21,9 @@ program black_hole_diffusion
   ! FIXME
   S_crit = 1.e99_x_precision
   ! FIXME
-  delta_S_max = 1e-3
+  delta_S_max = 1e-4
   ! FIXME I love it
-  delta_T_max = 1e-2
+  delta_T_max = 1e-3
 
   ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
@@ -72,7 +72,8 @@ program black_hole_diffusion
  ! dt_nu = t_nu / cst_dt
  ! dt_T  = t_T / cst_dt
 
-  write(*,*) 'dt_T, dt_nu:', dt_T, dt_nu
+  write(*,*) 'dt_T_min, dt_nu_min:', minval(dt_T), minval(dt_nu)
+  write(*,*) 'dt_T_max, dt_nu_max:', maxval(dt_T), maxval(dt_nu)
 
   ! Initial time = 0
   t = 0._x_precision

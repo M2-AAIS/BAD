@@ -7,7 +7,9 @@ module mod_constants
   integer, parameter, public :: n_cell       = 256                    ! Number of cells along the disk radius
   ! Specific to main program
   integer, parameter, public :: n_iterations = 2000000                ! Number of iterations to run
-  integer, parameter, public :: output_freq  = 1                   ! Frequency of the outputs
+  integer, parameter, public :: output_freq  = 1000                   ! Frequency of the outputs
+  real(kind = x_precision), parameter, public :: cst_dt_nu = 10._x_precision
+  real(kind = x_precision), parameter, public :: cst_dt_T = 1.e3_x_precision
   ! Specific to s_curve
   integer, parameter, public :: nb_it        = 1000                   ! Number of points for the S curve
   integer, parameter, public :: max_it       = 10000000               ! Maximum number of s_curve dichotomy iterations, limit: 1e9
@@ -23,7 +25,6 @@ module mod_constants
   real(kind = x_precision), parameter, public :: R       = 8.3144598e7_x_precision ! Gas cst in csg = Boltzmann cst over proton mass
   real(kind = x_precision), parameter, public :: gammag  = 5._x_precision / 3._x_precision ! Adiabatic coefficient
   real(kind = x_precision), parameter, public :: thomson = 6.6524587158e-25_x_precision ! Thomson cross-section in cgs
-  real (kind = x_precision), parameter, public :: cst_dt = 10._x_precision
 
   type parameters
     real(kind = x_precision) :: M, Mdot, Mdot_crit, kappa_e, RTM, alpha, dx, t_nu, t_T
