@@ -2,6 +2,7 @@ module mod_distance
   use mod_constants
   use mod_read_parameters
   use mod_s_curve
+  use mod_variables
   implicit none 
   
   private  
@@ -16,7 +17,8 @@ module mod_distance
       real(kind = x_precision), dimension(n_cell) :: dist
       real(kind = x_precision), dimension(n_cell) :: temp_c, sigma_c
 
-      dist = 1. !FIXME
+      dist = sqrt ((abs(state_in%T-temp_c))**2._x_precision + & 
+           (abs(state_in%S-sigma_c))**2._x_precision)
       
     end subroutine distance
   end module mod_distance
