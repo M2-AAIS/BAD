@@ -66,8 +66,8 @@ program black_hole_diffusion
   t_T  = params%t_T  !* state_0%temps_0
   t_nu = params%t_nu !*  state_0%temps_0
 
-  dt_nu = t_nu / 10._x_precision
-  dt_T  = t_T / 10._x_precision
+  dt_nu = t_nu / cst_dt
+  dt_T  = t_T / cst_dt
 
   write(*,*) 'dt_T, dt_nu:', dt_T, dt_nu
 
