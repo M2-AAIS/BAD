@@ -44,6 +44,11 @@ program black_hole_diffusion
   call make_temperature(Tmin, Tmax)
   call set_conditions(eps_in, Smin, Smax)
   call curve(temperature_c, sigma_c)
+
+  ! Pass to T*_crit and S*_crit
+  temperature_c  = temperature_c / state_0%T_0
+  sigma_c = sigma_c / state_0%S_0 * x_state%x
+  
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
 
