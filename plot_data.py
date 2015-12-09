@@ -203,13 +203,13 @@ lines = {'r-T': 0,
          'Sigma-T': []}
 
 class colorLooper:
-    def __init__(self, colors= ['red', 'green', 'blue', 'grey']):
+    def __init__(self, colors= ['red', 'green', 'blue', 'grey', 'purple', 'brown', 'pink']):
         self.colors = colors
         self.i = 0
 
     def __next__(self):
         self.i += 1
-        return self.colors[self.i - 1]
+        return self.colors[self.i - 1 % len(self.colors)]
     
     def __iter__(self):
         self.i = 0
@@ -409,7 +409,7 @@ if __name__ == '__main__':
         onClickHandler = lambda event: onClick(data, event)
         onKeyHandler = lambda event: onKey(data, event)
         
-        fig.canvas.mpl_connect('button_press_event', onClickHandler)
+        # fig.canvas.mpl_connect('button_press_event', onClickHandler)
         fig.canvas.mpl_connect('key_press_event', onKeyHandler)
         ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun,
                                       interval=args.interval)
