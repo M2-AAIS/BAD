@@ -19,6 +19,7 @@ program black_hole_diffusion
 
   real(kind = x_precision), dimension(n_cell) :: temperature_c
   real(kind = x_precision), dimension(n_cell) :: sigma_c
+  real(kind = x_precision), dimension(n_cell) :: S_c 
   !-------------------------------------------------------------------------
 
   integer                                     :: iteration, ios, i
@@ -30,6 +31,8 @@ program black_hole_diffusion
   logical                                     :: T_converged
   real (kind = x_precision), dimension(n_cell):: dist
 
+  real (kind = x_precision), dimension(n_cell):: dist_crit
+  real (kind = x_precision)                   :: dt_pre_factor
 
   ! FIXME
   S_crit = 1.e99_x_precision
@@ -46,9 +49,8 @@ program black_hole_diffusion
   call set_conditions(eps_in, Smin, Smax)
   call curve(temperature_c, sigma_c)
 
-  ! Conversion into T*_crit and S*_crit
-  temperature_c  = temperature_c / state_0%T_0
-  sigma_c = sigma_c / state_0%S_0 * x_state%x
+  ! Conversion into S*_crit
+  S_c = sigma_c * x_state%x
 
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
@@ -171,15 +173,12 @@ program black_hole_diffusion
         ! Recompute variables when the system is stable
         call compute_variables(s)
         call timestep (s, dt_T, dt_nu)
-        call distance(s, dist, temperature_c, sigma_c)
-        min_dt_T = minval(dt_T)
-        min_dt_nu = minval(dt_nu)         
-        ! Condition to slow dt
         dist_crit = 1. !FIXME
-       ! if (maxval(dist) <= maxval(dist_crit)) then !FIXME
-       !   dt_T  = dist / dist_crit * dt_nu
-       !   dt_nu = dist / dist_crit * dt_T
-       ! endif
+        dt_pre_factor = pre_factor(s, S_c, dist_crit)
+        min_dt_T = minval(dt_T) * dt_pre_factor
+        min_dt_nu = minval(dt_nu) * dt_pre_factor         
+ 
+
      end if
 
      !----------------------------------------------
