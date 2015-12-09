@@ -7,12 +7,12 @@ module mod_constants
   integer, parameter, public :: n_cell       = 256                    ! Number of cells along the disk radius
   ! Specific to main program
   integer, parameter, public :: n_iterations = 100000                 ! Number of iterations to run
-  integer, parameter, public :: output_freq  = 100                    ! Frequency of the outputs
-  real(kind = x_precision), parameter, public :: cst_dt_nu = 10._x_precision
-  real(kind = x_precision), parameter, public :: cst_dt_T = 5.e0_x_precision
+  integer, parameter, public :: output_freq  = 1                      ! Frequency of the outputs
+  real(kind = x_precision), parameter, public :: cst_dt_nu = 0.5_x_precision
+  real(kind = x_precision), parameter, public :: cst_dt_T = 0.05_x_precision
   ! Specific to s_curve
   integer, parameter, public :: nb_it        = 1000                   ! Number of points for the S curve
-  integer, parameter, public :: max_it       = 10000000               ! Maximum number of s_curve dichotomy iterations, limit: 1e9
+  integer, parameter, public :: max_it       = 1000000000               ! Maximum number of s_curve dichotomy iterations, limit: 1e9
 
   ! Physical constants
   real(kind = x_precision), parameter, public :: G       = 6.67408e-8_x_precision ! Gravitationnal cst in cgs
