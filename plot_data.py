@@ -359,13 +359,13 @@ def onKey(data, event):
         data.offset += amount
         
     behaviour = {
-        'left': lambda: mod(-1),
-        'right': lambda: mod(+1),
+        'down': lambda: mod(-1),
+        'up': lambda: mod(+1),
         ' ': lambda: onClick(data, ''),
-        'ctrl+left': lambda: mod(-10),
-        'ctrl+right': lambda: mod(+10),
-        'shift+ctrl+left': lambda: mod(-1000),
-        'shift+ctrl+right': lambda: mod(+1000),
+        'ctrl+down': lambda: mod(-10),
+        'ctrl+up': lambda: mod(+10),
+        'shift+ctrl+down': lambda: mod(-1000),
+        'shift+ctrl+up': lambda: mod(+1000),
         }
     if event.key in behaviour:
         behaviour[event.key]()
