@@ -58,7 +58,7 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Set the initial conditions for S, T
   !----------------------------------------------
-  s%T = CI%T_ci / state_0%T_0
+  s%T = 5._x_precision*CI%T_ci / state_0%T_0
   s%S = CI%Sig_ci / state_0%S_0 * x_state%x
 
   ! H_over_r becoming H*
