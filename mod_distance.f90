@@ -6,18 +6,16 @@ module mod_distance
   
   private  
 
-  public :: distance
+  public :: pre_factor
 
   contains 
 
-    subroutine distance(state_in, dist, temp_c, sigma_c)
+    function pre_factor(state_in, S_c, dist_crit)
       implicit none
-      type(state)                                 :: state_in
-      real(kind = x_precision), dimension(n_cell) :: dist
-      real(kind = x_precision), dimension(n_cell) :: temp_c, sigma_c
-
-      dist = sqrt ((abs(state_in%T-temp_c))**2._x_precision + & 
-           (abs(state_in%S-sigma_c))**2._x_precision)
+      type(state), intent(in)                                 :: state_in
+      real(kind = x_precision)                                :: pre_factor
+      real(kind = x_precision), dimension(n_cell), intent(in) :: S_c, dist_crit
       
-    end subroutine distance
+      pre_factor = min(minval((S_c - state_in%S) / dist_crit), 1._x_precision)      
+    end function pre_factor
   end module mod_distance
