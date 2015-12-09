@@ -29,9 +29,11 @@ contains
       !  dt_nu = x_state%x**2._x_precision / state_in%nu 
 
     dt_nu = x_state%x / abs(state_in%v) / cst_dt_nu
-    dt_T  = (state_in%H / x_state%x)**(2._x_precision) * dt_nu * cst_dt_nu &
-         / cst_dt_T
- 
+   ! dt_T  = (state_in%H / x_state%x)**(2._x_precision) * dt_nu * cst_dt_nu &
+   !      / cst_dt_T
+
+   ! dt_T  =  1._x_precision / params%alpha / x_state%Omega / cst_dt_T
+    dt_T  = state_in%Cs / params%alpha / state_in%H / x_state%Omega**2._x_precision
   end subroutine timestep
   
 end module mod_timestep
