@@ -5,34 +5,40 @@ module mod_maps
 
   implicit none
 
-  integer                           :: nb_S ! The number of points along Sigma axis
-  integer                           :: nb_T ! The number of points along T axis
+  integer                  :: nb_S  ! The number of points along Sigma axis
+  integer                  :: nb_T  ! The number of points along T axis
+  real(kind = x_precision) :: T_min ! Lowest value of Temperature range
+  real(kind = x_precision) :: T_max ! Highest value of Temperature range
+  real(kind = x_precision) :: S_min ! Lowest value of Sigma range
+  real(kind = x_precision) :: S_max ! Highest value of Sigma range
+
 
 contains
 
-  subroutine set_conditions(nbS, nbT)
+  subroutine set_conditions(nbS, nbT, Tmin, Tmax, Smin, Smax)
     implicit none
 
     integer, intent(in) :: nbS
     integer, intent(in) :: nbT
+    real(kind = x_precision), intent(in) :: Tmin ! Lowest value of Temperature range
+    real(kind = x_precision), intent(in) :: Tmax ! Highest value of Temperature range
+    real(kind = x_precision), intent(in) :: Smin ! Lowest value of Sigma range
+    real(kind = x_precision), intent(in) :: Smax ! Highest value of Sigma range
 
     nb_S = nbS
     nb_T = nbT
+    T_min = Tmin
+    T_max = Tmax
+    S_min = Smin
+    S_max = Smax
 
   end subroutine set_conditions
 
   ! Build the T, Sigma grid given the number of points along each axis and the ranges
-  subroutine build_grid(T_min, T_max, S_min, S_max)
+  subroutine build_grid()
     implicit none
 
-    real(kind = x_precision), intent(in) :: T_min ! Lowest value of Temperature range
-    real(kind = x_precision), intent(in) :: T_max ! Highest value of Temperature range
-    real(kind = x_precision), intent(in) :: S_min ! Lowest value of Sigma range
-    real(kind = x_precision), intent(in) :: S_max ! Highest value of Sigma range
-
     type(state),              dimension(nb_T,nb_S)        :: grid    ! The states grid
-    real(kind = x_precision), dimension(nb_T,nb_S)        :: T_grid  ! The Temperature grid
-    real(kind = x_precision), dimension(nb_T,nb_S)        :: S_grid  ! The Sigma grid
     real(kind = x_precision), dimension(n_cell,nb_T,nb_S) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
     real(kind = x_precision), dimension(n_cell,nb_T,nb_S) :: tau_res ! The tau grids, one for each position in the disk
     real(kind = x_precision) :: dT     ! Temperature steps in the grid
@@ -53,9 +59,6 @@ contains
       S_temp = dS * (i-1) + S_min
 
       ! Store them along first/second dimension
-      T_grid(i,1:nb_S) = T_temp
-      S_grid(1:nb_T,i) = S_temp
-
       do k = 1, n_cell
         grid(i,1:nb_S)%T(k) = T_temp ! Does not work without (k), so put it there
         grid(1:nb_T,i)%S(k) = S_temp * x_state%x(k) ! Actually the state use S, not Sigma
@@ -72,15 +75,13 @@ contains
       end do
     end do
 
-    call save_data(T_grid, S_grid, Q_res, tau_res)
+    call save_data(Q_res, tau_res)
 
   end subroutine build_grid
 
-  subroutine save_data(T_grid, S_grid, Q_res, tau_res)
+  subroutine save_data(Q_res, tau_res)
     implicit none
 
-    real(kind = x_precision), dimension(nb_T,nb_S),        intent(in) :: T_grid  ! The Temperature grid
-    real(kind = x_precision), dimension(nb_T,nb_S),        intent(in) :: S_grid  ! The Sigma grid
     real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(in) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
     real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(in) :: tau_res ! The tau grids, one for each position in the disk
 
@@ -91,7 +92,7 @@ contains
     integer             :: ios         ! I/O status
     integer             :: i,j,k       ! Loop counters
 
-    write(line_fmt,'(A,I4,A)') '(',nb_S,'(e16.6e2))'
+    write(line_fmt,'(A,I4,A)') '(',nb_S,'(e11.3e2))'
 
     do k = 1, n_cell
 
@@ -105,15 +106,11 @@ contains
         stop
       endif
 
-      write(fid, fmt = '(A)') '# T grid'
-      do i = 1, nb_T
-        write(fid, fmt = line_fmt) (T_grid(i,j), j = 1, nb_S)
-      end do
+      write(fid, fmt = '(A)') '# T bounds'
+      write(fid, fmt = '(2(e11.3e2))') T_min*state_0%T_0, T_max*state_0%T_0
 
-      write(fid, fmt = '(A)') '# Sigma grid'
-      do i = 1, nb_T
-        write(fid, fmt = line_fmt) (S_grid(i,j), j = 1, nb_S)
-      end do
+      write(fid, fmt = '(A)') '# Sigma bounds'
+      write(fid, fmt = '(2(e11.3e2))') S_min*state_0%S_0, S_max*state_0%S_0
 
       write(fid, fmt = '(A)') '# Q grid'
       do i = 1, nb_T
