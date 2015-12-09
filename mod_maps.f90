@@ -114,12 +114,12 @@ contains
 
       write(fid, fmt = '(A)') '# Q grid'
       do i = 1, nb_T
-        write(fid, fmt = line_fmt) (Q_res(k,i,j), j = 1, nb_S)
+        write(fid, fmt = line_fmt) (Q_res(k,nb_T+1-i,j), j = 1, nb_S)
       end do
 
       write(fid, fmt = '(A)') '# tau grid'
       do i = 1, nb_T
-        write(fid, fmt = line_fmt) (tau_res(k,i,j), j = 1, nb_S)
+        write(fid, fmt = line_fmt) (tau_res(k,nb_T+1-i,j), j = 1, nb_S)
       end do
 
       close(fid)

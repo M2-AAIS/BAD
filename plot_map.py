@@ -42,7 +42,5 @@ if __name__ == '__main__':
         plt.colorbar()
         plt.xlabel('Sigma')
         plt.ylabel('Temperature')
-        plt.xscale('log')
-        plt.yscale('log')
 
     plt.show()
