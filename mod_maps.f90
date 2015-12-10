@@ -38,41 +38,31 @@ contains
   subroutine build_grid()
     implicit none
 
-    type(state),              dimension(nb_T,nb_S)        :: grid    ! The states grid
+    type(state)                                           :: s       ! The states grid
     real(kind = x_precision), dimension(n_cell,nb_T,nb_S) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
     real(kind = x_precision), dimension(n_cell,nb_T,nb_S) :: tau_res ! The tau grids, one for each position in the disk
     real(kind = x_precision) :: dT     ! Temperature steps in the grid
     real(kind = x_precision) :: dS     ! Sigma steps in the grid
     real(kind = x_precision) :: T_temp ! Temporary variable to store Temperature
     real(kind = x_precision) :: S_temp ! Temporary variable to store Sigma
-    integer                  :: i,j,k  ! Loop counters
+    integer                  :: i,j    ! Loop counters
 
     ! Compute the Temperature and Sigma steps
     dT = (T_max - T_min) / (nb_T - 1)
     dS = (S_max - S_min) / (nb_S - 1)
 
-    ! Loop over first dimension
     do i = 1, nb_T
+       do j = 1, nb_S
+          T_temp = dT * (i-1) + T_min
+          S_temp = dS * (j-1) + S_min
 
-      ! Compute the i-th values
-      T_temp = dT * (i-1) + T_min
-      S_temp = dS * (i-1) + S_min
-
-      ! Store them along first/second dimension
-      do k = 1, n_cell
-        grid(i,1:nb_S)%T(k) = T_temp ! Does not work without (k), so put it there
-        grid(1:nb_T,i)%S(k) = S_temp * x_state%x(k) ! Actually the state use S, not Sigma
-      end do
-    end do
-
-    do i = 1, nb_T
-      do j = 1, nb_S
-        call compute_variables(grid(i,j)) ! Compute the variables in each position of the state
-        do k = 1, n_cell ! For each position on the disk
-          Q_res(k,i,j) = grid(i,j)%Qplus(k) - grid(i,j)%Qminus(k) ! Q+ - Q-
-          tau_res(k,i,j) = grid(i,j)%tau(k) ! tau_eff
-        end do
-      end do
+          s%T = T_temp
+          S%S = S_temp
+          
+          call compute_variables(s) ! Compute the variables in each position of the state
+          Q_res(:,i,j) = s%Qplus - s%Qminus
+          tau_res(:,i,j) = s%tau
+       end do
     end do
 
     call save_data(Q_res, tau_res)
