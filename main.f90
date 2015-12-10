@@ -40,7 +40,7 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Convergence criteria for S and T
   !----------------------------------------------
-  delta_S_max = 1e-6
+  delta_S_max = 1e-8
   delta_T_max = 1e-4
 
   ! Read the parameters, generate state_0 and create adim state
