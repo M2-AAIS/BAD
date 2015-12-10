@@ -9,9 +9,9 @@ from os import path
 
 parser = argparse.ArgumentParser(description='Plot data from output of the black hole simulation.')
 parser.add_argument('--index', type=int, default=1,
-                    help='Index to plot (default: %{default}s)')
+                    help='Index to plot (default: %(default)s)')
 parser.add_argument('--map-dir', type=str, default='maps', dest='map_dir',
-                    help='Directory containing paths (default: %{default}s)')
+                    help='Directory containing paths (default: %(default)s)')
 args = parser.parse_args()
 
 
