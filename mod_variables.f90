@@ -68,16 +68,16 @@ contains
 
     ! Compute Fz depending on the optical thickness
     !FIXME: use code bellow when optically thick
-    state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
-         sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
+    ! state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
+    !      sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
 
     !FIXME: try 0.0006 instead of 1.0
-    ! where (state_out%tau >= 1.0)
-    !    state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
-    !         sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
-    ! elsewhere
-    !    state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
-    ! end where
+    where (state_out%tau >= 0.0006)
+       state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
+            sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
+    elsewhere
+       state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
+    end where
 
     ! Compute variables related to pressure
     state_out%Pgaz = state_out%rho * state_out%T
