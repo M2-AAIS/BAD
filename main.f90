@@ -25,7 +25,7 @@ program black_hole_diffusion
   integer                                     :: iteration, ios, i
   type(state)                                 :: s
   real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
-  real(kind = x_precision), dimension(n_cell) :: prev_S, S_crit
+  real(kind = x_precision), dimension(n_cell) :: prev_S
   real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
   real(kind = x_precision)                    :: min_dt_nu, min_dt_T
   logical                                     :: T_converged
@@ -33,9 +33,6 @@ program black_hole_diffusion
 
   real (kind = x_precision), dimension(n_cell):: dist_crit
   real (kind = x_precision)                   :: dt_pre_factor
-
-  ! FIXME
-  S_crit = 1.e99_x_precision
 
   !----------------------------------------------
   ! Convergence criteria for S and T
@@ -128,7 +125,7 @@ program black_hole_diffusion
   !----------------------------------------------
   do while (iteration < n_iterations)
      ! Check that we are not close to S_critical
-     if (maxval(s%S - S_crit) > 0) then
+     if (maxval(s%S - S_c) > 0) then
         print*, 'Exiting because of S'
         ! Switch to explicit scheme
      else
