@@ -135,7 +135,7 @@ program black_hole_diffusion
         prev_S = s%S
 
         ! Do a single S integration
-        call do_timestep_S(s, min_dt_nu)
+        call do_timestep_S_imp(s, min_dt_nu)
 
         ! Update time, number of iterations
         t = t + min_dt_nu
