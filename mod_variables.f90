@@ -16,13 +16,13 @@ contains
   subroutine compute_variables(state_out)
     implicit none
 
+    type(state), intent(inout) :: state_out
+
     real(kind = x_precision), dimension(n_cell)   :: coeff_a, coeff_b, coeff_c
     real(kind = x_precision), dimension(n_cell)   :: Delta
     real(kind = x_precision), dimension(n_cell)   :: kappa_ff, epsilo
+    real(kind = x_precision), dimension(n_cell)   :: Sx
     real(kind = x_precision), dimension(0:n_cell) :: nuS ! one more dimension to store nuS(0)
-
-    type(state), intent(inout)                    :: state_out
-    integer                                       :: k
 
     !-------------------------------------------------------------
     ! Compute trinomial coefficients for H
@@ -39,23 +39,15 @@ contains
     state_out%rho  = state_out%S / (state_out%H * x_state%x)
 
     !-------------------------------------------------------------
-    ! Compute v while taking care of limit conditions.
-    ! we're using an upwind scheme depending on the sign of v
-    nuS(0) = 0
+    ! Compute v while taking care of limit conditions. This is not an advection equation, so use mean derivative.
+    nuS(0)        = 0
     nuS(1:n_cell) = state_out%nu * state_out%S
-    
-    do k = 1, n_cell - 1
-       if (state_out%v(k) > 0) then
-          state_out%v(k) = - 1._x_precision / (state_out%S(k) * x_state%x(k)) * &
-               (nuS(k) - nuS(k-1)) / params%dx
-       else
-          state_out%v(k) = - 1._x_precision / (state_out%S(k) * x_state%x(k)) * &
-               (nuS(k+1) - nuS(k)) / params%dx
-       end if
-    end do
-    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * x_state%x(n_cell))
+    Sx            = state_out%S * x_state%x
 
-    state_out%Mdot = - state_out%v * state_out%S * x_state%x
+    state_out%v(1:n_cell-1) = - 1._x_precision / Sx(1:n_cell-1) * (nuS(2:n_cell) - nuS(0:n_cell-2)) / (2 * params%dx)
+    state_out%v(n_cell)     = - 1._x_precision / Sx(n_cell) ! FIXME: not true if we increase Mdot at rmax at some point
+
+    state_out%Mdot = - state_out%v * Sx
 
     ! Compute variables needed for Fz
     kappa_ff      = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
