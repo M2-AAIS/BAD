@@ -64,4 +64,4 @@ run_map: maps
 
 rerun: clean all run
 
-rebuild: clean all s_curve
+rebuild: clean all s_curve map
