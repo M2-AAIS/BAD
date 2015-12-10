@@ -115,30 +115,19 @@ contains
     !using only on the superior branch of the S curve NOT VERIFIED YET
     implicit none
 
-    type (state), intent(inout)                   :: states
-    real (kind = x_precision), intent(in)         :: dt
+    type (state), intent(inout)                :: states
+    real (kind=x_precision), intent(in)        :: dt
 
-    real (kind = x_precision), dimension(n_cell)  :: S_tmp ! temporary array in order to process the state%S at t+dt
+    real (kind=x_precision), dimension(n_cell) :: S_tmp ! temporary array in order to process the state%S at t+dt
+    real (kind=x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
 
-    S_tmp(1)          = states%S(1) + ( &
-                        states%nu(2) * states%S(2) &
-                        - 2._x_precision  * states%nu(1) * states%S(1) &
-                        ) &
-                        /  (params%dx**2 * x_state%x(1)**2) * dt
+    nuS(0) = 0
+    nuS(1:n_cell) = states%nu * states%S
+    nuS(n_cell+1) = params%dx + nuS(n_cell)
 
-    S_tmp(2:n_cell-1) = states%S(2:n_cell-1) + ( &
-                        states%nu(3:n_cell) * states%S(3:n_cell) &
-                        - 2._x_precision * states%nu(2:n_cell-1) * states%S(2:n_cell-1) &
-                        +  states%nu(1:n_cell-2) * states%S(1:n_cell-2) &
-                        ) &
-                        / (params%dx**2 *  x_state%x(2:n_cell-1)**2) * dt
-
-    S_tmp(n_cell)     = states%S(n_cell) + ( &
-                        params%dx &
-                        - states%nu(n_cell)  * states%nu(n_cell) &
-                        + states%nu(n_cell-1) * states%S(n_cell-1) &
-                        ) &
-                        / params%dx**2 * dt
+    S_tmp = states%S + ( &
+         nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1) )&
+         / (params%dx**2 *  x_state%x**2) * dt
 
     states%S = S_tmp
   end subroutine do_timestep_S_exp
