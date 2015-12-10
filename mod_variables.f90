@@ -18,11 +18,11 @@ contains
 
     type(state), intent(inout) :: state_out
 
-    real(kind = x_precision), dimension(n_cell)   :: coeff_a, coeff_b, coeff_c
-    real(kind = x_precision), dimension(n_cell)   :: Delta
-    real(kind = x_precision), dimension(n_cell)   :: kappa_ff, epsilo
-    real(kind = x_precision), dimension(n_cell)   :: Sx
-    real(kind = x_precision), dimension(0:n_cell) :: nuS ! one more dimension to store nuS(0)
+    real(x_precision), dimension(n_cell)   :: coeff_a, coeff_b, coeff_c
+    real(x_precision), dimension(n_cell)   :: Delta
+    real(x_precision), dimension(n_cell)   :: kappa_ff, epsilo
+    real(x_precision), dimension(n_cell)   :: Sx
+    real(x_precision), dimension(0:n_cell) :: nuS ! one more dimension to store nuS(0)
 
     !-------------------------------------------------------------
     ! Compute trinomial coefficients for H

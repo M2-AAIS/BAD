@@ -10,14 +10,14 @@ module mod_read_parameters
   type(dim_state)  :: r_state ! Contains the r and Omega_r tables
   type(state_zero) :: state_0
 
-  real(kind = x_precision)  :: fmdot   ! Fraction of Mdot
-  type(state_ci)            :: CI      ! Contains the initial parmaters for Temparature end Sigma
+  real(x_precision) :: fmdot   ! Fraction of Mdot
+  type(state_ci)    :: CI      ! Contains the initial parmaters for Temparature end Sigma
 
-  real(kind = x_precision), dimension(n_cell) :: f1 
+  real(x_precision), dimension(n_cell) :: f1
 
   private
 
-  public           :: get_parameters, params, x_state, r_state, state_0, f1, fmdot, CI
+  public :: get_parameters, params, x_state, r_state, state_0, f1, fmdot, CI
 
 contains
 
@@ -26,18 +26,18 @@ contains
     implicit none
 
     ! Internal variables
-    real(kind=x_precision) :: X,Y,Z   ! Chemical composition : X+Y+Z = 1
-    real(kind=x_precision) :: mu      ! Mean molecular mass
-    real(kind=x_precision) :: rmax    ! Maximum considered radius (in rs)
-    real(kind=x_precision) :: rmin    ! Minimal radius (in rs)
-    real(kind=x_precision) :: mp      ! Proton mass in cgs
-    real(kind=x_precision) :: Ledd    ! Eddington luminosity
-    real(kind=x_precision) :: c2      ! Light speed to the square
-    real(kind=x_precision) :: rs      ! Schwarzschild radius
-    real(kind=x_precision) :: t_dyn   ! Dynamic time
-    integer(kind=4)        :: ios     ! I/O test variable
-    integer                :: i       ! Cells iteration variable
-    character(len=50)      :: line    ! String reading variable
+    real(x_precision) :: X,Y,Z   ! Chemical composition : X+Y+Z = 1
+    real(x_precision) :: mu      ! Mean molecular mass
+    real(x_precision) :: rmax    ! Maximum considered radius (in rs)
+    real(x_precision) :: rmin    ! Minimal radius (in rs)
+    real(x_precision) :: mp      ! Proton mass in cgs
+    real(x_precision) :: Ledd    ! Eddington luminosity
+    real(x_precision) :: c2      ! Light speed to the square
+    real(x_precision) :: rs      ! Schwarzschild radius
+    real(x_precision) :: t_dyn   ! Dynamic time
+    integer(kind=4)   :: ios     ! I/O test variable
+    integer           :: i       ! Cells iteration variable
+    character(len=50) :: line    ! String reading variable
 
     ! Open file
     open(unit=11, file="./input_parameter.dat", action="read", status="old", iostat=ios)
@@ -62,7 +62,7 @@ contains
 
     ! Process M and M_dot in cgs, M_dot_crit = 12 * Ledd * M / c^2
     params%M         = params%M * M_sun
-    params%Mdot_crit =  12._x_precision * Ledd * params%M / c**2 
+    params%Mdot_crit =  12._x_precision * Ledd * params%M / c**2
     params%Mdot      = params%Mdot * params%Mdot_crit
 
     ! Compute c2 and rs
@@ -99,28 +99,28 @@ contains
 
     ! Process t_dyn
     t_dyn       = 7.2 * 10**(-5._x_precision) * (params%M / M_sun) * (r_state%r(n_cell) / (3 * rs))**1.5_x_precision
-    
+
     ! Process t_T
     params%t_T  = t_dyn / params%alpha
-    
+
     !-----------------------------------------------------------
-    !--Process of initial parmameter for Temperature and Sigma-- 
+    !--Process of initial parmameter for Temperature and Sigma--
     !-----------------------------------------------------------
     ! Process f1 to compute T_ci and Sig_ci
     f1 = 1._x_precision - (sqrt(3._x_precision) / x_state%x)
-    
-    fmdot = 1.e-2_x_precision 
+
+    fmdot = 1.e-2_x_precision
     ! Process T_ci
-    CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1._x_precision/5._x_precision) & 
+    CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1._x_precision/5._x_precision) &
          * (params%Mdot * fmdot / 1.e16_x_precision)**(3._x_precision/10._x_precision) * &
-         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) & 
+         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) &
          * f1**(3._x_precision/10._x_precision)
-    ! Process Sig_ci 
+    ! Process Sig_ci
     CI%Sig_ci = 5.2_x_precision * params%alpha**(-4._x_precision/5._x_precision) * &
-         (params%Mdot * fmdot / 1.e16_x_precision)**(7._x_precision/10._x_precision) * & 
-         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) & 
+         (params%Mdot * fmdot / 1.e16_x_precision)**(7._x_precision/10._x_precision) * &
+         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) &
          * f1**(7._x_precision/10._x_precision)
-    ! Process H_over_r 
+    ! Process H_over_r
     CI%H_over_r = 1.7e-2_x_precision * params%alpha**(-1._x_precision/10._x_precision) * (params%Mdot  &
          * fmdot / 1.e16_x_precision)**(3._x_precision/20._x_precision) * (params%M / M_sun)**(-3._x_precision/8._x_precision) &
          * (r_state%r / 1.e10_x_precision)**(1._x_precision/8._x_precision) * f1**(3._x_precision/5._x_precision)
@@ -129,7 +129,7 @@ contains
 
     ! Process kappa_e
     params%kappa_e = 0.2_x_precision * (1._x_precision + X)
-    
+
     ! Display parameters
     write(*,"('#           Input Parameters             ')")
     write(*,"('#****************************************')")

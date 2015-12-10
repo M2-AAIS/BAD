@@ -14,10 +14,11 @@ contains
   subroutine timestep (state_in, dt_T, dt_nu)
     implicit none
 
-    type (state), intent(in)              :: state_in
-    real(kind = x_precision), dimension(n_cell),  intent(out) :: dt_nu, dt_T
-    real(kind = x_precision), dimension(n_cell)               :: diffQ
-    real(kind = x_precision) :: threshold
+    type(state),                          intent(in)  :: state_in
+    real(x_precision), dimension(n_cell), intent(out) :: dt_nu, dt_T
+
+    real(x_precision), dimension(n_cell) :: diffQ
+    real(x_precision)                    :: threshold
 
     threshold = 1e10_x_precision
     diffQ = abs(state_in%Qplus - state_in%Qminus)

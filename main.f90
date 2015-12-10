@@ -11,28 +11,27 @@ program black_hole_diffusion
   implicit none
 
   !--------------------------- Parameters for s_curve-----------------------
-  real(kind = x_precision), parameter         :: eps_in = 1.0e-7_x_precision ! Precision required for the dichotomy
-  real(kind = x_precision), parameter         :: Tmin   = 2.5e-2_x_precision
-  real(kind = x_precision), parameter         :: Tmax   = 4.49e0_x_precision
-  real(kind = x_precision), parameter         :: Smin   = 2.36e1_x_precision
-  real(kind = x_precision), parameter         :: Smax   = 2.36e3_x_precision
+  real(x_precision), parameter         :: eps_in = 1.0e-7_x_precision ! Precision required for the dichotomy
+  real(x_precision), parameter         :: Tmin   = 2.5e-2_x_precision
+  real(x_precision), parameter         :: Tmax   = 4.49e0_x_precision
+  real(x_precision), parameter         :: Smin   = 2.36e1_x_precision
+  real(x_precision), parameter         :: Smax   = 2.36e3_x_precision
 
-  real(kind = x_precision), dimension(n_cell) :: temperature_c
-  real(kind = x_precision), dimension(n_cell) :: sigma_c
-  real(kind = x_precision), dimension(n_cell) :: S_c 
+  real(x_precision), dimension(n_cell) :: temperature_c
+  real(x_precision), dimension(n_cell) :: sigma_c
+  real(x_precision), dimension(n_cell) :: S_c
   !-------------------------------------------------------------------------
 
-  integer                                     :: iteration, ios, i
-  type(state)                                 :: s
-  real(kind = x_precision)                    :: delta_S_max, delta_T_max, t
-  real(kind = x_precision), dimension(n_cell) :: prev_S
-  real(kind = x_precision), dimension(n_cell) :: dt_nu, dt_T
-  real(kind = x_precision)                    :: min_dt_nu, min_dt_T
-  logical                                     :: T_converged
-  real (kind = x_precision), dimension(n_cell):: dist
+  integer                              :: iteration, ios, i
+  type(state)                          :: s
+  real(x_precision)                    :: delta_S_max, delta_T_max, t
+  real(x_precision), dimension(n_cell) :: prev_S
+  real(x_precision), dimension(n_cell) :: dt_nu, dt_T
+  real(x_precision)                    :: min_dt_nu, min_dt_T
+  logical                              :: T_converged
 
-  real (kind = x_precision), dimension(n_cell):: dist_crit
-  real (kind = x_precision)                   :: dt_pre_factor
+  real(x_precision), dimension(n_cell) :: dist_crit
+  real(x_precision)                    :: dt_pre_factor
 
   !----------------------------------------------
   ! Convergence criteria for S and T
@@ -132,14 +131,14 @@ program black_hole_diffusion
         t = t + 2*min_dt_T*1e-2
         call compute_variables(s)
         call timestep (s, dt_T, dt_nu)
-        
+
         if (mod(iteration, output_freq) == 0 .or. &
              (iteration > 790000 .and. mod(iteration, 10) == 0)) then
            call snapshot(s, iteration, t, 13)
            print*,'snapshot', iteration, t, 1 - maxval(s%S/S_c), dt_pre_factor
         end if
         iteration = iteration + 1
-        
+
         ! Switch to explicit scheme
      else
         !----------------------------------------------
@@ -168,7 +167,7 @@ program black_hole_diffusion
         do while (.not. T_converged)
            ! Recompute the dt pre factor
            dt_pre_factor = pre_factor(s, S_c, dist_crit)
-           
+
            ! Do a single T integration
            call do_timestep_T(s, min_dt_T, T_converged, delta_T_max)
 
@@ -188,8 +187,8 @@ program black_hole_diffusion
         call timestep (s, dt_T, dt_nu)
         dt_pre_factor = pre_factor(s, S_c, dist_crit)
         min_dt_T = minval(dt_T) * dt_pre_factor
-        min_dt_nu = minval(dt_nu) * dt_pre_factor         
- 
+        min_dt_nu = minval(dt_nu) * dt_pre_factor
+
 
      end if
 

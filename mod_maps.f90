@@ -5,12 +5,12 @@ module mod_maps
 
   implicit none
 
-  integer                  :: nb_S  ! The number of points along Sigma axis
-  integer                  :: nb_T  ! The number of points along T axis
-  real(kind = x_precision) :: T_min ! Lowest value of Temperature range
-  real(kind = x_precision) :: T_max ! Highest value of Temperature range
-  real(kind = x_precision) :: S_min ! Lowest value of Sigma range
-  real(kind = x_precision) :: S_max ! Highest value of Sigma range
+  integer           :: nb_S  ! The number of points along Sigma axis
+  integer           :: nb_T  ! The number of points along T axis
+  real(x_precision) :: T_min ! Lowest value of Temperature range
+  real(x_precision) :: T_max ! Highest value of Temperature range
+  real(x_precision) :: S_min ! Lowest value of Sigma range
+  real(x_precision) :: S_max ! Highest value of Sigma range
 
 
 contains
@@ -20,10 +20,10 @@ contains
 
     integer, intent(in) :: nbS
     integer, intent(in) :: nbT
-    real(kind = x_precision), intent(in) :: Tmin ! Lowest value of Temperature range
-    real(kind = x_precision), intent(in) :: Tmax ! Highest value of Temperature range
-    real(kind = x_precision), intent(in) :: Smin ! Lowest value of Sigma range
-    real(kind = x_precision), intent(in) :: Smax ! Highest value of Sigma range
+    real(x_precision), intent(in) :: Tmin ! Lowest value of Temperature range
+    real(x_precision), intent(in) :: Tmax ! Highest value of Temperature range
+    real(x_precision), intent(in) :: Smin ! Lowest value of Sigma range
+    real(x_precision), intent(in) :: Smax ! Highest value of Sigma range
 
     nb_S = nbS
     nb_T = nbT
@@ -38,13 +38,13 @@ contains
   subroutine build_grid(Q_res, tau_res)
     implicit none
 
-    real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(out) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
-    real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(out) :: tau_res ! The tau grids, one for each position in the disk
+    real(x_precision), dimension(n_cell,nb_T,nb_S), intent(out) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
+    real(x_precision), dimension(n_cell,nb_T,nb_S), intent(out) :: tau_res ! The tau grids, one for each position in the disk
 
-    type(state)              :: s   ! A temporary state to compute the variables
-    real(kind = x_precision) :: dT  ! Temperature steps in the grid
-    real(kind = x_precision) :: dS  ! Sigma steps in the grid
-    integer                  :: i,j ! Loop counters
+    type(state)       :: s   ! A temporary state to compute the variables
+    real(x_precision) :: dT  ! Temperature steps in the grid
+    real(x_precision) :: dS  ! Sigma steps in the grid
+    integer           :: i,j ! Loop counters
 
     ! Compute the Temperature and Sigma steps
     dT = (T_max - T_min) / (nb_T - 1)
@@ -54,7 +54,7 @@ contains
        s%T = dT * (i-1) + T_min
        do j = 1, nb_S
           s%S = dS * (j-1) + S_min
-          
+
           call compute_variables(s) ! Compute the variables in each position of the state
           Q_res(:,i,j) = s%Qplus - s%Qminus
           tau_res(:,i,j) = s%tau
@@ -66,8 +66,8 @@ contains
   subroutine save_data(Q_res, tau_res)
     implicit none
 
-    real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(in) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
-    real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(in) :: tau_res ! The tau grids, one for each position in the disk
+    real(x_precision), dimension(n_cell,nb_T,nb_S), intent(in) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
+    real(x_precision), dimension(n_cell,nb_T,nb_S), intent(in) :: tau_res ! The tau grids, one for each position in the disk
 
     character(len = 64) :: fname       ! Name of the output file
     character(len = 16) :: line_fmt    ! Format of lines in the output file

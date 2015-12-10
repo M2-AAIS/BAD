@@ -3,7 +3,7 @@
 module mod_output
   use mod_constants
   use mod_read_parameters
-  
+
   implicit none
 
   private
@@ -15,15 +15,15 @@ contains
   ! Save a snapshot of state (s) at iteration, time
   subroutine snapshot (s, iteration, time, unit)
     use mod_variables
-    
+
     implicit none
-    
-    type (state), intent(in)               :: s
-    real (kind=x_precision), intent(in)    :: time
-    integer, intent(in)                    :: iteration, unit
-    
-    integer                                :: i
-    type (state) :: state_dim
+
+    type(state),       intent(in) :: s
+    real(x_precision), intent(in) :: time
+    integer,           intent(in) :: iteration, unit
+
+    integer     :: i
+    type(state) :: state_dim
 
     write(unit, fmt=*) '# ', iteration
     write(unit, fmt=*) '# ', time
@@ -45,6 +45,6 @@ contains
     end do
 
   end subroutine snapshot
-  
+
 end module mod_output
 

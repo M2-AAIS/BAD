@@ -6,14 +6,14 @@ program black_hole_s_curve
   implicit none
 
   ! Parameters for s_curve
-  real(kind = x_precision), parameter         :: eps_in = 1.e-8_x_precision  ! Precision required for the dichotomy
-  real(kind = x_precision), parameter         :: Tmin   = 2.5e-2_x_precision
-  real(kind = x_precision), parameter         :: Tmax   = 4.49e0_x_precision
-  real(kind = x_precision), parameter         :: Smin   = 2.36e1_x_precision
-  real(kind = x_precision), parameter         :: Smax   = 2.36e3_x_precision
+  real(x_precision), parameter         :: eps_in = 1.e-8_x_precision  ! Precision required for the dichotomy
+  real(x_precision), parameter         :: Tmin   = 2.5e-2_x_precision
+  real(x_precision), parameter         :: Tmax   = 4.49e0_x_precision
+  real(x_precision), parameter         :: Smin   = 2.36e1_x_precision
+  real(x_precision), parameter         :: Smax   = 2.36e3_x_precision
 
-  real(kind = x_precision), dimension(n_cell) :: temperature_c
-  real(kind = x_precision), dimension(n_cell) :: sigma_c
+  real(x_precision), dimension(n_cell) :: temperature_c
+  real(x_precision), dimension(n_cell) :: sigma_c
 
   call get_parameters()
 
