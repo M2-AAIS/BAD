@@ -48,7 +48,7 @@ class Data:
         self.lastLineRead = self.file.readline()
         self.pause = False       # bool flag if paused (activates left<>right navigation
         self.reread = False      # 
-        self.offset = None       # Number of indexes to jump back or forth
+        self.offset = 0          # Number of indexes to jump back or forth
 
     def getChunk(self):
         '''Get a chunk (niter, time, headers + data)
