@@ -3,6 +3,7 @@
 
 import matplotlib.pyplot as plt
 import matplotlib
+import numpy as np
 import pandas as pd
 import argparse
 from os import path
@@ -33,14 +34,14 @@ if __name__ == '__main__':
 
     #fig, ax = plt.subplots()
 
-    for element in ([Q, 'Q', 'Q^+ - Q^-'], [tau, 'tau', '\\tau']):
-    # FIXME: be able to plot for negative values
+    for element in ({'data': Q, 'title': 'Q^+ - Q^-', 'threshold': 5e13},
+                    {'data': tau, 'title': '\\tau', 'threshold': 1e-5}):
         plt.figure()
-        plt.title(u"$"+element[2]+"$")
-        plt.imshow(element[0], interpolation='none', cmap='viridis', extent=extents, aspect='auto',
-                   norm=matplotlib.colors.LogNorm())
+        plt.title(u"${}$".format(element['title']))
+        plt.imshow(element['data'], interpolation='none', cmap='viridis', extent=extents, aspect='auto',
+                   norm=matplotlib.colors.SymLogNorm(element['threshold']))
         plt.colorbar()
-        plt.xlabel('Sigma')
-        plt.ylabel('Temperature')
+        plt.xlabel('$\Sigma$')
+        plt.ylabel('$T$')
 
     plt.show()
