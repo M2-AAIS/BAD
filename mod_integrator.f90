@@ -9,7 +9,7 @@ module mod_integrator
   implicit none
   private
 
-  public :: do_timestep_T, do_timestep_S, do_timestep_S_exp
+  public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp
 
 contains
   ! (T(t+dt) - T(t))/dt = f(s, dt)
@@ -73,7 +73,7 @@ contains
   end function f_exp
 
 
-  subroutine do_timestep_S (s, dt)
+  subroutine do_timestep_S_imp (s, dt)
   !process the temporal evolution of S
     implicit none
 
@@ -108,7 +108,7 @@ contains
     if (info /= 0) then
       stop "error in DGTSV call in subroutine do_timestep_S"
     end if
-  end subroutine do_timestep_S
+  end subroutine do_timestep_S_imp
 
   subroutine do_timestep_S_exp (states, dt)
     !process the temporal evolution of S with an explicit algorithm
