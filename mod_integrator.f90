@@ -13,82 +13,80 @@ module mod_integrator
 
 contains
 
-  function dS_over_dt(s)
+  function dS_dt(s)
     implicit none
 
-    type(state), intent(in)                    :: s
-    real(kind=x_precision), dimension(n_cell) :: dS_over_dt
-    real(kind=x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
+    type(state), intent(in) :: s
 
-    nuS(0) = 0
+    real(x_precision), dimension(n_cell)     :: dS_dt
+
+    real(x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
+
+    nuS(0)        = 0
     nuS(1:n_cell) = s%nu * s%S
     nuS(n_cell+1) = params%dx + nuS(n_cell)
 
-    dS_over_dt = 1._x_precision / x_state%x**2 * &
-                 (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
-                 params%dx**2
+    dS_dt = 1._x_precision / x_state%x**2 * &
+            (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
+            params%dx**2
 
-  end function dS_over_dt
+  end function dS_dt
 
-  function f(s)
+  function dT_dt_imp(s)
   !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     implicit none
 
-    type(state), intent(in)                    :: s
-    real (kind=x_precision), dimension(n_cell) :: f
+    type(state), intent(in) :: s
+
+    real(x_precision), dimension(n_cell) :: dT_dt_imp
 
     ! Second member of the dT/dt equation
-    f = (s%Qplus - s%Qminus) / s%Cv
+    dT_dt_imp = (s%Qplus - s%Qminus) / s%Cv
 
-  end function f
+  end function dT_dt_imp
 
-  function f_exp(s)
+  function dT_dt_exp(s)
     !function to process the right term of dT/dt
     !return an array corresponding to the right term of dT/dt in each box
     implicit none
 
-    type(state), intent(in)                    :: s
-    real (kind=x_precision), dimension(n_cell) :: f_exp
+    type(state), intent(in) :: s
 
-    real (kind=x_precision)                    :: overdx, overdx2
-    real (kind=x_precision), dimension(n_cell) :: dS_over_x_over_dx, S_over_x, dT_over_dx, nuS
+    real(x_precision), dimension(n_cell) :: dT_dt_exp
 
-    overdx  = 1._x_precision / params%dx
-    overdx2 = overdx**2
-    nuS     = s%nu * s%S
+    real(x_precision), dimension(n_cell) :: dS_over_dt, dSigma_over_dx, Sigma, dT_over_dx
+
+    dS_over_dt = dS_dt(s)
 
     ! Compute dT/dx as the right spatial derivative
-    dT_over_dx(1:n_cell - 1) = (s%T(2:n_cell) - s%T(1:n_cell - 1)) * overdx
-    dT_over_dx(n_cell)       = 0
+    dT_over_dx(1:n_cell-1) = (s%T(2:n_cell) - s%T(1:n_cell-1)) / params%dx
+    dT_over_dx(n_cell)     = 0
 
     ! Compute d(S/x)/dx as the right spatial derivative
-    S_over_x                        = s%S / x_state%x
-    dS_over_x_over_dx(1:n_cell - 1) = (S_over_x(2:n_cell) - S_over_x(1:n_cell - 1)) * overdx
-    dS_over_x_over_dx(n_cell)       = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
-                                      ( x_state%x(n_cell)**2 * s%v(n_cell) * params%dx**2 )
+    Sigma = s%S / x_state%x
+
+    dSigma_over_dx(1:n_cell-1) = (Sigma(2:n_cell) - Sigma(1:n_cell-1)) / params%dx
+    dSigma_over_dx(n_cell)     = - dS_over_dt(n_cell) / s%v(n_cell)
 
     !right term
-    f_exp = ( 3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 &
-            - s%Fz * x_state%x / s%s &
-            + params%RTM * ( 4._x_precision - 3._x_precision * s%beta ) / s%beta * s%T / s%S &
-            * (dS_over_dt(s) + s%v * dS_over_x_over_dx ) &
-            - s%Cv * s%v / x_state%x * dT_over_dx ) &
-            / s%Cv
+    dT_dt_exp = (dT_dt_imp(s) + params%RTM * ( 4._x_precision - 3._x_precision * s%beta ) / s%beta * &
+                 s%T / s%S * (dS_over_dt + s%v * dSigma_over_dx) - &
+                 s%Cv * s%v / x_state%x * dT_over_dx) / s%Cv
 
-  end function f_exp
+  end function dT_dt_exp
 
-  subroutine do_timestep_S_imp (s, dt)
+  subroutine do_timestep_S_imp(s, dt)
   !process the temporal evolution of S
     implicit none
 
-    type (state), intent(inout)                   :: s
+    real(x_precision), intent(in)    :: dt
+    type(state),       intent(inout) :: s
 
-    real(kind = x_precision)                      :: overdx, overdx2, dtoverdx2
-    real(kind = x_precision), intent(in)          :: dt
-    integer                                       :: info
+    real(x_precision), dimension(n_cell)   :: diag, x2
+    real(x_precision), dimension(n_cell-1) :: diag_low, diag_up
+    real(x_precision)                      :: overdx, overdx2, dtoverdx2
+    integer                                :: info
 
-    real(kind = x_precision), dimension(n_cell)   :: diag, x2
-    real(kind = x_precision), dimension(n_cell-1) :: diag_low, diag_up
 
     overdx    = 1._x_precision / params%dx
     overdx2   = overdx**2
@@ -102,7 +100,7 @@ contains
     diag_low = -s%nu(1:n_cell-1) / x2(2:  n_cell) * dtoverdx2
 
     diag(n_cell)       = 1 + s%nu(n_cell) / x2(n_cell) * dtoverdx2
-    diag_low(n_cell-1) = -s%nu(n_cell-1) / x2(n_cell)  * dtoverdx2
+    diag_low(n_cell-1) = - s%nu(n_cell-1) / x2(n_cell) * dtoverdx2
 
     s%S(n_cell) = s%S(n_cell) + dt * overdx / x2(n_cell)
 
@@ -114,15 +112,15 @@ contains
     end if
   end subroutine do_timestep_S_imp
 
-  subroutine do_timestep_S_exp (states, dt)
+  subroutine do_timestep_S_exp(states, dt)
     !process the temporal evolution of S with an explicit algorithm
     !using only on the superior branch of the S curve NOT VERIFIED YET
     implicit none
 
-    type(state), intent(inout)                :: states
-    real(kind=x_precision), intent(in)        :: dt
+    real(x_precision), intent(in)    :: dt
+    type(state),       intent(inout) :: states
 
-    states%S = states%S + dt * dS_over_dt(states)
+    states%S = states%S + dt * dS_dt(states)
 
   end subroutine do_timestep_S_exp
 
@@ -130,16 +128,16 @@ contains
   !process the temporal evolution of T
     implicit none
 
-    type (state), intent(inout)       :: s
-    logical, intent(out)              :: converge
-    real(kind=x_precision),intent(in) :: epst
+    real(x_precision), intent(in)    :: epst
+    real(x_precision), intent(in)    :: dt
+    type(state),       intent(inout) :: s
+    logical,           intent(out)   :: converge
 
-    type (state)                                :: s_deriv
-    real(kind = x_precision), intent(in)        :: dt
 
-    real(kind = x_precision), dimension(n_cell) :: dtemp, rhs, newT
-    real(kind = x_precision), dimension(n_cell) :: f0, fT
-    real(kind = x_precision) :: maxi
+    real(x_precision), dimension(n_cell) :: dtemp, rhs, newT
+    real(x_precision), dimension(n_cell) :: f0, fT
+    real(x_precision)                    :: maxi
+    type(state)                          :: s_deriv
 
     dtemp     = s%T * 1.e-3_x_precision
     s_deriv   = s
@@ -149,8 +147,8 @@ contains
     call compute_variables(s)
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
 
-    f0 = f(s)
-    fT = (f(s_deriv) - f0) / dtemp
+    f0 = dT_dt_imp(s)
+    fT = (dT_dt_imp(s_deriv) - f0) / dtemp
 
     rhs = f0 / fT * (exp(fT*dt) - 1._x_precision)
     ! rhs = dt*f0 * (1._x_precision + 0.5_x_precision*dt*fT)
@@ -182,7 +180,6 @@ contains
        converge = .false.
     end if
 
-    ! Copy the result
   end subroutine do_timestep_T
 
 end module mod_integrator
