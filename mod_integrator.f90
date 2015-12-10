@@ -12,8 +12,8 @@ module mod_integrator
   public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp
 
 contains
-  ! (T(t+dt) - T(t))/dt = f(s, dt)
-  function f (s)
+
+  function f(s)
   !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     implicit none
 
@@ -25,21 +25,19 @@ contains
 
   end function f
 
-  function f_exp(s,dt)
+  function f_exp(s)
     !function to process the right term of dT/dt
     !return an array corresponding to the right term of dT/dt in each box
     implicit none
 
     type(state), intent(in)                    :: s
-    real (kind=x_precision), intent(in)        :: dt
     real (kind=x_precision), dimension(n_cell) :: f_exp
 
-    real (kind=x_precision)                    :: overdx, overdx2, overdt
+    real (kind=x_precision)                    :: overdx, overdx2
     real (kind=x_precision), dimension(n_cell) :: dS_over_dt, dS_over_x_over_dx, S_over_x, dT_over_dx, nuS
 
     overdx  = 1._x_precision / params%dx
     overdx2 = overdx**2
-    overdt  = 1._x_precision /dt
     nuS     = s%nu * s%S
 
     ! Compute dT/dx as the right spatial derivative
@@ -118,18 +116,16 @@ contains
     type (state), intent(inout)                :: states
     real (kind=x_precision), intent(in)        :: dt
 
-    real (kind=x_precision), dimension(n_cell) :: S_tmp ! temporary array in order to process the state%S at t+dt
     real (kind=x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
 
     nuS(0) = 0
     nuS(1:n_cell) = states%nu * states%S
     nuS(n_cell+1) = params%dx + nuS(n_cell)
 
-    S_tmp = states%S + ( &
-         nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1) )&
-         / (params%dx**2 *  x_state%x**2) * dt
+    states%S = states%S + dt * (1._x_precision / x_state%x**2 * &
+               (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
+               params%dx**2)
 
-    states%S = S_tmp
   end subroutine do_timestep_S_exp
 
   subroutine do_timestep_T(s, dt, converge, epst)

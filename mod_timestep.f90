@@ -18,7 +18,6 @@ contains
     real(kind = x_precision), dimension(n_cell),  intent(out) :: dt_nu, dt_T
     real(kind = x_precision), dimension(n_cell)               :: diffQ
     real(kind = x_precision) :: threshold
-    integer :: i
 
     threshold = 1e10_x_precision
     diffQ = abs(state_in%Qplus - state_in%Qminus)
