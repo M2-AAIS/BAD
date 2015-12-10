@@ -26,7 +26,7 @@ parser.add_argument('--s-curves-dir', metavar='dir', nargs=1,
                     help='S curves directory (default: %(default)s).', default='s_curves')
 parser.add_argument('--reread', action='store_true', default=False,
                     help='Reread file when fully read.')
-parser.add_argument('--interval', default=0, type=int,
+parser.add_argument('--interval', default=1000, type=int,
                     help='Interval (in ms) between each frames (default %(default)s)')
 parser.add_argument('--plot-Qs', default=False, action='store_true', dest='plot_Qs',
                     help='Plot Q⁺ and Q⁻ instead of Mdot')
