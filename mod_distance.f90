@@ -15,7 +15,7 @@ module mod_distance
       type(state), intent(in)                                 :: state_in
       real(kind = x_precision)                                :: pre_factor, tmp
       real(kind = x_precision), dimension(n_cell), intent(in) :: S_c, dist_crit
-      tmp = 1 - (0.999_x_precision*exp(-(minval((S_c - state_in%S) / dist_crit))))
+      tmp = 1 - (0.99_x_precision*exp(-(minval((S_c - state_in%S) / dist_crit))))
       
       pre_factor = tmp
     end function pre_factor
