@@ -16,33 +16,44 @@ contains
   subroutine compute_variables(state_out)
     implicit none
 
-    real(kind = x_precision), dimension(n_cell) :: coeff_a, coeff_b, coeff_c
-    real(kind = x_precision), dimension(n_cell) :: Delta
-    real(kind = x_precision), dimension(n_cell) :: kappa_ff, epsilo
+    real(kind = x_precision), dimension(n_cell)   :: coeff_a, coeff_b, coeff_c
+    real(kind = x_precision), dimension(n_cell)   :: Delta
+    real(kind = x_precision), dimension(n_cell)   :: kappa_ff, epsilo
+    real(kind = x_precision), dimension(0:n_cell) :: nuS ! one more dimension to store nuS(0)
 
-    type(state), intent(inout)                  :: state_out
+    type(state), intent(inout)                    :: state_out
+    integer                                       :: k
 
+    !-------------------------------------------------------------
     ! Compute trinomial coefficients for H
     coeff_a = (x_state%Omega * state_0%Omega_0)**2 * (state_out%S * state_0%S_0)
     coeff_b = - 2._x_precision * cst_rad * (state_out%T * state_0%T_0)**4 * x_state%x / (3._x_precision * state_0%H_0)
     coeff_c = - params%RTM * state_out%T * state_out%S * state_0%S_0 / state_0%H_0**2
     Delta = coeff_b**2 - 4._x_precision * coeff_a * coeff_c
 
+    !-------------------------------------------------------------
     ! Compute variable depending on S, H
     state_out%H    = - 0.5_x_precision * (coeff_b + sign(sqrt(Delta), coeff_b)) / coeff_a
     state_out%cs   = x_state%Omega * state_out%H
     state_out%nu   = params%alpha * state_out%cs * state_out%H
     state_out%rho  = state_out%S / (state_out%H * x_state%x)
 
-    ! Compute v while taking care of limit conditions. First version is mean derivative one (same upperbound condition), might be used later.
-    !state_out%v(1)          = - state_out%nu(2) * state_out%S(2) / (state_out%S(1) * x_state%x(1) * 2 * params%dx)
-    !state_out%v(2:n_cell-1) = - 1._x_precision / (state_out%S(2:n_cell-1) * x_state%x(2:n_cell-1)) * &
-    !                          (state_out%nu(3:n_cell) * state_out%S(3:n_cell) - &
-    !                           state_out%nu(1:n_cell-2) * state_out%S(1:n_cell-2)) / (2 * params%dx)
-    state_out%v(1:n_cell-1) = - 1._x_precision / (state_out%S(1:n_cell-1) * x_state%x(1:n_cell-1)) * &
-                              (state_out%nu(2:n_cell) * state_out%S(2:n_cell) - &
-                               state_out%nu(1:n_cell-1) * state_out%S(1:n_cell-1)) / params%dx
-    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * x_state%x(n_cell)) !FIXME !not equal to (Mdot_0 =) 1
+    !-------------------------------------------------------------
+    ! Compute v while taking care of limit conditions.
+    ! we're using an upwind scheme depending on the sign of v
+    nuS(0) = 0
+    nuS(1:n_cell) = state_out%nu * state_out%S
+    
+    do k = 1, n_cell - 1
+       if (state_out%v(k) > 0) then
+          state_out%v(k) = - 1._x_precision / (state_out%S(k) * x_state%x(k)) * &
+               (nuS(k) - nuS(k-1)) / params%dx
+       else
+          state_out%v(k) = - 1._x_precision / (state_out%S(k) * x_state%x(k)) * &
+               (nuS(k+1) - nuS(k)) / params%dx
+       end if
+    end do
+    state_out%v(n_cell)     = - 1._x_precision / (state_out%S(n_cell) * x_state%x(n_cell))
 
     state_out%Mdot = - state_out%v * state_out%S * x_state%x
 
