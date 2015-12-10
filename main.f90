@@ -154,6 +154,9 @@ program black_hole_diffusion
         !----------------------------------------------
         T_converged = .false.
         do while (.not. T_converged)
+           ! Recompute the dt pre factor
+           dt_pre_factor = pre_factor(s, S_c, dist_crit)
+           
            ! Do a single T integration
            call do_timestep_T(s, min_dt_T, T_converged, delta_T_max)
 
