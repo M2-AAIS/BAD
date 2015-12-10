@@ -48,6 +48,7 @@ program black_hole_diffusion
 
   ! Conversion into S*_crit
   S_c = sigma_c * x_state%x
+  dist_crit = 400. * x_state%x
 
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
@@ -170,7 +171,6 @@ program black_hole_diffusion
         ! Recompute variables when the system is stable
         call compute_variables(s)
         call timestep (s, dt_T, dt_nu)
-        dist_crit = 400. * x_state%x !FIXME
         dt_pre_factor = pre_factor(s, S_c, dist_crit)
         min_dt_T = minval(dt_T) * dt_pre_factor
         min_dt_nu = minval(dt_nu) * dt_pre_factor         
