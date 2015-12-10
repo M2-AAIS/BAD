@@ -24,7 +24,7 @@ contains
 
     nuS(0)        = 0
     nuS(1:n_cell) = s%nu * s%S
-    nuS(n_cell+1) = params%dx * s%Mdot(n_cell) + nuS(n_cell)
+    nuS(n_cell+1) = params%dx + nuS(n_cell)
 
     dS_dt = 1._x_precision / x_state%x**2 * &
             (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
@@ -94,7 +94,7 @@ contains
 
     x2 = x_state%x**2
 
-    ! Create the diagonals NOT VERIFIED YET, including potential Mdot(n_cell)=Mdot_0 use
+    ! Create the diagonals NOT VERIFIED YET
     diag     =  1 + 2 * s%nu / x2 * dtoverdx2
     diag_up  = -s%nu(2:n_cell  ) / x2(1:n_cell-1) * dtoverdx2
     diag_low = -s%nu(1:n_cell-1) / x2(2:  n_cell) * dtoverdx2

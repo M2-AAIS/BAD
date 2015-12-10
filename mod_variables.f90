@@ -45,7 +45,7 @@ contains
     Sx            = state_out%S * x_state%x
 
     state_out%v(1:n_cell-1) = - 1._x_precision / Sx(1:n_cell-1) * (nuS(2:n_cell) - nuS(0:n_cell-2)) / (2 * params%dx)
-    state_out%v(n_cell)     = - state_out%Mdot(n_cell) / Sx(n_cell)
+    state_out%v(n_cell)     = - 1._x_precision / Sx(n_cell) ! FIXME: not true if we increase Mdot at rmax at some point
 
     state_out%Mdot = - state_out%v * Sx
 
