@@ -13,6 +13,23 @@ module mod_integrator
 
 contains
 
+  function dS_over_dt(s)
+    implicit none
+
+    type(state), intent(in)                    :: s
+    real(kind=x_precision), dimension(n_cell) :: dS_over_dt
+    real(kind=x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
+
+    nuS(0) = 0
+    nuS(1:n_cell) = s%nu * s%S
+    nuS(n_cell+1) = params%dx + nuS(n_cell)
+
+    dS_over_dt = 1._x_precision / x_state%x**2 * &
+                 (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
+                 params%dx**2
+
+  end function dS_over_dt
+
   function f(s)
   !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     implicit none
@@ -34,7 +51,7 @@ contains
     real (kind=x_precision), dimension(n_cell) :: f_exp
 
     real (kind=x_precision)                    :: overdx, overdx2
-    real (kind=x_precision), dimension(n_cell) :: dS_over_dt, dS_over_x_over_dx, S_over_x, dT_over_dx, nuS
+    real (kind=x_precision), dimension(n_cell) :: dS_over_x_over_dx, S_over_x, dT_over_dx, nuS
 
     overdx  = 1._x_precision / params%dx
     overdx2 = overdx**2
@@ -50,26 +67,15 @@ contains
     dS_over_x_over_dx(n_cell)       = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
                                       ( x_state%x(n_cell)**2 * s%v(n_cell) * params%dx**2 )
 
-    ! Compute dS/dt using the corresponding equation, with d²(nuS)/dx² as (d(left)+d(right))/2
-    dS_over_dt(1:n_cell-1) = ( nuS(2:n_cell) &
-                             - 2._x_precision*nuS(1:n_cell-1) &
-                             + nuS(1:n_cell-1) ) &
-                             * overdx2 / x_state%x(1:n_cell-1)**2
-    dS_over_dt(n_cell)     = ( params%dx - nuS(n_cell) + nuS(n_cell-1) ) / &
-                             ( x_state%x(n_cell)**2 * params%dx**2 )
-    ! FIX THIS : dS_over_dt is wrongly defined !
-
-
     !right term
     f_exp = ( 3._x_precision * state_0%v_0**2 * s%nu * x_state%Omega**2 &
             - s%Fz * x_state%x / s%s &
             + params%RTM * ( 4._x_precision - 3._x_precision * s%beta ) / s%beta * s%T / s%S &
-            * ( dS_over_dt + s%v * dS_over_x_over_dx ) &
+            * (dS_over_dt(s) + s%v * dS_over_x_over_dx ) &
             - s%Cv * s%v / x_state%x * dT_over_dx ) &
             / s%Cv
 
   end function f_exp
-
 
   subroutine do_timestep_S_imp (s, dt)
   !process the temporal evolution of S
@@ -113,18 +119,10 @@ contains
     !using only on the superior branch of the S curve NOT VERIFIED YET
     implicit none
 
-    type (state), intent(inout)                :: states
-    real (kind=x_precision), intent(in)        :: dt
+    type(state), intent(inout)                :: states
+    real(kind=x_precision), intent(in)        :: dt
 
-    real (kind=x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
-
-    nuS(0) = 0
-    nuS(1:n_cell) = states%nu * states%S
-    nuS(n_cell+1) = params%dx + nuS(n_cell)
-
-    states%S = states%S + dt * (1._x_precision / x_state%x**2 * &
-               (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
-               params%dx**2)
+    states%S = states%S + dt * dS_over_dt(states)
 
   end subroutine do_timestep_S_exp
 
