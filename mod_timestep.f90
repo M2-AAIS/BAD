@@ -17,14 +17,19 @@ contains
     type (state), intent(in)              :: state_in
     real(kind = x_precision), dimension(n_cell),  intent(out) :: dt_nu, dt_T
     real(kind = x_precision), dimension(n_cell)               :: diffQ
+    real(kind = x_precision) :: threshold
+    integer :: i
 
+    threshold = 1e10_x_precision
     diffQ = abs(state_in%Qplus - state_in%Qminus)
 
-    where (diffQ <= 0.00001)
-       dt_T = state_in%Cv * state_in%T / 0.00001 / cst_dt_T
-    elsewhere
-       dt_T = state_in%Cv * state_in%T / diffQ / cst_dt_T
-    end where
+    do i = 1, n_cell
+       if (diffQ(i) <= threshold) then
+          dt_T(i) = state_in%Cv(i) * state_in%T(i) / threshold / cst_dt_T
+       else
+          dt_T(i) = state_in%Cv(i) * state_in%T(i) / diffQ(i) / cst_dt_T
+       end if
+    end do
       ! dt_nu  = dt_T / (state_in%H / x_state%x)**(2._x_precision) / cst_dt_nu
       !  dt_nu = x_state%x**2._x_precision / state_in%nu 
 
