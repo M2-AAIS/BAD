@@ -35,37 +35,31 @@ contains
   end subroutine set_conditions
 
   ! Build the T, Sigma grid given the number of points along each axis and the ranges
-  subroutine build_grid()
+  subroutine build_grid(Q_res, tau_res)
     implicit none
 
-    type(state)                                           :: s       ! The states grid
-    real(kind = x_precision), dimension(n_cell,nb_T,nb_S) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
-    real(kind = x_precision), dimension(n_cell,nb_T,nb_S) :: tau_res ! The tau grids, one for each position in the disk
-    real(kind = x_precision) :: dT     ! Temperature steps in the grid
-    real(kind = x_precision) :: dS     ! Sigma steps in the grid
-    real(kind = x_precision) :: T_temp ! Temporary variable to store Temperature
-    real(kind = x_precision) :: S_temp ! Temporary variable to store Sigma
-    integer                  :: i,j    ! Loop counters
+    real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(out) :: Q_res   ! The Q+-Q- grids, one for each position in the disk
+    real(kind = x_precision), dimension(n_cell,nb_T,nb_S), intent(out) :: tau_res ! The tau grids, one for each position in the disk
+
+    type(state)              :: s   ! A temporary state to compute the variables
+    real(kind = x_precision) :: dT  ! Temperature steps in the grid
+    real(kind = x_precision) :: dS  ! Sigma steps in the grid
+    integer                  :: i,j ! Loop counters
 
     ! Compute the Temperature and Sigma steps
     dT = (T_max - T_min) / (nb_T - 1)
     dS = (S_max - S_min) / (nb_S - 1)
 
     do i = 1, nb_T
+       s%T = dT * (i-1) + T_min
        do j = 1, nb_S
-          T_temp = dT * (i-1) + T_min
-          S_temp = dS * (j-1) + S_min
-
-          s%T = T_temp
-          S%S = S_temp
+          s%S = dS * (j-1) + S_min
           
           call compute_variables(s) ! Compute the variables in each position of the state
           Q_res(:,i,j) = s%Qplus - s%Qminus
           tau_res(:,i,j) = s%tau
        end do
     end do
-
-    call save_data(Q_res, tau_res)
 
   end subroutine build_grid
 
