@@ -166,7 +166,8 @@ contains
     if (minval(newT) < 0) then
        converge = .false.
        print*, 'Convergence problem!'
-       return
+       ! print*,newT
+       stop
     end if
 
     ! do while (minval(newT) < 0)
