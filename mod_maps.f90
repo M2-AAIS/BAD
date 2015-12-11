@@ -47,13 +47,13 @@ contains
     integer           :: i,j ! Loop counters
 
     ! Compute the Temperature and Sigma steps
-    dT = (T_max - T_min) / (nb_T - 1)
-    dS = (S_max - S_min) / (nb_S - 1)
+    dT = (log(T_max) - log(T_min)) / (nb_T - 1)
+    dS = (log(S_max) - log(S_min)) / (nb_S - 1)
 
     do i = 1, nb_T
-       s%T = dT * (i-1) + T_min
+       s%T = exp(dT * (i-1) + log(T_min))
        do j = 1, nb_S
-          s%S = dS * (j-1) + S_min
+          s%S = exp(dS * (j-1) + log(S_min))
 
           call compute_variables(s) ! Compute the variables in each position of the state
           Q_res(:,i,j) = s%Qplus - s%Qminus
@@ -89,6 +89,12 @@ contains
         write(*,*)"Error while opening the ", fname," file."
         stop
       endif
+
+      write(fid, fmt = '(A)') '# nb_T'
+      write(fid, fmt = '(I5.5)') nb_T
+
+      write(fid, fmt = '(A)') '# nb_S'
+      write(fid, fmt = '(I5.5)') nb_S
 
       write(fid, fmt = '(A)') '# T bounds'
       write(fid, fmt = '(2(e11.3e2))') T_min*state_0%T_0, T_max*state_0%T_0
