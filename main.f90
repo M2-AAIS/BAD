@@ -124,6 +124,8 @@ program black_hole_diffusion
   ! Start iterations
   !----------------------------------------------
   do while (iteration < n_iterations)
+     prev_S = s%S
+     
      ! Check that we are not close to S_critical
      if (1. - maxval(s%S/S_c) < 1.e-2) then
         call do_timestep_S_exp(s, min_dt_T*8.e-3)
@@ -145,7 +147,6 @@ program black_hole_diffusion
         !----------------------------------------------
         ! S integration
         !----------------------------------------------
-        prev_S = s%S
 
         ! Do a single S integration
         call do_timestep_S_imp(s, min_dt_nu)
