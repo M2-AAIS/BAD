@@ -28,6 +28,7 @@ module mod_constants
 
   type parameters
     real(x_precision) :: M, Mdot, Mdot_crit, kappa_e, RTM, alpha, dx, t_nu, t_T
+    real(x_precision) :: Mdot_kick_factor
     ! M         : Black hole Mass
     ! Mdot      : Acretion rate at rmax
     ! Mdot_crit : Critical accretion rate
@@ -37,6 +38,7 @@ module mod_constants
     ! dx        : Dimensionless spacestep
     ! t_nu      : Viscous time
     ! t_T       : Thermal time
+    ! Mdot_kick_factor : kick factor 
   end type parameters
 
   type state
