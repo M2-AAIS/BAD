@@ -9,29 +9,9 @@ module mod_integrator
   implicit none
   private
 
-  public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp
+  public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp 
 
 contains
-
-  function dS_dt(s)
-    implicit none
-
-    type(state), intent(in) :: s
-
-    real(x_precision), dimension(n_cell)     :: dS_dt
-
-    real(x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
-
-    ! see BAD-report for explanation of nuS(0) and nuS(n_cell+1)
-    nuS(0)        = 0
-    nuS(1:n_cell) = s%nu * s%S
-    nuS(n_cell+1) = params%dx + nuS(n_cell)
-
-    dS_dt = 1._x_precision / x_state%x**2 * &
-            (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
-            params%dx**2
-
-  end function dS_dt
 
   function dT_dt_imp(s)
   !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
@@ -55,25 +35,26 @@ contains
 
     real(x_precision), dimension(n_cell) :: dT_dt_exp
 
-    real(x_precision), dimension(n_cell) :: dS_over_dt, dSigma_over_dx, Sigma, dT_over_dx
+    ! real(x_precision), dimension(n_cell) :: dS_over_dt, dSigma_over_dx, Sigma, dT_over_dx
 
-    dS_over_dt = dS_dt(s)
+    ! dS_over_dt = dS_dt(s)
 
     ! Compute dT/dx as the right spatial derivative
-    dT_over_dx(1:n_cell-1) = (s%T(2:n_cell) - s%T(1:n_cell-1)) / params%dx
-    dT_over_dx(n_cell)     = 0
+    ! dT_over_dx(1:n_cell-1) = (s%T(2:n_cell) - s%T(1:n_cell-1)) / params%dx
+    ! dT_over_dx(n_cell)     = 0
 
     ! Compute d(S/x)/dx as the right spatial derivative
-    Sigma = s%S / x_state%x
+    ! Sigma = s%S / x_state%x
 
-    dSigma_over_dx(1:n_cell-1) = (Sigma(2:n_cell) - Sigma(1:n_cell-1)) / params%dx
-    dSigma_over_dx(n_cell)     = - dS_over_dt(n_cell) / s%v(n_cell)
+    ! dSigma_over_dx(1:n_cell-1) = (Sigma(2:n_cell) - Sigma(1:n_cell-1)) / params%dx
+    ! dSigma_over_dx(n_cell)     = - dS_over_dt(n_cell) / s%v(n_cell)
 
     !right term
-    dT_dt_exp = (dT_dt_imp(s) + params%RTM * ( 4._x_precision - 3._x_precision * s%beta ) / s%beta * &
-                 s%T / s%S * (dS_over_dt + s%v * dSigma_over_dx) - &
-                 s%Cv * s%v / x_state%x * dT_over_dx) / s%Cv
+    ! dT_dt_exp = (dT_dt_imp(s) + params%RTM * ( 4._x_precision - 3._x_precision * s%beta ) / s%beta * &
+    !              s%T / s%S * (dS_over_dt + s%v * dSigma_over_dx) - &
+    !              s%Cv * s%v / x_state%x * dT_over_dx) / s%Cv
 
+    dT_dt_exp = dT_dt_imp(s) + s%Qadv / s%CV
   end function dT_dt_exp
 
   subroutine do_timestep_S_imp(s, dt)
@@ -159,7 +140,7 @@ contains
     if (minval(newT) < 0) then
        converge = .false.
        print*, 'Convergence problem!'
-       ! print*,newT
+       print*,newT
        stop
     end if
 

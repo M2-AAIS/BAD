@@ -3,12 +3,11 @@
 module mod_variables
   use mod_constants
   use mod_read_parameters
-
   implicit none
 
   private
 
-  public :: compute_variables, dim_adim
+  public :: compute_variables, dim_adim, dS_dt
 
 contains
 
@@ -22,6 +21,8 @@ contains
     real(x_precision), dimension(n_cell)   :: Delta
     real(x_precision), dimension(n_cell)   :: kappa_ff, epsilo
     real(x_precision), dimension(n_cell)   :: Sx
+    real(x_precision), dimension(n_cell)   :: dS_over_dt, dSigma_over_dx, dT_over_dx
+    real(x_precision), dimension(n_cell)   :: Sigma
     real(x_precision), dimension(0:n_cell) :: nuS ! one more dimension to store nuS(0)
 
     !-------------------------------------------------------------
@@ -83,6 +84,29 @@ contains
     state_out%Qplus  = 3._x_precision * state_0%v_0**2 * state_out%nu * x_state%Omega**2
     state_out%Qminus = state_out%Fz * x_state%x / state_out%S
 
+    !-----------------------
+    ! Compute advecting term
+    !-----------------------
+
+    dS_over_dt = dS_dt(state_out)
+
+    ! Compute dT/dx as the right spatial derivative
+    dT_over_dx(1:n_cell-1) = (state_out%T(2:n_cell) - state_out%T(1:n_cell-1)) / params%dx
+    dT_over_dx(n_cell)     = 0
+
+    ! Compute d(S/x)/dx as the right spatial derivative
+    Sigma = state_out%S / x_state%x
+
+    dSigma_over_dx(1:n_cell-1) = (Sigma(2:n_cell) - Sigma(1:n_cell-1)) / params%dx
+    dSigma_over_dx(n_cell)     = - dS_over_dt(n_cell) / state_out%v(n_cell)
+
+    !Compute advecting term
+    state_out%Qadv=params%RTM * ( 4._x_precision - 3._x_precision * state_out%beta ) / state_out%beta * &
+                 state_out%T / state_out%S * (dS_over_dt + state_out%v * dSigma_over_dx) - &
+                 state_out%Cv * state_out%v / x_state%x * dT_over_dx 
+
+    !-----------------------
+
   end subroutine compute_variables
 
   ! Transform dimensions of variables
@@ -123,5 +147,28 @@ contains
        stop
     end select
   end subroutine dim_adim
+
+  
+  function dS_dt(s)
+    implicit none
+
+    type(state), intent(in) :: s
+
+    real(x_precision), dimension(n_cell)     :: dS_dt
+
+    real(x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
+
+    ! see BAD-report for explanation of nuS(0) and nuS(n_cell+1)
+    nuS(0)        = 0
+    nuS(1:n_cell) = s%nu * s%S
+    nuS(n_cell+1) = params%dx + nuS(n_cell)
+
+    dS_dt = 1._x_precision / x_state%x**2 * &
+            (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
+            params%dx**2
+
+  end function dS_dt
+
+
 
 end module mod_variables
