@@ -36,7 +36,7 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Convergence criteria for S and T
   !----------------------------------------------
-  delta_S_max = 1e-7
+  delta_S_max = 1e-8
   delta_T_max = 1e-4
 
   ! Read the parameters, generate state_0 and create adim state
@@ -134,8 +134,8 @@ program black_hole_diffusion
         call compute_variables(s)
         call timestep (s, dt_T, dt_nu)
 
-        if (mod(iteration, output_freq) == 0 .or. &
-             (iteration > 830000 .and. mod(iteration, 10) == 0)) then
+        if (mod(iteration, output_freq) == 0) then ! .or. &
+           !  (iteration > 790000 .and. mod(iteration, 10) == 0)) then
            call snapshot(s, iteration, t, 13)
            print*,'snapshot', iteration, t, 1 - maxval(s%S/S_c), dt_pre_factor
         end if
@@ -156,7 +156,8 @@ program black_hole_diffusion
         iteration = iteration + 1
 
         ! Do a snapshot
-        if (mod(iteration, output_freq) == 0) then
+        if (mod(iteration, output_freq) == 0 ) then! &
+              ! .or. iteration > 705000) then
            call snapshot(s, iteration, t, 13)
            print*,'snapshot', iteration, t
         end if
@@ -178,7 +179,8 @@ program black_hole_diffusion
            iteration = iteration + 1
 
            ! Do a snapshot
-           if (mod(iteration, output_freq) == 0) then
+           if (mod(iteration, output_freq) == 0 ) then! &
+                ! .or. iteration > 705000) then
               call snapshot(s, iteration, t, 13)
               print*,'snapshot', iteration, t
            end if
@@ -198,9 +200,9 @@ program black_hole_diffusion
      ! Mdot kick
      ! increase Mdot at the boundaries if S is stalled
      !----------------------------------------------
-     if (maxval(abs((prev_S - s%S)/s%S)) < delta_S_max) then
+     if (maxval(abs((prev_S - s%S)/s%S)) / min_dt_T < delta_S_max) then
         ! Mdot kick
-        params%Mdot_kick_factor = params%Mdot_kick_factor * 1.3_x_precision
+        params%Mdot_kick_factor = params%Mdot_kick_factor * 2._x_precision
         print*, 'Mdot kick!', params%Mdot_kick_factor
         iteration = iteration + 1
      end if
