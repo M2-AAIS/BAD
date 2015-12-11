@@ -200,9 +200,9 @@ program black_hole_diffusion
      !----------------------------------------------
      if (maxval(abs((prev_S - s%S)/s%S)) < delta_S_max) then
         ! Mdot kick
-        ! params%kick_factor = params%kick_factor * 1.5
-        ! print*, 'Mdot kick!', params%kick_factor
-        iteration = n_iterations
+        params%Mdot_kick_factor = params%Mdot_kick_factor * 1.5
+        print*, 'Mdot kick!', params%Mdot_kick_factor
+        iteration = iteration + 1
      end if
   end do
 
