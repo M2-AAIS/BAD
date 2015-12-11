@@ -126,18 +126,19 @@ program black_hole_diffusion
   do while (iteration < n_iterations)
      ! Check that we are not close to S_critical
      if (1. - maxval(s%S/S_c) < 1.e-2) then
-        call do_timestep_S_exp(s, min_dt_T*1.e-2)
+        call do_timestep_S_exp(s, min_dt_T*8.e-3)
         call do_timestep_T(s, min_dt_T*1.e-2, T_converged, delta_T_max)
         t = t + 2*min_dt_T*1e-2
         call compute_variables(s)
         call timestep (s, dt_T, dt_nu)
 
         if (mod(iteration, output_freq) == 0 .or. &
-             (iteration > 790000 .and. mod(iteration, 10) == 0)) then
+             (iteration > 830000 .and. mod(iteration, 10) == 0)) then
            call snapshot(s, iteration, t, 13)
            print*,'snapshot', iteration, t, 1 - maxval(s%S/S_c), dt_pre_factor
         end if
         iteration = iteration + 1
+
 
         ! Switch to explicit scheme
      else
