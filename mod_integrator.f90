@@ -13,6 +13,26 @@ module mod_integrator
 
 contains
 
+  function dS_dt(s)
+    implicit none
+
+    type(state), intent(in) :: s
+
+    real(x_precision), dimension(n_cell)     :: dS_dt
+
+    real(x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
+
+    ! see BAD-report for explanation of nuS(0) and nuS(n_cell+1)
+    nuS(0)        = 0
+    nuS(1:n_cell) = s%nu * s%S
+    nuS(n_cell+1) = params%Mdot_kick_factor * params%dx + nuS(n_cell)
+
+    dS_dt = 1._x_precision / x_state%x**2 * &
+            (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
+            params%dx**2
+
+  end function dS_dt
+  
   function dT_dt_imp(s)
   !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     implicit none
@@ -77,14 +97,14 @@ contains
     x2 = x_state%x**2
 
     ! Create the diagonals NOT VERIFIED YET
-    diag     =  1 + 2 * s%nu / x2 * dtoverdx2
+    diag     =  1._x_precision + 2._x_precision * s%nu / x2 * dtoverdx2
     diag_up  = -s%nu(2:n_cell  ) / x2(1:n_cell-1) * dtoverdx2
     diag_low = -s%nu(1:n_cell-1) / x2(2:  n_cell) * dtoverdx2
 
-    diag(n_cell)       = 1 + s%nu(n_cell) / x2(n_cell) * dtoverdx2
+    diag(n_cell)       = 1._x_precision + s%nu(n_cell) / x2(n_cell) * dtoverdx2
     diag_low(n_cell-1) = - s%nu(n_cell-1) / x2(n_cell) * dtoverdx2
 
-    s%S(n_cell) = s%S(n_cell) + dt * overdx / x2(n_cell)
+    s%S(n_cell) = s%S(n_cell) + dt * params%Mdot_kick_factor * overdx / x2(n_cell)
 
     ! Solving for S, this does modify s%S directly
     call dgtsv(n_cell, 1, diag_low, diag, diag_up, s%S, n_cell, info)
