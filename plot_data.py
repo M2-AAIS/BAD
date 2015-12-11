@@ -262,6 +262,8 @@ def init(ic, crit_pts, s_curves, initial_data):
     if args.plot_Qs:
         lines['r-Q+'] = ax21.plot(initial_data['r'], initial_data['Q_+'], label='$Q^+$')[0]
         lines['r-Q-'] = ax21.plot(initial_data['r'], initial_data['Q_-'], label='$Q^-$')[0]
+        lines['r-Qadv'] = ax21.plot(initial_data['r'], initial_data['Qadv'], label='$Qadv$')[0]
+
         ax21.legend()
     else:
         lines['r-Mdot'] = ax21.plot(initial_data['r'], initial_data['M_dot'])[0]
@@ -327,6 +329,7 @@ def plotData(plotArgs):
     if args.plot_Qs:
         lines['r-Q+'].set_ydata(data['Q_+'])
         lines['r-Q-'].set_ydata(data['Q_-'])
+        lines['r-Qadv'].set_ydata(data['Qadv'])
     else:
         lines['r-Mdot'].set_ydata(data['M_dot'])
 
