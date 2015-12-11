@@ -161,14 +161,12 @@ contains
     ! see BAD-report for explanation of nuS(0) and nuS(n_cell+1)
     nuS(0)        = 0
     nuS(1:n_cell) = s%nu * s%S
-    nuS(n_cell+1) = params%dx + nuS(n_cell)
+    nuS(n_cell+1) = params%Mdot_kick_factor * params%dx + nuS(n_cell)
 
     dS_dt = 1._x_precision / x_state%x**2 * &
             (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
             params%dx**2
 
   end function dS_dt
-
-
 
 end module mod_variables

@@ -12,26 +12,6 @@ module mod_integrator
   public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp 
 
 contains
-
-  function dS_dt(s)
-    implicit none
-
-    type(state), intent(in) :: s
-
-    real(x_precision), dimension(n_cell)     :: dS_dt
-
-    real(x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
-
-    ! see BAD-report for explanation of nuS(0) and nuS(n_cell+1)
-    nuS(0)        = 0
-    nuS(1:n_cell) = s%nu * s%S
-    nuS(n_cell+1) = params%Mdot_kick_factor * params%dx + nuS(n_cell)
-
-    dS_dt = 1._x_precision / x_state%x**2 * &
-            (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &
-            params%dx**2
-
-  end function dS_dt
   
   function dT_dt_imp(s)
   !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
