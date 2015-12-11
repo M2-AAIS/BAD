@@ -22,6 +22,7 @@ contains
 
     real(x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
 
+    ! see BAD-report for explanation of nuS(0) and nuS(n_cell+1)
     nuS(0)        = 0
     nuS(1:n_cell) = s%nu * s%S
     nuS(n_cell+1) = params%dx + nuS(n_cell)
