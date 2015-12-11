@@ -224,7 +224,9 @@ class colorLooper:
         
 def init(ic, crit_pts, s_curves, initial_data):
     ''' Plot the initial conditions, the critical points and the s_curves'''
-    ## Top left panel
+    #######################################################################
+    #  Top left panel
+    #######################################################################
     ax11.plot(ic['r'], ic['T'], '--', label='Initial conditions')
     ax11.plot(ic['r'], crit_pts['Temp_thick'], '--', label='critical')
     
@@ -232,7 +234,7 @@ def init(ic, crit_pts, s_curves, initial_data):
     ax11.set_ylabel('$T\ (K)$')
 
     lines['r-T'] = ax11.plot(initial_data['r'], initial_data['T'])[0]
-    
+
     ax11.set_yscale('log')
     ax11.grid()
     # ax11.legend()
@@ -247,8 +249,9 @@ def init(ic, crit_pts, s_curves, initial_data):
     ax11.set_xticks(ticks)
     ax11.set_xticklabels(ticklabels)
 
-
-    ## Top right panel
+    #######################################################################
+    #  Top right panel
+    #######################################################################
     ax12.set_xlabel('$r\ (\mathrm{cm})$')
     ax12.set_ylabel('$\Sigma\ (\mathrm{g.cm^{-2}})$')
     ax12.plot(ic['r'], ic['Sigma'], '--')
@@ -259,6 +262,21 @@ def init(ic, crit_pts, s_curves, initial_data):
     ax12.grid()
     ax12.set_yscale('log')
 
+        
+    # add ticks corresponding to the s_curve
+    ticks      = list(ax12.get_xticks())
+    ticklabels = list(ax12.get_xticklabels())
+    for ind, s_curve in s_curves:
+        ticks.append(ic['r'][ind])
+        ticklabels.append('$r_{'+str(ind)+'}$')
+    
+
+    ax12.set_xticks(ticks)
+    ax12.set_xticklabels(ticklabels)
+
+    #######################################################################
+    #  Bottom left panel
+    #######################################################################
     if args.plot_Qs:
         lines['r-Q+'] = ax21.plot(initial_data['r'], initial_data['Q_+'], label='$Q^+$')[0]
         lines['r-Q-'] = ax21.plot(initial_data['r'], initial_data['Q_-'], label='$Q^-$')[0]
@@ -269,15 +287,14 @@ def init(ic, crit_pts, s_curves, initial_data):
         lines['r-Mdot'] = ax21.plot(initial_data['r'], initial_data['M_dot'])[0]
     
     # add ticks corresponding to the s_curve
-    ticks      = list(ax12.get_xticks())
-    ticklabels = list(ax12.get_xticklabels())
+    ticks      = list(ax21.get_xticks())
+    ticklabels = list(ax21.get_xticklabels())
     for ind, s_curve in s_curves:
         ticks.append(ic['r'][ind])
         ticklabels.append('$r_{'+str(ind)+'}$')
 
-    ax12.set_xticks(ticks)
-    ax12.set_xticklabels(ticklabels)
-
+    ax21.set_xticks(ticks)
+    ax21.set_xticklabels(ticklabels)
 
     ## Bottom left panel
     ax21.set_xlabel('$r\ (\mathrm{cm})$')
@@ -286,8 +303,10 @@ def init(ic, crit_pts, s_curves, initial_data):
     else:
         ax21.set_ylabel('$\dot{M}\ (\mathrm{g.s^{-1}})$')
     ax21.grid()
- 
-    ## Bottom right panel
+
+    #######################################################################
+    #  Bottom right panel
+    #######################################################################
     colorsIter = colorLooper()
     for ind, s_curve in s_curves:
         ax22.plot(s_curve['Surface_density'], s_curve['Temperature'],
