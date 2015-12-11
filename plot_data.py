@@ -1,4 +1,7 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+# necessary for Python2
+from __future__ import print_function
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
