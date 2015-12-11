@@ -47,7 +47,7 @@ program black_hole_diffusion
 
   ! Conversion into S*_crit
   S_c = sigma_c * x_state%x
-  dist_crit = 400. * x_state%x
+  dist_crit = 500. * x_state%x
 
   ! Initiate the S_curve
   ! call s_curve(foo, bar)
@@ -200,7 +200,7 @@ program black_hole_diffusion
      !----------------------------------------------
      if (maxval(abs((prev_S - s%S)/s%S)) < delta_S_max) then
         ! Mdot kick
-        params%Mdot_kick_factor = params%Mdot_kick_factor * 1.5
+        params%Mdot_kick_factor = params%Mdot_kick_factor * 1.3_x_precision
         print*, 'Mdot kick!', params%Mdot_kick_factor
         iteration = iteration + 1
      end if
