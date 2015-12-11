@@ -1,6 +1,6 @@
 GC=gfortran
-GFLAGS=-Wall -Wextra -pedantic -std=f2008 -g -O0 -fno-second-underscore -Wno-compare-reals -fcheck=all -fimplicit-none -ffpe-trap=zero,overflow -fbacktrace -gdwarf-2 -fall-intrinsics -Wno-unused-function -fcheck=bounds
-CFLAGS=-llapack -g -O0
+GFLAGS=-Wall -Wextra -pedantic -std=f2008 -g -O2 -fno-second-underscore -Wno-compare-reals -fcheck=all -fimplicit-none -ffpe-trap=zero,overflow -fbacktrace -gdwarf-2 -fall-intrinsics -Wno-unused-function -fcheck=bounds
+CFLAGS=-llapack -g -O2
 OUT=simul
 OUTS=s_curve
 OUTM=map
