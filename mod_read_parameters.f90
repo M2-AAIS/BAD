@@ -64,6 +64,7 @@ contains
     params%M         = params%M * M_sun
     params%Mdot_crit =  12._x_precision * Ledd * params%M / c**2
     params%Mdot      = params%Mdot * params%Mdot_crit
+    params%Mdot_kick_factor = 1._x_precision
 
     ! Compute c2 and rs
     c2 = c**2
