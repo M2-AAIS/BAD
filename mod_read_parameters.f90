@@ -131,19 +131,6 @@ contains
     ! Process kappa_e
     params%kappa_e = 0.2_x_precision * (1._x_precision + X)
 
-    ! Display parameters
-    write(*,"('#           Input Parameters             ')")
-    write(*,"('#****************************************')")
-    write(*,"('# BH_mass     =',1p,E12.4)") params%M
-    write(*,"('# rmax        =',1p,E12.4)") rmax
-    write(*,"('# Mdot        =',1p,E12.4)") params%Mdot
-    write(*,"('# alpha       =',1p,E12.4)") params%alpha
-    write(*,"('# X           =',1p,E12.4)") X
-    write(*,"('# Y           =',1p,E12.4)") Y
-    write(*,"('# t_nu        =',1p,E12.4)") params%t_nu
-    write(*,"('# t_T         =',1p,E12.4)") params%t_T
-    write(*,"('#****************************************')")
-
     ! Compute the initial variables needed for dimensionless variables
     !state_0%Omega_0 = sqrt(G * params%M / rs**3)
     state_0%temps_0 = 2._x_precision / state_0%Omega_0
@@ -161,6 +148,23 @@ contains
     state_0%Prad_0  = cst_rad * state_0%T_0**4 / 3._x_precision
     state_0%beta_0  = state_0%Prad_0 / state_0%Pgaz_0
 
+    ! Display parameters
+    write(*,"('#           Input Parameters             ')")
+    write(*,"('#****************************************')")
+    write(*,"('# BH_mass     =',1p,E12.4)") params%M
+    write(*,"('# Rmax        =',1p,E12.4)") rmax * state_0%H_0
+    write(*,"('# Rmin        =',1p,E12.4)") rmin * state_0%H_0
+    write(*,"('# R_s         =',1p,E12.4)") rs
+    write(*,"('# Ledd        =',1p,E12.4)") Ledd
+    write(*,"('# Mdot_crit   =',1p,E12.4)") params%Mdot_crit
+    write(*,"('# Mdot        =',1p,E12.4)") params%Mdot
+    write(*,"('# Mdot_0      =',1p,E12.4)") params%Mdot*params%Mdot_kick_factor
+    write(*,"('# alpha       =',1p,E12.4)") params%alpha
+    write(*,"('# X           =',1p,E12.4)") X
+    write(*,"('# Y           =',1p,E12.4)") Y
+    write(*,"('# t_nu        =',1p,E12.4)") params%t_nu
+    write(*,"('# t_T         =',1p,E12.4)") params%t_T
+    write(*,"('#****************************************')")
     write(*,"('#           Initial Variables            ')")
     write(*,"('#****************************************')")
     write(*,"('# Omega_0     =',1p,E12.4)") state_0%Omega_0
