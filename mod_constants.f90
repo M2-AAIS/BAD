@@ -19,7 +19,7 @@ module mod_constants
   real(x_precision), parameter, public :: c       = 2.99792458e10_x_precision ! Speed of light in cgs
   real(x_precision), parameter, public :: pi      = 4.0_x_precision*atan(1.0_x_precision)
   real(x_precision), parameter, public :: M_sun   = 1.98855e33_x_precision ! Mass of the sun in cgs
-  real(x_precision), parameter, public :: cst_rad = 7.5657308531642009e-17_x_precision ! Radiation cst in cgs
+  real(x_precision), parameter, public :: cst_rad = 7.5657308531642009e-15_x_precision ! Radiation cst in cgs
   real(x_precision), parameter, public :: stefan  = (c * cst_rad) / 4.0_x_precision ! Stefan cst in cgs
   real(x_precision), parameter, public :: kb      = 1.3806488e-16_x_precision ! Boltzmann cst in cgs
   real(x_precision), parameter, public :: R       = 8.3144598e7_x_precision ! Gas cst in csg = Boltzmann cst over proton mass
