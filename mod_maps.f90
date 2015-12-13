@@ -53,7 +53,7 @@ contains
     do i = 1, nb_T
        s%T = exp(dT * (i-1) + log(T_min))
        do j = 1, nb_S
-          s%S = exp(dS * (j-1) + log(S_min))
+          s%S = exp(dS * (j-1) + log(S_min)) * x_state%x
 
           call compute_variables(s) ! Compute the variables in each position of the state
           Q_res(:,i,j) = s%Qplus - s%Qminus
