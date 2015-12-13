@@ -48,7 +48,7 @@ if __name__ == '__main__':
         plt.yscale('log')
         CSQ = plt.contour(X, Y, Q, origin='image', levels=[0], colors=('w'), extent=extents)
         plt.clabel(CSQ, inline=1, fontsize=10)
-        CStau = plt.contour(X, Y, tau, origin='image', levels=[0.006,1], colors=('r','m'), extent=extents)
+        CStau = plt.contour(X, Y, tau, origin='image', levels=[0.06,1], colors=('r','m'), extent=extents)
         plt.clabel(CStau, inline=1, fontsize=10)
         plt.imshow(element['data'], interpolation='none', cmap='viridis', extent=extents, aspect='auto',
                    norm=matplotlib.colors.SymLogNorm(element['threshold']))
