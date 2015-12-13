@@ -65,12 +65,12 @@ contains
     !      sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
 
     !FIXME: We need to figure why it’s 0.006 and not 1
-   ! where (state_out%tau >= 0.006)
+    where (state_out%tau >= 1)
        state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
             sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
-  !  elsewhere
-  !     state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
-  !  end where
+    elsewhere
+       state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
+    end where
 
     ! Compute variables related to pressure
     state_out%Pgaz = state_out%rho * state_out%T
