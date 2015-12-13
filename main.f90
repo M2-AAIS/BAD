@@ -96,10 +96,6 @@ program black_hole_diffusion
   t_T  = params%t_T  !* state_0%temps_0
   t_nu = params%t_nu !*  state_0%temps_0
 
-  ! Initialize prev_S
-  ! we multiply delta to prevent the code from thinking it converged
-  prev_S = 1.2*s%S
-
   ! t_T  = params%t_T  !* state_0%temps_0
   ! t_nu = params%t_nu !*  state_0%temps_0
 
