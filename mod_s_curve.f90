@@ -418,7 +418,7 @@ contains
 
       Fz = 2._x_precision * c**2 * T**4 /(27._x_precision * sqrt(3._x_precision) * (K_ff + K_e) * Sigma * state_0%S_0)
 
-    case (0)
+    case(0)
 
       Fz = 4._x_precision * state_0%H_0 * E_ff * H / (state_0%Omega_0 * state_0%S_0)
 
@@ -471,7 +471,7 @@ contains
 
       dichotomy = 0
 
-    else if( f_max * f_min < 0.) then
+    else
 
       do while (dabs(Smax - Smin) >= eps .and. j < max_it)
 
