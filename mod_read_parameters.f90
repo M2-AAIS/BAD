@@ -9,15 +9,11 @@ module mod_read_parameters
   type(adim_state) :: x_state ! Contains the x and Omega tables
   type(dim_state)  :: r_state ! Contains the r and Omega_r tables
   type(state_zero) :: state_0
-
-  real(x_precision) :: fmdot   ! Fraction of Mdot
-  type(state_ci)    :: CI      ! Contains the initial parmaters for Temparature end Sigma
-
-  real(x_precision), dimension(n_cell) :: f1
+  type(state_ci)   :: CI      ! Contains the initial parmaters for Temparature end Sigma
 
   private
 
-  public :: get_parameters, params, x_state, r_state, state_0, f1, fmdot, CI
+  public :: get_parameters, params, x_state, r_state, state_0, CI
 
 contains
 
@@ -35,6 +31,8 @@ contains
     real(x_precision) :: c2      ! Light speed to the square
     real(x_precision) :: rs      ! Schwarzschild radius
     real(x_precision) :: t_dyn   ! Dynamic time
+    real(x_precision) :: falpha, fMdot, fM
+    real(x_precision), dimension(n_cell) :: f10, fr
     integer(kind=4)   :: ios     ! I/O test variable
     integer           :: i       ! Cells iteration variable
     character(len=50) :: line    ! String reading variable
@@ -81,6 +79,9 @@ contains
     ! Process RTM
     params%RTM = R * state_0%T_0 / mu
 
+    ! Process kappa_e
+    params%kappa_e = 0.2_x_precision * (1._x_precision + X)
+
     ! Process dx
     rmin      = 3._x_precision
     params%dx = (sqrt(rmax) - sqrt(rmin)) / n_cell
@@ -107,29 +108,24 @@ contains
     !-----------------------------------------------------------
     !--Process of initial parmameter for Temperature and Sigma--
     !-----------------------------------------------------------
-    ! Process f1 to compute T_ci and Sig_ci
-    f1 = 1._x_precision - (sqrt(3._x_precision) / x_state%x)
+    ! Process terms needed to compute T_ci and Sig_ci
+    falpha = params%alpha**(-0.2_x_precision)
+    fMdot  = (1.e-1_x_precision * params%Mdot / 1.e16_x_precision)**0.1_x_precision
+    fM     = (params%M / M_sun)**0.25_x_precision
+    fr     = (r_state%r / 1.e10_x_precision)**(-0.75_x_precision) 
+    f10    = (1._x_precision - sqrt(3._x_precision) / x_state%x)**0.1_x_precision
 
-    fmdot = 1.e-3_x_precision
     ! Process T_ci
-    CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1._x_precision/5._x_precision) &
-         * (params%Mdot * fmdot / 1.e16_x_precision)**(3._x_precision/10._x_precision) * &
-         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) &
-         * f1**(3._x_precision/10._x_precision)
-    ! Process Sig_ci
-    CI%Sig_ci = 5.2_x_precision * params%alpha**(-4._x_precision/5._x_precision) * &
-         (params%Mdot * fmdot / 1.e16_x_precision)**(7._x_precision/10._x_precision) * &
-         (params%M / M_sun)**(1._x_precision/4._x_precision) * (r_state%r / 1.e10_x_precision)**(-3._x_precision/4._x_precision) &
-         * f1**(7._x_precision/10._x_precision)
-    ! Process H_over_r
-    CI%H_over_r = 1.7e-2_x_precision * params%alpha**(-1._x_precision/10._x_precision) * (params%Mdot  &
-         * fmdot / 1.e16_x_precision)**(3._x_precision/20._x_precision) * (params%M / M_sun)**(-3._x_precision/8._x_precision) &
-         * (r_state%r / 1.e10_x_precision)**(1._x_precision/8._x_precision) * f1**(3._x_precision/5._x_precision)
-    !-----------------------------------------------------------
-    !-----------------------------------------------------------
+    CI%T_ci   = 1.4e4_x_precision * falpha * (fMdot * f10)**3 * fM * fr
 
-    ! Process kappa_e
-    params%kappa_e = 0.2_x_precision * (1._x_precision + X)
+    ! Process Sig_ci
+    CI%Sig_ci = 5.2_x_precision * falpha**4 * (fMdot * f10)**7 * fM * fr
+
+    ! Process H
+    CI%H_ci   = 1.7e8_x_precision * falpha**0.5_x_precision * (fMdot / (fr * fM))**1.5_x_precision * f10**6 
+
+    !-----------------------------------------------------------
+    !-----------------------------------------------------------
 
     ! Compute the initial variables needed for dimensionless variables
     !state_0%Omega_0 = sqrt(G * params%M / rs**3)

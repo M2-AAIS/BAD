@@ -80,13 +80,12 @@ module mod_constants
   end type state_zero
 
   type state_ci
-     real(x_precision), dimension(n_cell) :: T_ci, Sig_ci, H_over_r
-    ! T_ci      : initial condition for Temperature
-    ! Sig_ci    : initial condition for Sigma
+     real(x_precision), dimension(n_cell) :: T_ci, Sig_ci, H_ci
+     ! T_ci   : Initial condition for Temperature
+     ! Sig_ci : Initial condition for Sigma
+     ! H_ci   : Initial condition for H (for comparison only)
   end type state_ci
-
 
 contains
 
 end module mod_constants
-

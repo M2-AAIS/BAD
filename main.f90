@@ -49,29 +49,25 @@ program black_hole_diffusion
   S_c = sigma_c * x_state%x
   dist_crit = 400. * x_state%x
 
-  ! Initiate the S_curve
-  ! call s_curve(foo, bar)
-
   !----------------------------------------------
   ! Set the initial conditions for S, T
   !----------------------------------------------
   s%T = 1.8_x_precision*CI%T_ci / state_0%T_0
   s%S = CI%Sig_ci / state_0%S_0 * x_state%x
 
-  ! H_over_r becoming H*
-  CI%H_over_r = CI%H_over_r * r_state%r
   open(15, file="CI.dat", status="replace", iostat=ios)
-
   if (ios /= 0) then
      stop "Error while opening output file."
   end if
  
   ! Save initial conditions
   write(15, '(7(A16))')'r', 'x', 'T*', 'S*', 'T', 'Sigma', 'H'
-  do i= 1, n_cell
-     write(15, '(7(e16.6e2))')r_state%r(i), x_state%x(i), s%T(i), s%S(i),&
-          s%T(i)*state_0%T_0, s%S(i) * state_0%s_0 / x_state%x(i), CI%H_over_r(i)
+
+  do i = 1, n_cell
+     write(15, '(7(e16.6e2))') r_state%r(i), x_state%x(i), s%T(i), s%S(i),&
+                               s%T(i)*state_0%T_0, s%S(i) * state_0%S_0 / x_state%x(i), CI%H_ci(i)
   enddo
+
   close(15)
 
   !----------------------------------------------
@@ -124,19 +120,17 @@ program black_hole_diffusion
      
      ! Check that we are not close to S_critical
      if (1. - maxval(s%S/S_c) < 1.e-2) then
-        call do_timestep_S_exp(s, maxval(dt_T*1.e-1))
-        call do_timestep_T(s, maxval(dt_T*1.e-1), T_converged, delta_T_max)
-        t = t + 2*maxval(dt_T*1e-1)
+        call do_timestep_S_exp(s, min_dt_T*1.e-1_x_precision)
+        call do_timestep_T(s, min_dt_T*1.e-1_x_precision, T_converged, delta_T_max)
+        t = t + min_dt_T
         call compute_variables(s)
-        call timestep (s, dt_T, dt_nu)
+        call timestep(s, dt_T, dt_nu)
 
-        if (mod(iteration, output_freq) == 0) then ! .or. &
-           !  (iteration > 790000 .and. mod(iteration, 10) == 0)) then
+        if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
-           print*,'snapshot', iteration, t, 1 - maxval(s%S/S_c), 1 - minval(s%S/s_c), dt_pre_factor
+           print*,'snapshot', iteration, t, 1 - maxval(s%S/S_c), 1 - minval(s%S/S_c), dt_pre_factor
         end if
         iteration = iteration + 1
-
 
         ! Switch to explicit scheme
      else
@@ -152,8 +146,7 @@ program black_hole_diffusion
         iteration = iteration + 1
 
         ! Do a snapshot
-        if (mod(iteration, output_freq) == 0 ) then! &
-              ! .or. iteration > 705000) then
+        if (mod(iteration, output_freq) == 0 ) then
            call snapshot(s, iteration, t, 13)
            print*,'snapshot', iteration, t
         end if
@@ -188,7 +181,6 @@ program black_hole_diffusion
         dt_pre_factor = pre_factor(s, S_c, dist_crit)
         min_dt_T = minval(dt_T) * dt_pre_factor
         min_dt_nu = minval(dt_nu) * dt_pre_factor
-
 
      end if
 
