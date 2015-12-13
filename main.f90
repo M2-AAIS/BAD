@@ -11,10 +11,10 @@ program black_hole_diffusion
   implicit none
 
   !--------------------------- Parameters for s_curve-----------------------
-  real(x_precision), parameter         :: eps_in = 1.e-7_x_precision ! Precision required for the dichotomy
+  real(x_precision), parameter         :: eps_in = 1.e-6_x_precision ! Precision required for the dichotomy
   real(x_precision), parameter         :: Tmin   = 10._x_precision**5.3_x_precision
   real(x_precision), parameter         :: Tmax   = 10._x_precision**7.4_x_precision
-  real(x_precision), parameter         :: Smin   = 10._x_precision**1.5_x_precision
+  real(x_precision), parameter         :: Smin   = 10._x_precision**1.0_x_precision
   real(x_precision), parameter         :: Smax   = 10._x_precision**3.5_x_precision
 
   real(x_precision), dimension(n_cell) :: temperature_c
@@ -52,7 +52,7 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Set the initial conditions for S, T
   !----------------------------------------------
-  s%T = 1.8_x_precision*CI%T_ci / state_0%T_0
+  s%T = CI%T_ci / state_0%T_0
   s%S = CI%Sig_ci / state_0%S_0 * x_state%x
 
   open(15, file="CI.dat", status="replace", iostat=ios)
