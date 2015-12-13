@@ -110,7 +110,7 @@ contains
     ! Process f1 to compute T_ci and Sig_ci
     f1 = 1._x_precision - (sqrt(3._x_precision) / x_state%x)
 
-    fmdot = 1.e-2_x_precision
+    fmdot = 1.e-3_x_precision
     ! Process T_ci
     CI%T_ci = 1.4e4_x_precision * (params%alpha)**(-1._x_precision/5._x_precision) &
          * (params%Mdot * fmdot / 1.e16_x_precision)**(3._x_precision/10._x_precision) * &
