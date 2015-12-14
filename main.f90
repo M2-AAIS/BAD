@@ -11,7 +11,7 @@ program black_hole_diffusion
   implicit none
 
   character(len=10)                      :: arg
-  integer                                :: stp_value = 1000000 ! select the stop iteration 
+  integer                                :: stp_value = 50000 ! select the stop iteration 
   !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   character(len=100)                     :: line
@@ -73,17 +73,9 @@ program black_hole_diffusion
   !--Call ./simul start > let the job do until stp_value for iteration
   !-----------------------Call ./simul restart------------------------
   !-------------------------------------------------------------------
-  if (arg == 'start') then 
-     s%T = IC%T / state_0%T_0
-     s%S = IC%Sigma / state_0%S_0 * x_state%x
-     ! Initial time = 0
-     t = 0._x_precision
-     ! Start
-     iteration = 0
-  elseif (arg == 'restart')then 
-    ! call system ("rm tmp.dat")
-     call system ("tail -n 259 output.dat > tmp.dat" )
-     open(21, file="tmp.dat", action='read', iostat=ios)
+  if (arg == 'restart') then  
+     call system ("tail -n 259 output.dat > restart.dat" )
+     open(21, file="restart.dat", action='read', iostat=ios)
      if (ios /= 0) then
         stop "Error while opening output file."
      end if
@@ -96,7 +88,14 @@ program black_hole_diffusion
      s%T = s%T / state_0%T_0
      s%S = s%S / state_0%S_0 * x_state%x
      close(21)
-    ! restart iteration FIXEME
+     ! restart iteration FIXEME
+  elseif (arg == 'load') then
+     s%T = IC%T / state_0%T_0
+     s%S = IC%Sigma / state_0%S_0 * x_state%x
+     ! Initial time = 0
+     t = 0._x_precision
+     ! Start
+     iteration = 0
   else
      print*, 'Unsupported action "', arg, '". Call ./simul [start|restart].'
      stop
@@ -159,7 +158,7 @@ program black_hole_diffusion
 
         if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
-           if (arg == 'start' .and. iteration > stp_value) then
+           if (arg == 'load' .and. iteration > stp_value) then
               stop
            endif
            print*,'snapshot', iteration, t, 'exp', maxval(s%T - T_c), maxval(s%S - S_c), dt_T
@@ -187,7 +186,7 @@ program black_hole_diffusion
         iteration = iteration + 1
 
         if (mod(iteration, output_freq) == 0 ) then
-           if (arg == 'start' .and. iteration > stp_value) then
+           if (arg == 'load' .and. iteration > stp_value) then
               stop
            endif
            call snapshot(s, iteration, t, 13)
@@ -215,7 +214,7 @@ program black_hole_diffusion
 
            ! Do a snapshot
            if (mod(iteration, output_freq) == 0) then
-              if (arg == 'start' .and. iteration > stp_value) then
+              if (arg == 'load' .and. iteration > stp_value) then
                  stop
               endif
               call snapshot(s, iteration, t, 13)
