@@ -97,7 +97,10 @@ program black_hole_diffusion
      s%S = s%S / state_0%S_0 * x_state%x
      close(21)
     ! restart iteration FIXEME
-  endif
+  else
+     print*, 'Unsupported action "', arg, '". Call ./simul [start|restart].'
+     stop
+  end if
 
   !----------------------------------------------
   ! Do an initial computation of the variables
