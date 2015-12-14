@@ -5,22 +5,31 @@ import matplotlib.pyplot as plt
 from numpy import array, log
 import sys
 import os
+import argparse
 
 import matplotlib.animation as animation
 
 fig = plt.figure()
 
-inpath = sys.argv[1]
+parser = argparse.ArgumentParser(description='Plot data from output of the black hole simulation.')
+parser.add_argument('--path', default='s_curves/',
+                    help='path to the S curves directory')
+parser.add_argument('--index', default=-1, type=int,
+                    help='Give a particular index to plot')
+args = parser.parse_args()
 
-if os.path.isfile(inpath):
-    print('Visiting {}'.format(inpath))
-    filenames = [inpath]
+fullpath = os.path.join(args.path,
+                        'Temperature_Sigma_{:0>5}_tot.dat'.format(args.index))
+print(fullpath)
+if os.path.isfile(fullpath):
+    print('Visiting {}'.format(fullpath))
+    filenames = [fullpath]
 else:
-    _filenames = os.listdir(inpath)
+    _filenames = os.listdir(args.path)
     _filenames.sort()
-    filenames = [inpath + '/' + fname for fname in _filenames if '_tot.dat' in fname]
+    filenames = [os.path.join(args.path,fname) for fname in _filenames if '_tot.dat' in fname]
     
-    print('Visiting all files of {}'.format(inpath))
+    print('Visiting all files of {}'.format(args.path))
 
 axline, = plt.plot(0, 0, 'o', label='')
 
