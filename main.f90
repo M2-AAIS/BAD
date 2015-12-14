@@ -47,7 +47,7 @@ program black_hole_diffusion
 
   ! Conversion into S*_crit
   S_c = sigma_c * x_state%x
-  dist_crit = 200. * x_state%x
+  dist_crit = 100. * x_state%x
 
   !----------------------------------------------
   ! Set the initial conditions for S, T
@@ -119,15 +119,15 @@ program black_hole_diffusion
      
      ! Check that we are not close to S_critical
      if (1. - maxval(s%S/S_c) < 1.e-2) then
-        call do_timestep_S_exp(s, min_dt_T*1.e-1_x_precision)
-        call do_timestep_T(s, min_dt_T*1.e-1_x_precision, T_converged, delta_T_max)
+        call do_timestep_S_exp(s, min_dt_T)
+        call do_timestep_T(s, min_dt_T, T_converged, delta_T_max)
         t = t + min_dt_T
         call compute_variables(s)
-        call timestep(s, dt_T, dt_nu)
 
         if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
-           print*,'snapshot', iteration, t, 1 - maxval(s%S/S_c), 1 - minval(s%S/S_c), dt_pre_factor
+           print*,'snapshot', iteration, t, 'exp', 1 - maxval(s%S/S_c), 1 - minval(s%S/S_c),&
+                min_dt_T, dt_pre_factor
         end if
         iteration = iteration + 1
 
@@ -167,19 +167,11 @@ program black_hole_diffusion
            iteration = iteration + 1
 
            ! Do a snapshot
-           if (mod(iteration, output_freq) == 0 ) then! &
-                ! .or. iteration > 705000) then
+           if (mod(iteration, output_freq) == 0) then ! .or. iteration > 144000) then
               call snapshot(s, iteration, t, 13)
-              print*,'snapshot', iteration, t
+              print*,'snapshot', iteration, t, 'T', min_dt_T, dt_pre_factor
            end if
         end do
-
-        ! Recompute variables when the system is stable
-        call compute_variables(s)
-        call timestep (s, dt_T, dt_nu)
-        dt_pre_factor = pre_factor(s, S_c, dist_crit)
-        min_dt_T = minval(dt_T) * dt_pre_factor
-        min_dt_nu = minval(dt_nu) * dt_pre_factor
 
      end if
 
@@ -193,6 +185,13 @@ program black_hole_diffusion
         print*, 'Mdot kick! YOLOOOOO', params%Mdot_kick_factor
         iteration = iteration + 1
      end if
+
+     ! Recompute variables when the system is stable
+     call compute_variables(s)
+     call timestep (s, dt_T, dt_nu)
+     dt_pre_factor = pre_factor(s, S_c, dist_crit)
+     min_dt_T = minval(dt_T) * dt_pre_factor
+     min_dt_nu = minval(dt_nu) * dt_pre_factor
   end do
 
   close(13)

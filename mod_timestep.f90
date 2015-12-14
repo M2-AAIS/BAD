@@ -32,6 +32,9 @@ contains
    ! dt_nu = x_state%x**2._x_precision / state_in%nu
 
     dt_nu = x_state%x / abs(state_in%v) / cst_dt_nu
+    where (dt_nu < dt_T*100._x_precision)
+       dt_T = dt_nu/100._x_precision
+    end where
    ! dt_T  = (state_in%H / x_state%x)**(2._x_precision) * dt_nu * cst_dt_nu &
    !      / cst_dt_T
 
