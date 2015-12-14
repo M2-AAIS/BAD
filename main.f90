@@ -24,8 +24,9 @@ program black_hole_diffusion
 
   integer                              :: iteration, ios, i
   type(state)                          :: s
-  real(x_precision)                    :: delta_S_max, delta_T_max, t
-  real(x_precision), dimension(n_cell) :: prev_S
+  real(x_precision), dimension(n_cell) :: prev_S, prev_T
+  real(x_precision)                    :: delta_S_max, delta_T_max
+  real(x_precision)                    :: t
   real(x_precision)                    :: dt_nu, dt_T
   logical                              :: T_converged
   logical                              :: unstable
@@ -126,7 +127,7 @@ program black_hole_diffusion
         ! Do an explicit integration of both S and T over a thermic timestep
         call timestep_T(s, dt_T)
         call do_timestep_S_exp(s, dt_T)
-        call do_timestep_T(s, dt_T, T_converged, delta_T_max)
+        call do_timestep_T(s, dt_T)
 
         ! Increase time, increment number of iterations
         t = t + dt_T
@@ -167,11 +168,16 @@ program black_hole_diffusion
         ! T integrations
         ! Iterate while T hasn't converged
         !----------------------------------------------
+
         T_converged = .false.
+
         do while (.not. T_converged)
-           ! Do a single T integration
+
            call timestep_T(s, dt_T)
-           call do_timestep_T(s, dt_T, T_converged, delta_T_max)
+
+           ! Do a single T integration
+           prev_T = s%T ! We need to keep the old value for comparison
+           call do_timestep_T(s, dt_T)
 
            ! Increase time, increment number of iterations
            t = t + dt_T
@@ -182,13 +188,17 @@ program black_hole_diffusion
               call snapshot(s, iteration, t, 13)
               print*,'snapshot', iteration, t, 'T', dt_T
            end if
+
+           ! Check if T converged everywhere
+           T_converged = maxval(abs(prev_T - s%T)/s%T) < delta_T_max
+
         end do
 
         !----------------------------------------------
         ! Mdot kick
         ! Increase Mdot at r_max if S is stalled
         !----------------------------------------------
-        if (maxval(abs((prev_S - s%S)/s%S)) / dt_nu < delta_S_max) then
+        if (maxval(abs(prev_S - s%S)/s%S) / dt_nu < delta_S_max) then
            s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
            print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
         end if

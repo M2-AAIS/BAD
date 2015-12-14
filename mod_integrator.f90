@@ -106,19 +106,16 @@ contains
 
   end subroutine do_timestep_S_exp
 
-  subroutine do_timestep_T(s, dt, converge, epst)
+  subroutine do_timestep_T(s, dt)
   !process the temporal evolution of T
     implicit none
 
-    real(x_precision), intent(in)    :: epst
     real(x_precision), intent(in)    :: dt
     type(state),       intent(inout) :: s
-    logical,           intent(out)   :: converge
 
 
     real(x_precision), dimension(n_cell) :: dtemp, rhs, newT
     real(x_precision), dimension(n_cell) :: f0, fT
-    real(x_precision)                    :: maxi
     type(state)                          :: s_deriv
     integer :: i
 
@@ -139,7 +136,6 @@ contains
     newT = s%T + rhs
     ! When the minimum value of T is ≤0, reduce the timestep
     if (minval(newT) < 0) then
-       converge = .false.
        print*, 'Convergence problem!'
        do i = 1, n_cell
            print*, i, newT(i)
@@ -155,15 +151,6 @@ contains
     ! end do
 
     s%T = newT
-
-    maxi = maxval(abs(rhs / s%T))
-    if (maxi < epst) then
-       ! print *,'Converged — RHS=',  maxi
-       converge = .true.
-    else
-       ! print *, 'Not converged — RHS=', maxi
-       converge = .false.
-    end if
 
   end subroutine do_timestep_T
 
