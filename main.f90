@@ -122,7 +122,6 @@ program black_hole_diffusion
         call do_timestep_S_exp(s, min_dt_T)
         call do_timestep_T(s, min_dt_T, T_converged, delta_T_max)
         t = t + min_dt_T
-        call compute_variables(s)
 
         if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
