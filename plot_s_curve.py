@@ -16,6 +16,8 @@ parser.add_argument('--path', default='s_curves/',
                     help='path to the S curves directory')
 parser.add_argument('--index', default=-1, type=int,
                     help='Give a particular index to plot')
+parser.add_argument('--video', action='store_true',
+                    help='save a video (MUCH slower)')
 args = parser.parse_args()
 
 fullpath = os.path.join(args.path,
@@ -73,7 +75,8 @@ def init():
 
 if len(filenames) > 1:
     ani = animation.FuncAnimation(fig, draw_once, filenames, init_func=init, interval=10)
-    ani.save('s_curve.mp4', writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
+    if args.video:
+        ani.save('s_curve.mp4', writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
     plt.show()
 else:
     init()
