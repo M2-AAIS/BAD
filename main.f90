@@ -72,6 +72,7 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Do an initial computation of the variables
   !----------------------------------------------
+  s%Mdot(n_cell) = 1._x_precision
   call compute_variables(s)
   call timestep (s, dt_T, dt_nu)
   min_dt_T = minval(dt_T)
@@ -180,8 +181,8 @@ program black_hole_diffusion
      !----------------------------------------------
      if (maxval(abs((prev_S - s%S)/s%S)) / min_dt_T < delta_S_max) then
         ! Mdot kick
-        params%Mdot_kick_factor = params%Mdot_kick_factor * 2._x_precision
-        print*, 'Mdot kick! YOLOOOOO', params%Mdot_kick_factor
+        s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
+        print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
         iteration = iteration + 1
      end if
 

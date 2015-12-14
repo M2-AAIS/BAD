@@ -62,7 +62,6 @@ contains
     params%M         = params%M * M_sun
     params%Mdot_crit =  12._x_precision * Ledd * params%M / c**2
     params%Mdot      = params%Mdot * params%Mdot_crit
-    params%Mdot_kick_factor = 1._x_precision
 
     ! Compute c2 and rs
     c2 = c**2
@@ -148,16 +147,16 @@ contains
     write(*,"('#           Input Parameters             ')")
     write(*,"('#****************************************')")
     write(*,"('# BH_mass     =',1p,E12.4)") params%M
-    write(*,"('# Rmax        =',1p,E12.4)") rmax * state_0%H_0
-    write(*,"('# Rmin        =',1p,E12.4)") rmin * state_0%H_0
-    write(*,"('# R_s         =',1p,E12.4)") rs
-    write(*,"('# Ledd        =',1p,E12.4)") Ledd
+    write(*,"('# r_s         =',1p,E12.4)") rs
+    write(*,"('# r_min       =',1p,E12.4)") rmin * state_0%H_0
+    write(*,"('# r_max       =',1p,E12.4)") rmax * state_0%H_0
+    write(*,"('# L_edd       =',1p,E12.4)") Ledd
     write(*,"('# Mdot_crit   =',1p,E12.4)") params%Mdot_crit
-    write(*,"('# Mdot        =',1p,E12.4)") params%Mdot
-    write(*,"('# Mdot_0      =',1p,E12.4)") params%Mdot*params%Mdot_kick_factor
+    write(*,"('# fdot        =',1p,E12.4)") params%Mdot / params%Mdot_crit
     write(*,"('# alpha       =',1p,E12.4)") params%alpha
     write(*,"('# X           =',1p,E12.4)") X
     write(*,"('# Y           =',1p,E12.4)") Y
+    write(*,"('# mu          =',1p,E12.4)") mu
     write(*,"('# t_nu        =',1p,E12.4)") params%t_nu
     write(*,"('# t_T         =',1p,E12.4)") params%t_T
     write(*,"('#****************************************')")

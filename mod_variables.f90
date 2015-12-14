@@ -46,7 +46,7 @@ contains
     Sx            = state_out%S * x_state%x
 
     state_out%v(1:n_cell-1) = - 1._x_precision / Sx(1:n_cell-1) * (nuS(2:n_cell) - nuS(0:n_cell-2)) / (2 * params%dx)
-    state_out%v(n_cell)     = - 1._x_precision / Sx(n_cell) * params%Mdot_kick_factor
+    state_out%v(n_cell)     = - state_out%Mdot(n_cell) / Sx(n_cell)
 
     state_out%Mdot = - state_out%v * Sx
 
@@ -146,9 +146,9 @@ contains
     case default
        stop
     end select
+
   end subroutine dim_adim
 
-  
   function dS_dt(s)
     implicit none
 
@@ -156,12 +156,12 @@ contains
 
     real(x_precision), dimension(n_cell)     :: dS_dt
 
-    real(x_precision), dimension(0:n_cell+1) :: nuS ! two more for beginning / end
+    real(x_precision), dimension(0:n_cell+1) :: nuS   ! Two more for boundary conditions
 
-    ! see BAD-report for explanation of nuS(0) and nuS(n_cell+1)
+    ! See BAD-report for explanation of nuS(0) and nuS(n_cell+1)
     nuS(0)        = 0
     nuS(1:n_cell) = s%nu * s%S
-    nuS(n_cell+1) = params%Mdot_kick_factor * params%dx + nuS(n_cell)
+    nuS(n_cell+1) = s%Mdot(n_cell) * params%dx + nuS(n_cell)
 
     dS_dt = 1._x_precision / x_state%x**2 * &
             (nuS(2:n_cell+1) - 2._x_precision * nuS(1:n_cell) + nuS(0:n_cell-1)) / &

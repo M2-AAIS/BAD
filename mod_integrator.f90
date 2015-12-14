@@ -84,7 +84,7 @@ contains
     diag(n_cell)       = 1._x_precision + s%nu(n_cell) / x2(n_cell) * dtoverdx2
     diag_low(n_cell-1) = - s%nu(n_cell-1) / x2(n_cell) * dtoverdx2
 
-    s%S(n_cell) = s%S(n_cell) + dt * params%Mdot_kick_factor * overdx / x2(n_cell)
+    s%S(n_cell) = s%S(n_cell) + dt * s%Mdot(n_cell) * overdx / x2(n_cell)
 
     ! Solving for S, this does modify s%S directly
     call dgtsv(n_cell, 1, diag_low, diag, diag_up, s%S, n_cell, info)
