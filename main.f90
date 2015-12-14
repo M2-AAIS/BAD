@@ -11,7 +11,7 @@ program black_hole_diffusion
   implicit none
 
   character(len=10)   :: arg
-  integer            :: stp_value = 100000 ! select the stop iteration 
+  integer            :: stp_value = 10000000 ! select the stop iteration 
   !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   !--------------------------- Parameters for s_curve-----------------------
