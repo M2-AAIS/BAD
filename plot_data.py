@@ -12,6 +12,8 @@ from itertools import tee
 parser = argparse.ArgumentParser(description='Plot data from output of the black hole simulation.')
 parser.add_argument('--video', action='store_true',
                     help='save a video (MUCH slower)')
+parser.add_argument('--output', type=str, default='output.dat',
+                    help='The output file (default %(default)s)')
 parser.add_argument('--dont-loop', action='store_false', dest='loop', default=True,
                     help='prevent from looping infinitely')
 parser.add_argument('--video-file', metavar='file', default='evolution.mp4',
@@ -403,7 +405,7 @@ if __name__ == '__main__':
     ic = pd.read_csv('CI.dat', delim_whitespace=True)
     
     print('Reading output file')
-    simulData = Data('output.dat')
+    simulData = Data(args.output)
 
     print('Reading critical points')
     crit_pts = pd.read_csv(args.c_points, delim_whitespace=True)
