@@ -11,6 +11,8 @@ program black_hole_diffusion
   implicit none
 
   character(len=10)                      :: arg
+  integer                                :: stp_value = 50000 ! select the stop iteration 
+  !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   character(len=100)                     :: line
   !--------------------------- Parameters for s_curve-----------------------
@@ -155,7 +157,7 @@ program black_hole_diffusion
 
         if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
-           if (arg == 'load' .and. iteration > n_iterations) then
+           if (arg == 'load' .and. iteration > stp_value) then
               stop
            endif
            print*,'snapshot', iteration, t, 'exp', maxval(s%T - T_c), maxval(s%S - S_c), dt_T
@@ -183,7 +185,7 @@ program black_hole_diffusion
         iteration = iteration + 1
 
         if (mod(iteration, output_freq) == 0 ) then
-           if (arg == 'load' .and. iteration > n_iterations) then
+           if (arg == 'load' .and. iteration > stp_value) then
               stop
            endif
            call snapshot(s, iteration, t, 13)
@@ -211,7 +213,7 @@ program black_hole_diffusion
 
            ! Do a snapshot
            if (mod(iteration, output_freq) == 0) then
-              if (arg == 'load' .and. iteration > n_iterations) then
+              if (arg == 'load' .and. iteration > stp_value) then
                  stop
               endif
               call snapshot(s, iteration, t, 13)
