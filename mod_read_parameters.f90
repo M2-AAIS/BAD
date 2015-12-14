@@ -9,11 +9,11 @@ module mod_read_parameters
   type(adim_state) :: x_state ! Contains the x and Omega tables
   type(dim_state)  :: r_state ! Contains the r and Omega_r tables
   type(state_zero) :: state_0
-  type(state_ci)   :: CI      ! Contains the initial parmaters for Temparature end Sigma
+  type(state_ic)   :: IC      ! Contains the initial parmaters for Temparature end Sigma
 
   private
 
-  public :: get_parameters, params, x_state, r_state, state_0, CI
+  public :: get_parameters, params, x_state, r_state, state_0, IC
 
 contains
 
@@ -115,14 +115,14 @@ contains
     fr     = (r_state%r / 1.e10_x_precision)**(-0.75_x_precision) 
     f10    = (1._x_precision - sqrt(3._x_precision) / x_state%x)**0.1_x_precision
 
-    ! Process T_ci
-    CI%T_ci   = 1.4e4_x_precision * falpha * (fMdot * f10)**3 * fM * fr
+    ! Process initial condition for T
+    IC%T     = 1.4e4_x_precision * falpha * (fMdot * f10)**3 * fM * fr
 
-    ! Process Sig_ci
-    CI%Sig_ci = 5.2_x_precision * falpha**4 * (fMdot * f10)**7 * fM * fr
+    ! Process initial condition for Sigma
+    IC%Sigma = 5.2_x_precision * falpha**4 * (fMdot * f10)**7 * fM * fr
 
-    ! Process H
-    CI%H_ci   = 1.7e8_x_precision * falpha**0.5_x_precision * (fMdot / (fr * fM))**1.5_x_precision * f10**6 
+    ! Process initial condition for H
+    IC%H     = 1.7e8_x_precision * falpha**0.5_x_precision * (fMdot / (fr * fM))**1.5_x_precision * f10**6 
 
     !-----------------------------------------------------------
     !-----------------------------------------------------------

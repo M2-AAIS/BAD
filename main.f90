@@ -52,23 +52,22 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Set the initial conditions for S, T
   !----------------------------------------------
-  s%T = CI%T_ci / state_0%T_0
-  s%S = CI%Sig_ci / state_0%S_0 * x_state%x
-
   open(15, file="CI.dat", status="replace", iostat=ios)
   if (ios /= 0) then
      stop "Error while opening output file."
   end if
  
   ! Save initial conditions
-  write(15, '(7(A16))')'r', 'x', 'T*', 'S*', 'T', 'Sigma', 'H'
+  write(15, '(7(A16))')'r', 'T', 'Sigma', 'H'
 
   do i = 1, n_cell
-     write(15, '(7(e16.6e2))') r_state%r(i), x_state%x(i), s%T(i), s%S(i),&
-                               s%T(i)*state_0%T_0, s%S(i) * state_0%S_0 / x_state%x(i), CI%H_ci(i)
+     write(15, '(7(e16.6e2))') r_state%r(i), IC%T(i), IC%Sigma(i), IC%H(i)
   enddo
 
   close(15)
+
+  s%T = IC%T / state_0%T_0
+  s%S = IC%Sigma / state_0%S_0 * x_state%x
 
   !----------------------------------------------
   ! Do an initial computation of the variables
