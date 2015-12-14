@@ -10,10 +10,11 @@ program black_hole_diffusion
 
   implicit none
 
-  character(len=10)   :: arg
-  integer            :: stp_value = 10000000 ! select the stop iteration 
+  character(len=10)                      :: arg
+  integer                                :: stp_value = 1000000 ! select the stop iteration 
   !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
+  character(len=100)                     :: line
   !--------------------------- Parameters for s_curve-----------------------
   real(x_precision), dimension(n_cell) :: T_c
   real(x_precision), dimension(n_cell) :: Sigma_c
@@ -66,7 +67,6 @@ program black_hole_diffusion
 
   close(15)
 
-
   !-------------------------------------------------------------------
   !--------------------------Process restart--------------------------
   !------------ Select stp_value to stop the firt execute-------------
@@ -76,13 +76,20 @@ program black_hole_diffusion
   if (arg == 'start') then 
      s%T = IC%T / state_0%T_0
      s%S = IC%Sigma / state_0%S_0 * x_state%x
+     ! Initial time = 0
+     t = 0._x_precision
+     ! Start
+     iteration = 0
   elseif (arg == 'restart')then 
     ! call system ("rm tmp.dat")
-     call system ("tail -n 256 output.dat > tmp.dat" )
+     call system ("tail -n 259 output.dat > tmp.dat" )
      open(21, file="tmp.dat", action='read', iostat=ios)
      if (ios /= 0) then
         stop "Error while opening output file."
      end if
+     read(21,*)line, iteration
+     read(21,*)line, t
+     read(21,*)line
      do i = 1, n_cell      
         read(21,*)jnk1(i), s%T(i), jnk3(i), s%s(i)
      end do
@@ -105,15 +112,6 @@ program black_hole_diffusion
   if (ios /= 0) then
      stop "Error while opening output file."
   end if
-
-  !----------------------------------------------
-  ! Initialize t, dt and iteration counter
-  !----------------------------------------------
-  ! Initial time = 0
-  t = 0._x_precision
-
-  ! Start
-  iteration = 0
 
   !----------------------------------------------
   ! Save initial snapshot
