@@ -88,7 +88,6 @@ program black_hole_diffusion
      s%T = s%T / state_0%T_0
      s%S = s%S / state_0%S_0 * x_state%x
      close(21)
-     ! restart iteration FIXEME
   elseif (arg == 'load') then
      s%T = IC%T / state_0%T_0
      s%S = IC%Sigma / state_0%S_0 * x_state%x
