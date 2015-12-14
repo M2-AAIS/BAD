@@ -1,4 +1,4 @@
-! Module of the integrator that transforms the state_in to the state_out
+! Module that do integration of S and T given the current state and timestep.
 
 module mod_integrator
   use mod_constants
@@ -9,56 +9,39 @@ module mod_integrator
   implicit none
   private
 
-  public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp 
+  public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp
 
 contains
-  
+
+  ! Process the right term of dT*/dt*. Simplified case without convection.
   function dT_dt_imp(s)
-  !process the right term of \partial T* / \partial t* = (see Recapitulatif des adimensionenemts in report)
     implicit none
 
     type(state), intent(in) :: s
 
     real(x_precision), dimension(n_cell) :: dT_dt_imp
 
-    ! Second member of the dT/dt equation
+    ! Second member of the dT/dt equation. Simplified case.
     dT_dt_imp = (s%Qplus - s%Qminus) / s%Cv
 
   end function dT_dt_imp
 
+  ! Process the right term of dT*/dt*. Full expression with convection.
   function dT_dt_exp(s)
-    !function to process the right term of dT/dt
-    !return an array corresponding to the right term of dT/dt in each box
     implicit none
 
     type(state), intent(in) :: s
 
     real(x_precision), dimension(n_cell) :: dT_dt_exp
 
-    ! real(x_precision), dimension(n_cell) :: dS_over_dt, dSigma_over_dx, Sigma, dT_over_dx
-
-    ! dS_over_dt = dS_dt(s)
-
-    ! Compute dT/dx as the right spatial derivative
-    ! dT_over_dx(1:n_cell-1) = (s%T(2:n_cell) - s%T(1:n_cell-1)) / params%dx
-    ! dT_over_dx(n_cell)     = 0
-
-    ! Compute d(S/x)/dx as the right spatial derivative
-    ! Sigma = s%S / x_state%x
-
-    ! dSigma_over_dx(1:n_cell-1) = (Sigma(2:n_cell) - Sigma(1:n_cell-1)) / params%dx
-    ! dSigma_over_dx(n_cell)     = - dS_over_dt(n_cell) / s%v(n_cell)
-
-    !right term
-    ! dT_dt_exp = (dT_dt_imp(s) + params%RTM * ( 4._x_precision - 3._x_precision * s%beta ) / s%beta * &
-    !              s%T / s%S * (dS_over_dt + s%v * dSigma_over_dx) - &
-    !              s%Cv * s%v / x_state%x * dT_over_dx) / s%Cv
-
+    ! Second member of the dT/dt equation.
     dT_dt_exp = dT_dt_imp(s) + s%Qadv / s%CV
+
   end function dT_dt_exp
 
+  ! Process the temporal evolution of S with an implicit algorithm.
+  ! For use on the stable part of the simulation.
   subroutine do_timestep_S_imp(s, dt)
-  !process the temporal evolution of S
     implicit none
 
     real(x_precision), intent(in)    :: dt
@@ -90,13 +73,14 @@ contains
     call dgtsv(n_cell, 1, diag_low, diag, diag_up, s%S, n_cell, info)
 
     if (info /= 0) then
-      stop "error in DGTSV call in subroutine do_timestep_S"
+      stop "Error in DGTSV call in subroutine do_timestep_S_imp"
     end if
+
   end subroutine do_timestep_S_imp
 
+  ! Process the temporal evolution of S with an explicit algorithm.
+  ! For use on the instable part of the simulation.
   subroutine do_timestep_S_exp(s, dt)
-    !process the temporal evolution of S with an explicit algorithm
-    !using only on the superior branch of the S curve
     implicit none
 
     real(x_precision), intent(in)    :: dt
@@ -106,8 +90,8 @@ contains
 
   end subroutine do_timestep_S_exp
 
+  ! Process the temporal evolution of T with an explicit algorithm.
   subroutine do_timestep_T(s, dt)
-  !process the temporal evolution of T
     implicit none
 
     real(x_precision), intent(in)    :: dt
@@ -134,7 +118,8 @@ contains
     ! rhs = dt*f0 * (1._x_precision + 0.5_x_precision*dt*fT)
 
     newT = s%T + rhs
-    ! When the minimum value of T is ≤0, reduce the timestep
+
+    ! T should not go negative, if it does we’re in trouble
     if (minval(newT) < 0) then
        print*, 'Convergence problem!'
        do i = 1, n_cell
@@ -143,6 +128,7 @@ contains
        stop
     end if
 
+    ! When the minimum value of T is ≤0, reduce the timestep
     ! do while (minval(newT) < 0)
     !    print*, 'Convergence problem. Reducing dt', dt
     !    dt = dt / 2

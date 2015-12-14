@@ -556,7 +556,7 @@ contains
          call variables(k, T, Smin, f_min, optical_depth, tau_eff)
          call variables(k, T, Smax, f_max, optical_depth, tau_eff)
 
-         Smax = Smax - (f_max * (Smax - Smin)/(f_max - f_min))                     
+         Smax = Smax - (f_max * (Smax - Smin)/(f_max - f_min))
 
          j = j + 1
 

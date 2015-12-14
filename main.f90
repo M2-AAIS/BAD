@@ -56,7 +56,7 @@ program black_hole_diffusion
   if (ios /= 0) then
      stop "Error while opening output file."
   end if
- 
+
   ! Save initial conditions
   write(15, '(7(A16))')'r', 'T', 'Sigma', 'H'
 
@@ -150,7 +150,7 @@ program black_hole_diffusion
 
         ! Take into account the distance to the critical point
         dt_nu = dt_nu * pre_factor(s%S, S_c, dist_crit)
-     
+
         ! Do a single S integration
         prev_S = s%S ! We need to keep the old value for comparison
         call do_timestep_S_imp(s, dt_nu)

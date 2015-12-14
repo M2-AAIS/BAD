@@ -111,7 +111,7 @@ contains
     falpha = params%alpha**(-0.2_x_precision)
     fMdot  = (1.e-1_x_precision * params%Mdot / 1.e16_x_precision)**0.1_x_precision
     fM     = (params%M / M_sun)**0.25_x_precision
-    fr     = (r_state%r / 1.e10_x_precision)**(-0.75_x_precision) 
+    fr     = (r_state%r / 1.e10_x_precision)**(-0.75_x_precision)
     f10    = (1._x_precision - sqrt(3._x_precision) / x_state%x)**0.1_x_precision
 
     ! Process initial condition for T
@@ -121,7 +121,7 @@ contains
     IC%Sigma = 5.2_x_precision * falpha**4 * (fMdot * f10)**7 * fM * fr
 
     ! Process initial condition for H
-    IC%H     = 1.7e8_x_precision * falpha**0.5_x_precision * (fMdot / (fr * fM))**1.5_x_precision * f10**6 
+    IC%H     = 1.7e8_x_precision * falpha**0.5_x_precision * (fMdot / (fr * fM))**1.5_x_precision * f10**6
 
     !-----------------------------------------------------------
     !-----------------------------------------------------------

@@ -54,20 +54,14 @@ contains
     kappa_ff      = 6.13e22_x_precision * state_0%rho_0 * state_out%rho * &
                     (state_0%T_0 * state_out%T)**(-3.5_x_precision)
 
-
     state_out%tau = 0.5_x_precision * sqrt(params%kappa_e * kappa_ff) * (state_0%S_0 * state_out%S / x_state%x)
 
     epsilo        = 6.22e20_x_precision * (state_0%rho_0 * state_out%rho)**2 * sqrt(state_0%T_0 * state_out%T)
 
     ! Compute Fz depending on the optical thickness
-    !FIXME: use code bellow when optically thick
-    ! state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
-    !      sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
-
-    !FIXME: We need to figure why it’s 0.006 and not 1
     where (state_out%tau >= 1)
        state_out%Fz = (2._x_precision * c**2 * x_state%x * state_out%T**4) / (27._x_precision * &
-            sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
+                       sqrt(3._x_precision) * (kappa_ff + params%kappa_e) * state_out%S * state_0%S_0)
     elsewhere
        state_out%Fz = epsilo * state_out%H * state_0%temps_0 / state_0%rho_0
     end where
@@ -100,10 +94,10 @@ contains
     dSigma_over_dx(1:n_cell-1) = (Sigma(2:n_cell) - Sigma(1:n_cell-1)) / params%dx
     dSigma_over_dx(n_cell)     = - dS_over_dt(n_cell) / state_out%v(n_cell)
 
-    !Compute advecting term
-    state_out%Qadv=params%RTM * ( 4._x_precision - 3._x_precision * state_out%beta ) / state_out%beta * &
-                 state_out%T / state_out%S * (dS_over_dt + state_out%v * dSigma_over_dx) - &
-                 state_out%Cv * state_out%v / x_state%x * dT_over_dx 
+    ! Compute advecting term
+    state_out%Qadv = params%RTM * (4._x_precision - 3._x_precision * state_out%beta) / state_out%beta * &
+                     state_out%T / state_out%S * (dS_over_dt + state_out%v * dSigma_over_dx) - &
+                     state_out%Cv * state_out%v / x_state%x * dT_over_dx
 
     !-----------------------
 
