@@ -422,6 +422,11 @@ contains
 
       Fz = 4._x_precision * state_0%H_0 * E_ff * H / (state_0%Omega_0 * state_0%S_0)
 
+   case default
+
+      write(*,*)"Optical depth is not 0 or 1"
+      Fz = 0
+
     end select
 
     Q_plus  = 3._x_precision  * state_0%H_0**2 * nu * (Omega * state_0%Omega_0)**2
@@ -501,5 +506,68 @@ contains
     endif
 
   end function dichotomy
+
+
+
+
+  !-------------------------------------------------------------------------
+  ! secante method  in order to determine the change of sign in a given
+  ! interval [Smin,Smax] with an epsilon precision
+  !-------------------------------------------------------------------------
+  real(x_precision) function secante(k, i, optical_depth)
+    implicit none
+
+    integer, intent(in) :: k ! Position in the disk, to get r/Omega
+    integer, intent(in) :: i ! Iteration counter, to get the temperature
+    integer, intent(in) :: optical_depth
+    !-------------------------------------------------------------------------
+    integer           :: j
+    real(x_precision) :: T ! Temperature used for the secante
+    real(x_precision) :: tau_eff
+    real(x_precision) :: Smin     ! Lowest point
+    real(x_precision) :: Smax     ! Highest point
+    real(x_precision) :: f_min    ! Q+ − Q− at the lowest point
+    real(x_precision) :: f_max    ! Q+ − Q− at the highest point
+    !-------------------------------------------------------------------------
+
+    T = temperature(i)
+
+    Smin     = S_min
+    Smax     = S_max
+
+    j = 0
+
+    call variables(k, T, Smin, f_min, optical_depth, tau_eff)
+
+    call variables(k, T, Smax, f_max, optical_depth, tau_eff)
+
+    if ( f_max * f_min > 0.) then
+
+      secante = 0
+
+    else
+
+      do while (dabs(Smax - Smin) >= eps .and. j < max_it)
+
+         if (j == 0) then
+            Smin = S_min
+
+         else
+            call variables(k, T, Smin, f_min, optical_depth, tau_eff)
+            write(*,*)Smin
+
+            Smin = Smin - (Smax - Smin)/(f_max - f_min) * f_min
+         end if
+
+        j = j + 1
+
+      end do
+
+     secante  = (Smin + Smax)/2._x_precision
+
+    endif
+
+  end function secante
+
 
 end module mod_s_curve
