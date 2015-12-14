@@ -66,9 +66,9 @@ program black_hole_diffusion
   close(15)
 
   !-------------------------------------------------------------------
-  !--------------------------Process restart--------------------------
-  !------------ Select stp_value to stop the firt execute-------------
-  !--Call ./simul start > let the job do until stp_value for iteration
+  !------------------------------Restart------------------------------
+  !---------------------- Select n_iterations-------------------------
+  !------Call ./simul load > let the job do until n_iterations--------
   !-----------------------Call ./simul restart------------------------
   !-------------------------------------------------------------------
   if (arg == 'restart') then  
@@ -94,7 +94,7 @@ program black_hole_diffusion
      ! Start
      iteration = 0
   else
-     print*, 'Unsupported action "', arg, '". Call ./simul [start|restart].'
+     print*, 'Unsupported action "', arg, '". Call ./simul [load|restart].'
      stop
   end if
 
