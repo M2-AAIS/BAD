@@ -94,15 +94,15 @@ contains
     end if
   end subroutine do_timestep_S_imp
 
-  subroutine do_timestep_S_exp(states, dt)
+  subroutine do_timestep_S_exp(s, dt)
     !process the temporal evolution of S with an explicit algorithm
-    !using only on the superior branch of the S curve NOT VERIFIED YET
+    !using only on the superior branch of the S curve
     implicit none
 
     real(x_precision), intent(in)    :: dt
-    type(state),       intent(inout) :: states
+    type(state),       intent(inout) :: s
 
-    states%S = states%S + dt * dS_dt(states)
+    s%S = s%S + dt * dS_dt(s)
 
   end subroutine do_timestep_S_exp
 
