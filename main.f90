@@ -10,6 +10,10 @@ program black_hole_diffusion
 
   implicit none
 
+  character(len=10)   :: arg
+  integer            :: stp_value = 100000 ! select the stop iteration 
+  !  don't kill the job without stp_value
+  real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   !--------------------------- Parameters for s_curve-----------------------
   real(x_precision), parameter         :: eps_in = 1.e-6_x_precision ! Precision required for the dichotomy
   real(x_precision), parameter         :: Tmin   = 10._x_precision**5.3_x_precision
@@ -17,8 +21,8 @@ program black_hole_diffusion
   real(x_precision), parameter         :: Smin   = 10._x_precision**1.0_x_precision
   real(x_precision), parameter         :: Smax   = 10._x_precision**3.5_x_precision
 
-  real(x_precision), dimension(n_cell) :: T_c
-  real(x_precision), dimension(n_cell) :: Sigma_c
+  real(x_precision), dimension(n_cell) :: T_c 
+  real(x_precision), dimension(n_cell) :: Sigma_c 
   real(x_precision), dimension(n_cell) :: S_c
   !-------------------------------------------------------------------------
 
@@ -32,6 +36,8 @@ program black_hole_diffusion
   logical                              :: unstable
 
   real(x_precision), dimension(n_cell) :: dist_crit
+
+  call getarg(1,arg)
 
   !----------------------------------------------
   ! Convergence criteria for S and T
@@ -66,8 +72,23 @@ program black_hole_diffusion
 
   close(15)
 
-  s%T = IC%T / state_0%T_0
-  s%S = IC%Sigma / state_0%S_0 * x_state%x
+  if (arg == 'start') then 
+     s%T = IC%T / state_0%T_0
+     s%S = IC%Sigma / state_0%S_0 * x_state%x
+  elseif (arg == 'restart')then 
+    ! call system ("rm tmp.dat")
+     call system ("tail -n 256 output.dat > tmp.dat" )
+     open(21, file="tmp.dat", action='read', iostat=ios)
+     if (ios /= 0) then
+        stop "Error while opening output file."
+     end if
+     do i = 1, n_cell      
+        read(21,*)jnk1(i), s%T(i), jnk3(i), s%s(i)
+     end do
+     s%T = s%T / state_0%T_0
+     s%S = s%S / state_0%S_0 * x_state%x
+     close(21)
+  endif
 
   !----------------------------------------------
   ! Do an initial computation of the variables
@@ -135,6 +156,9 @@ program black_hole_diffusion
 
         if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
+           if (arg == 'start' .and. iteration > stp_value) then
+              stop
+           endif
            print*,'snapshot', iteration, t, 'exp', maxval(s%T - T_c), maxval(s%S - S_c), dt_T
         end if
 
@@ -160,6 +184,9 @@ program black_hole_diffusion
         iteration = iteration + 1
 
         if (mod(iteration, output_freq) == 0 ) then
+           if (arg == 'start' .and. iteration > stp_value) then
+              stop
+           endif
            call snapshot(s, iteration, t, 13)
            print*,'snapshot', iteration, t, 'S', dt_nu
         end if
@@ -185,6 +212,9 @@ program black_hole_diffusion
 
            ! Do a snapshot
            if (mod(iteration, output_freq) == 0) then
+              if (arg == 'start' .and. iteration > stp_value) then
+                 stop
+              endif
               call snapshot(s, iteration, t, 13)
               print*,'snapshot', iteration, t, 'T', dt_T
            end if
