@@ -87,10 +87,10 @@ contains
     !------------------------------------------------------------------------
     integer                              :: i,k            ! Iteration counters
 
-    ! For variables
+    ! For the variables
     real(x_precision)                    :: f              ! Q+ - Q-
     real(x_precision)                    :: tau_eff        ! Effective optical depth
-    integer                                     :: optical_depth  ! Indicator for the optical thickness
+    integer                              :: optical_depth  ! Indicator for the optical thickness
 
     ! For the separate curves given the thickness
     real(x_precision), dimension(nb_it)  :: sigma_t_thick
@@ -122,12 +122,15 @@ contains
 
         ! S found with the dichotomy approach
         sigma_t_thick(i) = dichotomy(k, i, optical_depth)
+        ! sigma_t_thick(i) = secant(k, i, optical_depth)
 
         ! Optical thin case (tau < 1)
         optical_depth = 0
 
         ! S found with the dichotomy approach
         sigma_t_thin(i)  = dichotomy(k, i, optical_depth)
+        ! sigma_t_thin(i) = secant(k, i, optical_depth)
+
       enddo
 
       ! For the first critical point (the one at the right of the S shape)
@@ -424,8 +427,8 @@ contains
 
    case default
 
-      write(*,*)"Optical depth is not 0 or 1"
-      Fz = 0
+      write(*,*)'Optical depth is not 0 or 1'
+      Fz = 0.
 
     end select
 
@@ -511,23 +514,23 @@ contains
 
 
   !-------------------------------------------------------------------------
-  ! secante method  in order to determine the change of sign in a given
+  ! Secant method in order to determine the change of sign in a given
   ! interval [Smin,Smax] with an epsilon precision
   !-------------------------------------------------------------------------
-  real(x_precision) function secante(k, i, optical_depth)
+  real(x_precision) function secant(k, i, optical_depth)
     implicit none
 
-    integer, intent(in) :: k ! Position in the disk, to get r/Omega
-    integer, intent(in) :: i ! Iteration counter, to get the temperature
-    integer, intent(in) :: optical_depth
+    integer, intent(in) :: k ! Position in the disk (r/Omega)
+    integer, intent(in) :: i ! Iteration counter (Temperature)
+    integer, intent(in) :: optical_depth ! Indicator for the optical thickness
     !-------------------------------------------------------------------------
-    integer           :: j
-    real(x_precision) :: T ! Temperature used for the secante
-    real(x_precision) :: tau_eff
-    real(x_precision) :: Smin     ! Lowest point
-    real(x_precision) :: Smax     ! Highest point
-    real(x_precision) :: f_min    ! Q+ − Q− at the lowest point
-    real(x_precision) :: f_max    ! Q+ − Q− at the highest point
+    integer             :: j
+    real(x_precision)   :: T ! Temperature used for the secant method
+    real(x_precision)   :: tau_eff
+    real(x_precision)   :: Smin     ! Lowest point
+    real(x_precision)   :: Smax     ! Highest point
+    real(x_precision)   :: f_min    ! Q+ − Q− at the lowest point
+    real(x_precision)   :: f_max    ! Q+ − Q− at the highest point
     !-------------------------------------------------------------------------
 
     T = temperature(i)
@@ -543,31 +546,27 @@ contains
 
     if ( f_max * f_min > 0.) then
 
-      secante = 0
+      secant = 0.
 
     else
 
-      do while (dabs(Smax - Smin) >= eps .and. j < max_it)
+      do while (f_max * f_min <= 0.)
 
-         if (j == 0) then
-            Smin = S_min
+         Smax = (Smin + Smax)/2._x_precision
+         call variables(k, T, Smin, f_min, optical_depth, tau_eff)
+         call variables(k, T, Smax, f_max, optical_depth, tau_eff)
 
-         else
-            call variables(k, T, Smin, f_min, optical_depth, tau_eff)
-            write(*,*)Smin
+         Smax = Smax - (f_max * (Smax - Smin)/(f_max - f_min))                     
 
-            Smin = Smin - (Smax - Smin)/(f_max - f_min) * f_min
-         end if
-
-        j = j + 1
+         j = j + 1
 
       end do
 
-     secante  = (Smin + Smax)/2._x_precision
+     secant  = (Smin + Smax)/2._x_precision
 
     endif
 
-  end function secante
+  end function secant
 
 
 end module mod_s_curve
