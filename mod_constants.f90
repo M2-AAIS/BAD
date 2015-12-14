@@ -9,7 +9,7 @@ module mod_constants
   integer, parameter, public :: n_iterations = 10000000               ! Number of iterations to run
   integer, parameter, public :: output_freq  = 8000                   ! Frequency of the outputs
   real(x_precision), parameter, public :: cst_dt_nu = 100._x_precision
-  real(x_precision), parameter, public :: cst_dt_T  = 10000._x_precision
+  real(x_precision), parameter, public :: cst_dt_T  = 100._x_precision
   ! Specific to s_curve
   integer, parameter, public :: nb_it        = 1000                   ! Number of points for the S curve
   integer, parameter, public :: max_it       = 10000000               ! Maximum number of s_curve dichotomy iterations

@@ -47,7 +47,7 @@ program black_hole_diffusion
 
   ! Conversion into S*_crit
   S_c = sigma_c * x_state%x
-  dist_crit = 400. * x_state%x
+  dist_crit = 200. * x_state%x
 
   !----------------------------------------------
   ! Set the initial conditions for S, T
