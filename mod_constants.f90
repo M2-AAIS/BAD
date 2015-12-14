@@ -11,8 +11,13 @@ module mod_constants
   real(x_precision), parameter, public :: cst_dt_nu = 100._x_precision
   real(x_precision), parameter, public :: cst_dt_T  = 100._x_precision
   ! Specific to s_curve
-  integer, parameter, public :: nb_it        = 1000                   ! Number of points for the S curve
-  integer, parameter, public :: max_it       = 10000000               ! Maximum number of s_curve dichotomy iterations
+  integer,           parameter, public :: nb_it  = 1000              ! Number of points for the S curve
+  integer,           parameter, public :: max_it = 10000000          ! Maximum number of s_curve dichotomy iterations
+  real(x_precision), parameter, public :: eps    = 1.e-6_x_precision ! Precision required for the dichotomy
+  real(x_precision), parameter, public :: Tmin   = 10._x_precision**5.3_x_precision
+  real(x_precision), parameter, public :: Tmax   = 10._x_precision**7.4_x_precision
+  real(x_precision), parameter, public :: Smin   = 10._x_precision**1.0_x_precision
+  real(x_precision), parameter, public :: Smax   = 10._x_precision**3.5_x_precision
 
   ! Physical constants
   real(x_precision), parameter, public :: G       = 6.67408e-8_x_precision ! Gravitationnal cst in cgs

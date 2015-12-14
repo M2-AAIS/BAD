@@ -15,14 +15,8 @@ program black_hole_diffusion
   !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   !--------------------------- Parameters for s_curve-----------------------
-  real(x_precision), parameter         :: eps_in = 1.e-6_x_precision ! Precision required for the dichotomy
-  real(x_precision), parameter         :: Tmin   = 10._x_precision**5.3_x_precision
-  real(x_precision), parameter         :: Tmax   = 10._x_precision**7.4_x_precision
-  real(x_precision), parameter         :: Smin   = 10._x_precision**1.0_x_precision
-  real(x_precision), parameter         :: Smax   = 10._x_precision**3.5_x_precision
-
-  real(x_precision), dimension(n_cell) :: T_c 
-  real(x_precision), dimension(n_cell) :: Sigma_c 
+  real(x_precision), dimension(n_cell) :: T_c
+  real(x_precision), dimension(n_cell) :: Sigma_c
   real(x_precision), dimension(n_cell) :: S_c
   !-------------------------------------------------------------------------
 
@@ -47,8 +41,8 @@ program black_hole_diffusion
 
   ! Read the parameters, generate state_0 and create adim state
   call get_parameters()
-  call make_temperature(Tmin / state_0%T_0, Tmax / state_0%T_0)
-  call set_conditions(eps_in, Smin / state_0%S_0, Smax / state_0%S_0)
+  call make_temperature()
+  call set_conditions()
   call curve(T_c, Sigma_c)
 
   ! Conversion into S*_crit

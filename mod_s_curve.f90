@@ -5,7 +5,6 @@ module mod_s_curve
 
   real(x_precision), dimension(nb_it) :: temperature ! Temperatures used for the dichotomy
   real(x_precision), dimension(nb_it) :: temp_real   ! Dimensioned version
-  real(x_precision)                   :: eps         ! Precision required for the dichotomy
   real(x_precision)                   :: S_min       ! Minimum surface density limit
   real(x_precision)                   :: S_max       ! Maximum surface density limit
 
@@ -43,38 +42,35 @@ contains
 
   !-------------------------------------------------------------------------
 
-  subroutine make_temperature(Tmin, Tmax)
+  subroutine make_temperature()
     implicit none
 
-    real(x_precision), intent(in) :: Tmin
-    real(x_precision), intent(in) :: Tmax
-    !------------------------------------------------------------------------
-
+    real(x_precision) :: T_min
+    real(x_precision) :: T_max
     real(x_precision) :: dt
     integer           :: i
 
-    dt = (Tmax - Tmin) / (nb_it - 1)
+    !------------------------------------------------------------------------
+
+    T_min = Tmin / state_0%T_0
+    T_max = Tmax / state_0%T_0
+
+    dt = (T_max - T_min) / (nb_it - 1)
 
     do i = 1, nb_it
-      temperature(i) = dt * (i-1) + Tmin
+      temperature(i) = dt * (i-1) + T_min
     enddo
 
-    temp_real  = temperature * state_0%T_0
+    temp_real = temperature * state_0%T_0
 
   end subroutine make_temperature
 
 
-  subroutine set_conditions(eps_in, Smin, Smax)
+  subroutine set_conditions()
     implicit none
 
-    real(x_precision), intent(in) :: eps_in
-    real(x_precision), intent(in) :: Smin
-    real(x_precision), intent(in) :: Smax
-    !------------------------------------------------------------------------
-
-    eps   = eps_in
-    S_min = Smin
-    S_max = Smax
+    S_min = Smin / state_0%S_0
+    S_max = Smax / state_0%S_0
 
   end subroutine set_conditions
 

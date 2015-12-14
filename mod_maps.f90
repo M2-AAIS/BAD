@@ -15,22 +15,18 @@ module mod_maps
 
 contains
 
-  subroutine set_conditions(nbS, nbT, Tmin, Tmax, Smin, Smax)
+  subroutine set_conditions(nbS, nbT)
     implicit none
 
     integer, intent(in) :: nbS
     integer, intent(in) :: nbT
-    real(x_precision), intent(in) :: Tmin ! Lowest value of Temperature range
-    real(x_precision), intent(in) :: Tmax ! Highest value of Temperature range
-    real(x_precision), intent(in) :: Smin ! Lowest value of Sigma range
-    real(x_precision), intent(in) :: Smax ! Highest value of Sigma range
 
     nb_S = nbS
     nb_T = nbT
-    T_min = Tmin
-    T_max = Tmax
-    S_min = Smin
-    S_max = Smax
+    T_min = Tmin / state_0%T_0
+    T_max = Tmax / state_0%T_0
+    S_min = Smin / state_0%S_0
+    S_max = Smax / state_0%S_0
 
   end subroutine set_conditions
 
@@ -49,6 +45,8 @@ contains
     ! Compute the Temperature and Sigma steps
     dT = (log(T_max) - log(T_min)) / (nb_T - 1)
     dS = (log(S_max) - log(S_min)) / (nb_S - 1)
+
+    s%Mdot(n_cell) = 1._x_precision
 
     do i = 1, nb_T
        s%T = exp(dT * (i-1) + log(T_min))
