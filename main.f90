@@ -72,6 +72,13 @@ program black_hole_diffusion
 
   close(15)
 
+
+  !-------------------------------------------------------------------
+  !--------------------------Process restart--------------------------
+  !------------ Select stp_value to stop the firt execute-------------
+  !--Call ./simul start > let the job do until stp_value for iteration
+  !-----------------------Call ./simul restart------------------------
+  !-------------------------------------------------------------------
   if (arg == 'start') then 
      s%T = IC%T / state_0%T_0
      s%S = IC%Sigma / state_0%S_0 * x_state%x
