@@ -11,7 +11,6 @@ program black_hole_diffusion
   implicit none
 
   character(len=10)                      :: arg
-  !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   character(len=100)                     :: line
   !--------------------------- Parameters for s_curve-----------------------
