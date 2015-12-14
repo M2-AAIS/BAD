@@ -120,6 +120,7 @@ contains
     real(x_precision), dimension(n_cell) :: f0, fT
     real(x_precision)                    :: maxi
     type(state)                          :: s_deriv
+    integer :: i
 
     dtemp     = s%T * 1.e-3_x_precision
     s_deriv   = s
@@ -140,7 +141,9 @@ contains
     if (minval(newT) < 0) then
        converge = .false.
        print*, 'Convergence problem!'
-       print*,newT
+       do i = 1, n_cell
+           print*, i, newT(i)
+       end do
        stop
     end if
 

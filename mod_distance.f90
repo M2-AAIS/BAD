@@ -10,14 +10,15 @@ module mod_distance
 
   contains
 
-    function pre_factor(state_in, S_c, dist_crit)
+    function pre_factor(S, S_c, dist_crit)
       implicit none
-      real(x_precision), dimension(n_cell), intent(in) :: S_c, dist_crit
-      type(state),                          intent(in) :: state_in
+      real(x_precision), dimension(n_cell), intent(in) :: S, S_c, dist_crit
 
-      real(x_precision) :: pre_factor
+      real(x_precision) :: pre_factor, distance
 
-      pre_factor = 1 - (0.99_x_precision*exp(-(minval((S_c - state_in%S) / dist_crit))))
+      distance = maxval((S - S_c)/dist_crit)
+
+      pre_factor = 1 - 0.90_x_precision * exp(distance)
 
     end function pre_factor
 

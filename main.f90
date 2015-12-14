@@ -17,8 +17,8 @@ program black_hole_diffusion
   real(x_precision), parameter         :: Smin   = 10._x_precision**1.0_x_precision
   real(x_precision), parameter         :: Smax   = 10._x_precision**3.5_x_precision
 
-  real(x_precision), dimension(n_cell) :: temperature_c
-  real(x_precision), dimension(n_cell) :: sigma_c
+  real(x_precision), dimension(n_cell) :: T_c
+  real(x_precision), dimension(n_cell) :: Sigma_c
   real(x_precision), dimension(n_cell) :: S_c
   !-------------------------------------------------------------------------
 
@@ -26,12 +26,11 @@ program black_hole_diffusion
   type(state)                          :: s
   real(x_precision)                    :: delta_S_max, delta_T_max, t
   real(x_precision), dimension(n_cell) :: prev_S
-  real(x_precision), dimension(n_cell) :: dt_nu, dt_T
-  real(x_precision)                    :: min_dt_nu, min_dt_T
+  real(x_precision)                    :: dt_nu, dt_T
   logical                              :: T_converged
+  logical                              :: unstable
 
   real(x_precision), dimension(n_cell) :: dist_crit
-  real(x_precision)                    :: dt_pre_factor
 
   !----------------------------------------------
   ! Convergence criteria for S and T
@@ -43,10 +42,10 @@ program black_hole_diffusion
   call get_parameters()
   call make_temperature(Tmin / state_0%T_0, Tmax / state_0%T_0)
   call set_conditions(eps_in, Smin / state_0%S_0, Smax / state_0%S_0)
-  call curve(temperature_c, sigma_c)
+  call curve(T_c, Sigma_c)
 
   ! Conversion into S*_crit
-  S_c = sigma_c * x_state%x
+  S_c = Sigma_c * x_state%x
   dist_crit = 100. * x_state%x
 
   !----------------------------------------------
@@ -74,9 +73,6 @@ program black_hole_diffusion
   !----------------------------------------------
   s%Mdot(n_cell) = 1._x_precision
   call compute_variables(s)
-  call timestep (s, dt_T, dt_nu)
-  min_dt_T = minval(dt_T)
-  min_dt_nu = minval(dt_nu)
 
   !----------------------------------------------
   ! Open file to write output to
@@ -89,18 +85,6 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Initialize t, dt and iteration counter
   !----------------------------------------------
-  t_T  = params%t_T  !* state_0%temps_0
-  t_nu = params%t_nu !*  state_0%temps_0
-
-  ! t_T  = params%t_T  !* state_0%temps_0
-  ! t_nu = params%t_nu !*  state_0%temps_0
-
-  ! dt_nu = t_nu / cst_dt
-  ! dt_T  = t_T / cst_dt
-
-  write(*,*) 'dt_T_min, dt_nu_min:', min_dt_T, min_dt_nu
-  write(*,*) 'dt_T_max, dt_nu_max:', maxval(dt_T), maxval(dt_nu)
-
   ! Initial time = 0
   t = 0._x_precision
 
@@ -113,85 +97,107 @@ program black_hole_diffusion
   call snapshot(s, iteration, t, 13)
 
   !----------------------------------------------
+  ! Compute initial timestep
+  !----------------------------------------------
+  call timestep_T(s, dt_T)
+  call timestep_nu(s, dt_nu)
+  write(*,*) 'dt_T_init, dt_nu_init:', dt_T, dt_nu
+
+  !----------------------------------------------
   ! Start iterations
   !----------------------------------------------
   do while (iteration < n_iterations)
-     prev_S = s%S
-     
-     ! Check that we are not close to S_critical
-     if (1. - maxval(s%S/S_c) < 1.e-2) then
-        call do_timestep_S_exp(s, min_dt_T)
-        call do_timestep_T(s, min_dt_T, T_converged, delta_T_max)
-        t = t + min_dt_T
+
+     !--------------------------------------------
+     ! Check if any point is in the unstable area
+     !--------------------------------------------
+
+     ! If some point is above is critical temperature…
+     if (maxval(s%T - T_c) < 0) then
+       ! …or right from is critical S…
+       unstable = maxval(s%S - S_c) > 0
+     else
+       ! …then we’re unstable.
+       unstable = .true.
+     end if
+
+     if (unstable) then
+
+        ! Do an explicit integration of both S and T over a thermic timestep
+        call timestep_T(s, dt_T)
+        call do_timestep_S_exp(s, dt_T)
+        call do_timestep_T(s, dt_T, T_converged, delta_T_max)
+
+        ! Increase time, increment number of iterations
+        t = t + dt_T
+        iteration = iteration + 1
 
         if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
-           print*,'snapshot', iteration, t, 'exp', 1 - maxval(s%S/S_c), 1 - minval(s%S/S_c),&
-                min_dt_T, dt_pre_factor
+           print*,'snapshot', iteration, t, 'exp', maxval(s%T - T_c), maxval(s%S - S_c), dt_T
         end if
-        iteration = iteration + 1
 
-        ! Switch to explicit scheme
      else
+
+        ! Integrate S, then integrate T until we’re back on the curve
+
         !----------------------------------------------
         ! S integration
         !----------------------------------------------
 
-        ! Do a single S integration
-        call do_timestep_S_imp(s, min_dt_nu)
+        call timestep_nu(s, dt_nu)
 
-        ! Update time, number of iterations
-        t = t + min_dt_nu
+        ! Take into account the distance to the critical point
+        dt_nu = dt_nu * pre_factor(s%S, S_c, dist_crit)
+     
+        ! Do a single S integration
+        prev_S = s%S ! We need to keep the old value for comparison
+        call do_timestep_S_imp(s, dt_nu)
+
+        ! Increase time, increment number of iterations
+        t = t + dt_nu
         iteration = iteration + 1
 
-        ! Do a snapshot
         if (mod(iteration, output_freq) == 0 ) then
            call snapshot(s, iteration, t, 13)
-           print*,'snapshot', iteration, t
+           print*,'snapshot', iteration, t, 'S', dt_nu
         end if
 
         !----------------------------------------------
         ! T integrations
-        ! iterate while t hasn't converged
+        ! Iterate while T hasn't converged
         !----------------------------------------------
         T_converged = .false.
         do while (.not. T_converged)
-           ! Recompute the dt pre factor
-           dt_pre_factor = pre_factor(s, S_c, dist_crit)
-
            ! Do a single T integration
-           call do_timestep_T(s, min_dt_T, T_converged, delta_T_max)
+           call timestep_T(s, dt_T)
+           call do_timestep_T(s, dt_T, T_converged, delta_T_max)
 
-           ! Increment time, number of iterations
-           t = t + min_dt_T
+           ! Increase time, increment number of iterations
+           t = t + dt_T
            iteration = iteration + 1
 
            ! Do a snapshot
-           if (mod(iteration, output_freq) == 0) then ! .or. iteration > 144000) then
+           if (mod(iteration, output_freq) == 0) then
               call snapshot(s, iteration, t, 13)
-              print*,'snapshot', iteration, t, 'T', min_dt_T, dt_pre_factor
+              print*,'snapshot', iteration, t, 'T', dt_T
            end if
         end do
 
-     end if
-
-     !----------------------------------------------
-     ! Mdot kick
-     ! increase Mdot at the boundaries if S is stalled
-     !----------------------------------------------
-     if (maxval(abs((prev_S - s%S)/s%S)) / min_dt_T < delta_S_max) then
+        !----------------------------------------------
         ! Mdot kick
-        s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
-        print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
-        iteration = iteration + 1
+        ! Increase Mdot at r_max if S is stalled
+        !----------------------------------------------
+        if (maxval(abs((prev_S - s%S)/s%S)) / dt_nu < delta_S_max) then
+           s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
+           print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
+        end if
+
      end if
 
      ! Recompute variables when the system is stable
      call compute_variables(s)
-     call timestep (s, dt_T, dt_nu)
-     dt_pre_factor = pre_factor(s, S_c, dist_crit)
-     min_dt_T = minval(dt_T) * dt_pre_factor
-     min_dt_nu = minval(dt_nu) * dt_pre_factor
+
   end do
 
   close(13)
