@@ -33,6 +33,7 @@ contains
                                  !'nu', &
                                  !'v', &
                                  'T', &
+                                 'M_dot', &
                                  !'P_rad', &
                                  !'P_gas', &
                                  !'beta', &
@@ -43,7 +44,6 @@ contains
                                  'Sigma', &
                                  'tau', &
                                  !'Fz', &
-                                 'M_dot', &
                                  'Cv', &
                                  'Q_+', &
                                  'Q_-', &
@@ -60,6 +60,7 @@ contains
                                         !state_dim%nu(i), &
                                         !state_dim%v(i), &
                                         state_dim%T(i), &
+                                        state_dim%Mdot(i), &
                                         !state_dim%Prad(i), &
                                         !state_dim%Pgaz(i), &
                                         !state_dim%beta(i), &
@@ -70,7 +71,6 @@ contains
                                         state_dim%S(i) / x_state%x(i), &
                                         s%tau(i), &
                                         !state_dim%Fz(i), &
-                                        state_dim%Mdot(i), &
                                         state_dim%Cv(i), &
                                         s%Qplus(i), &
                                         s%Qminus(i), &

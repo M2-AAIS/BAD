@@ -32,7 +32,7 @@ program black_hole_diffusion
 
   real(x_precision), dimension(n_cell) :: dist_crit
 
-  call getarg(1,arg)
+  call getarg(1, arg)
 
   !----------------------------------------------
   ! Convergence criteria for S and T
@@ -74,8 +74,9 @@ program black_hole_diffusion
   !-----------------------Call ./simul restart------------------------
   !-------------------------------------------------------------------
   if (arg == 'restart') then  
-     call system ("tail -n 259 output.dat > restart.dat" )
+     call system ("tail -n 259 output.dat > restart.dat")
      open(21, file="restart.dat", action='read', iostat=ios)
+     
      if (ios /= 0) then
         stop "Error while opening output file."
      end if
@@ -83,10 +84,11 @@ program black_hole_diffusion
      read(21,*)line, t
      read(21,*)line
      do i = 1, n_cell      
-        read(21,*)jnk1(i), s%T(i), jnk3(i), s%s(i)
+        read(21,*)jnk1(i), s%T(i), s%Mdot(i), jnk3(i), s%s(i)
      end do
      s%T = s%T / state_0%T_0
      s%S = s%S / state_0%S_0 * x_state%x
+     s%Mdot = s%Mdot / state_0%Mdot_0
      close(21)
   elseif (arg == 'load') then
      s%T = IC%T / state_0%T_0
@@ -103,7 +105,6 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Do an initial computation of the variables
   !----------------------------------------------
-  s%Mdot(n_cell) = 1._x_precision
   call compute_variables(s)
 
   !----------------------------------------------
@@ -228,6 +229,10 @@ program black_hole_diffusion
         !----------------------------------------------
         ! Mdot kick
         ! Increase Mdot at r_max if S is stalled
+        !
+        ! the convergence parameter is the maximum relative variation of
+        ! s. We give a kick when it's below a constant.
+        ! Since it depends linearly on the time, we take it into account
         !----------------------------------------------
         if (maxval(abs(prev_S - s%S)/s%S) / dt_nu < delta_S_max) then
            s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
