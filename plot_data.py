@@ -304,9 +304,10 @@ def init(ic, crit_pts, s_curves, initial_data):
         ax21.set_ylabel('$Q$')
     else:
         ax21.set_ylabel('$\dot{M}\ (\mathrm{g.s^{-1}})$')
+        ax21.set_yscale('log')
+        ax21.set_ylim(1e15, 1e18)
+
     ax21.grid()
-    ax21.set_yscale('log')
-    ax21.set_ylim(1e15, 1e18)
 
     #######################################################################
     #  Bottom right panel
