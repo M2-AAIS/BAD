@@ -110,7 +110,7 @@ contains
     call compute_variables(s_deriv)
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
 
-    f0 = dT_dt_imp(s)
+    f0 = dT_dt_exp(s)
     fT = (dT_dt_exp(s_deriv) - f0) / dtemp
 
     rhs = f0 / fT * (exp(fT*dt) - 1._x_precision)
