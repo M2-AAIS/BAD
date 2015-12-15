@@ -161,6 +161,7 @@ program black_hole_diffusion
 
         ! Do an explicit integration of both S and T over a thermic timestep
         call timestep_T(s, dt_T)
+        dt_T = 0.01_x_precision * dt_T
         call do_timestep_S_exp(s, dt_T)
         call do_timestep_T(s, dt_T)
 
