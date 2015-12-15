@@ -21,14 +21,14 @@ program black_hole_diffusion
   real(x_precision), dimension(n_cell) :: S_c
   !-------------------------------------------------------------------------
 
-  integer                              :: iteration, ios, i
+  integer                              :: iteration, ios, i, T_steps
   type(state)                          :: s
   real(x_precision), dimension(n_cell) :: prev_S, prev_T
-  real(x_precision)                    :: delta_S_max, delta_T_max
+  real(x_precision)                    :: delta_S_max, delta_T_max, S_rel_diff
   real(x_precision)                    :: t
-  real(x_precision)                    :: dt_nu, dt_T
+  real(x_precision)                    :: dt_nu, dt_T, pf
   logical                              :: T_converged
-  logical                              :: unstable
+  logical                              :: unstable, wasunstable
 
   real(x_precision), dimension(n_cell) :: dist_crit
 
@@ -137,9 +137,10 @@ program black_hole_diffusion
      ! Check if any point is in the unstable area
      !--------------------------------------------
 
+     wasunstable = unstable
      ! If some point is above is critical temperature…
      if (maxval(s%T - T_c) < 0) then
-       ! …or right from is critical S…
+       ! …or right from its critical S…
        unstable = maxval(s%S - S_c) > 0
      else
        ! …then we’re unstable.
@@ -147,6 +148,12 @@ program black_hole_diffusion
      end if
 
      if (unstable) then
+        if (.not. wasunstable) then
+           print*, 'Switched to explicit mode!'
+           s%Mdot(n_cell) = s%Mdot(n_cell) / 4._x_precision
+           print*, 'Mdot un-kick! un-YOLOOOOO', s%Mdot(n_cell)           
+        end if
+           
 
         ! Do an explicit integration of both S and T over a thermic timestep
         call timestep_T(s, dt_T)
@@ -166,6 +173,9 @@ program black_hole_diffusion
         end if
 
      else
+        if (wasunstable) then
+           print*, 'Switched to implicit mode!'
+        end if
 
         ! Integrate S, then integrate T until we’re back on the curve
 
@@ -176,7 +186,8 @@ program black_hole_diffusion
         call timestep_nu(s, dt_nu)
 
         ! Take into account the distance to the critical point
-        dt_nu = dt_nu * pre_factor(s%S, S_c, dist_crit)
+        pf =  pre_factor(s%S, S_c, dist_crit)
+        dt_nu = dt_nu * pf
 
         ! Do a single S integration
         prev_S = s%S ! We need to keep the old value for comparison
@@ -191,7 +202,7 @@ program black_hole_diffusion
               stop
            endif
            call snapshot(s, iteration, t, 13)
-           print*,'snapshot', iteration, t, 'S', dt_nu
+           print*,'snapshot', iteration, t, 'S', dt_nu, dt_T, pf
         end if
 
         !----------------------------------------------
@@ -201,8 +212,13 @@ program black_hole_diffusion
 
         T_converged = .false.
 
+        
+        t_steps = 0
         do while (.not. T_converged)
-
+           t_steps = t_steps + 1
+           if (t_steps >= 20 .and. mod(t_steps, 20) == 0) then
+              print*, 'W: T is taking time to converge, already', t_steps, 'iterations'
+           end if
            call timestep_T(s, dt_T)
 
            ! Do a single T integration
@@ -219,11 +235,11 @@ program black_hole_diffusion
                  stop
               endif
               call snapshot(s, iteration, t, 13)
-              print*,'snapshot', iteration, t, 'T', dt_T
+              print*,'snapshot', iteration, t, 'T', dt_nu, dt_T, pf
            end if
 
            ! Check if T converged everywhere
-           T_converged = maxval(abs(prev_T - s%T)/s%T) < delta_T_max
+           T_converged = maxval(abs(prev_T - s%T)/s%T) / dt_T < delta_T_max
 
         end do
 
@@ -235,9 +251,12 @@ program black_hole_diffusion
         ! s. We give a kick when it's below a constant.
         ! Since it depends linearly on the time, we take it into account
         !----------------------------------------------
-        if (maxval(abs(prev_S - s%S)/s%S) / dt_nu < delta_S_max) then
+        S_rel_diff = maxval(dabs(prev_S - s%S) / s%S / dt_nu)
+        if (S_rel_diff < delta_S_max) then
            s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
            print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
+        else
+           ! print*, S_rel_diff
         end if
 
      end if

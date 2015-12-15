@@ -18,7 +18,13 @@ module mod_distance
 
       distance = maxval((S - S_c)/dist_crit)
 
-      pre_factor = 1 - 0.90_x_precision * exp(distance)
+      pre_factor = 1._x_precision - 0.90_x_precision * exp(distance)
+
+      if (pre_factor > 1.) then
+         print*, 'W: pre_factor is greater than unity'
+      else if (pre_factor < .1) then
+         print*, 'W: pre_factor is lower than 0.1'
+      end if
 
     end function pre_factor
 
