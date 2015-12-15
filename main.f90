@@ -286,7 +286,7 @@ program black_hole_diffusion
            ! - - - - - - - - - - - - - - - - - - - - - - -
            if (S_rel_diff_max < delta_S_max) then
               s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
-              print*, 'Converged lately!'
+              print*, 'Converged totally!'
               print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell), S_steps
            else
               mean = S_rel_diff / mean_size + &
