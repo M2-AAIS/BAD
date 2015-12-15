@@ -40,8 +40,10 @@ if __name__ == '__main__':
 
     #fig, ax = plt.subplots()
 
-    for element in ({'data': Q, 'title': 'Q^+ - Q^-', 'threshold': 5e13},
-                    {'data': tau, 'title': '\\tau', 'threshold': 1e-5}):
+    for element in ({'data': Q, 'title': 'Q^+ - Q^-', 'threshold': 5e13,
+                     'data unit': 'Chauffage spécifique ($erg.g^{-1}s^{-1}$)'},
+                    {'data': tau, 'title': '\\tau', 'threshold': 1e-5,
+                     'data unit': 'Profondeur optique'}):
         plt.figure()
         plt.title(u"${}$".format(element['title']))
         plt.xscale('log')
@@ -52,8 +54,10 @@ if __name__ == '__main__':
         plt.clabel(CStau, inline=1, fontsize=10)
         plt.imshow(element['data'], interpolation='none', cmap='viridis', extent=extents, aspect='auto',
                    norm=matplotlib.colors.SymLogNorm(element['threshold']))
-        plt.colorbar()
-        plt.xlabel('$\Sigma$')
-        plt.ylabel('$T$')
+        plt.colorbar(label=element['data unit'])
+        plt.xlabel('$\Sigma$ ($g.cm^{-2}$)')
+        plt.ylabel('$T$ ($K$)')
+
+        plt.tight_layout()
 
     plt.show()
