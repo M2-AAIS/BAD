@@ -11,7 +11,7 @@ program black_hole_diffusion
   implicit none
 
   character(len=10)                      :: arg
-  integer                                :: stp_value = 500000 ! select the stop iteration 
+  integer                                :: stp_value = 500000 ! select the stop iteration
   !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   character(len=100)                     :: line
@@ -80,14 +80,14 @@ program black_hole_diffusion
         call system ("cp output.dat output.dat.prev")
      end if
      open(21, file="restart.dat", action='read', iostat=ios)
-     
+
      if (ios /= 0) then
         stop "Error while opening output file."
      end if
      read(21,*)line, iteration
      read(21,*)line, t
      read(21,*)line
-     do i = 1, n_cell      
+     do i = 1, n_cell
         read(21,*)jnk1(i), s%T(i), s%Mdot(i), jnk3(i), s%s(i)
      end do
      s%T = s%T / state_0%T_0
@@ -155,9 +155,8 @@ program black_hole_diffusion
         if (.not. wasunstable) then
            print*, 'Switched to explicit mode!'
            s%Mdot(n_cell) = s%Mdot(n_cell) / 4._x_precision
-           print*, 'Mdot un-kick! un-YOLOOOOO', s%Mdot(n_cell)           
+           print*, 'Mdot un-kick! un-YOLOOOOO', s%Mdot(n_cell)
         end if
-           
 
         ! Do an explicit integration of both S and T over a thermic timestep
         call timestep_T(s, dt_T)
@@ -217,14 +216,14 @@ program black_hole_diffusion
 
         T_converged = .false.
 
-        call compute_variables(s)
-        
         t_steps = 0
         do while (.not. T_converged)
            t_steps = t_steps + 1
            if (t_steps >= 20 .and. mod(t_steps, 20) == 0) then
               print*, 'W: T is taking time to converge, already', t_steps, 'iterations'
            end if
+
+           call compute_variables(s)
            call timestep_T(s, dt_T)
 
            ! Do a single T integration

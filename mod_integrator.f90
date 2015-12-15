@@ -108,7 +108,6 @@ contains
     s_deriv%T = s%T + dtemp
 
     call compute_variables(s_deriv)
-    call compute_variables(s)
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
 
     f0 = dT_dt_imp(s)
