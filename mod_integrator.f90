@@ -98,44 +98,20 @@ contains
     type(state),       intent(inout) :: s
 
 
-    real(x_precision), dimension(n_cell) :: dtemp, rhs, newT
+    real(x_precision), dimension(n_cell) :: dtemp
     real(x_precision), dimension(n_cell) :: f0, fT
     type(state)                          :: s_deriv
-    integer :: i
 
     dtemp     = s%T * 1.e-3_x_precision
     s_deriv   = s
     s_deriv%T = s%T + dtemp
 
     call compute_variables(s_deriv)
-    ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
 
     f0 = dT_dt_exp(s)
     fT = (dT_dt_exp(s_deriv) - f0) / dtemp
 
-    rhs = f0 / fT * (exp(fT*dt) - 1._x_precision)
-    ! rhs = dt*f0 * (1._x_precision + 0.5_x_precision*dt*fT)
-
-    newT = s%T + rhs
-
-    ! T should not go negative, if it does we’re in trouble
-    if (minval(newT) < 0) then
-       print*, 'Convergence problem!'
-       do i = 1, n_cell
-           print*, i, newT(i)
-       end do
-       stop
-    end if
-
-    ! When the minimum value of T is ≤0, reduce the timestep
-    ! do while (minval(newT) < 0)
-    !    print*, 'Convergence problem. Reducing dt', dt
-    !    dt = dt / 2
-    !    rhs = f0 / fT * (exp(fT*dt) - 1)
-    !    newT = s%T + rhs
-    ! end do
-
-    s%T = newT
+    s%T = s%T + f0 / fT * (exp(fT*dt) - 1._x_precision)
 
   end subroutine do_timestep_T
 

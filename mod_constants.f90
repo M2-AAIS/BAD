@@ -6,9 +6,9 @@ module mod_constants
   integer, parameter, public :: x_precision  = selected_real_kind(15) ! Numerical precision
   integer, parameter, public :: n_cell       = 256                    ! Number of cells along the disk radius
   ! Specific to main program
-  integer, parameter, public :: n_iterations = 10000000               ! Number of iterations to run
+  integer, parameter, public :: n_iterations = 20000000               ! Number of iterations to run
   integer, parameter, public :: output_freq  = 8000                   ! Frequency of the outputs
-  integer, parameter, public :: mean_size   = 100                      ! When doing means for S evolution, length of the history
+  integer, parameter, public :: mean_size    = 100                    ! When doing means for S evolution, length of the history
   real(x_precision), parameter, public :: cst_dt_nu = 100._x_precision
   real(x_precision), parameter, public :: cst_dt_T  = 1000._x_precision
   ! Specific to s_curve
