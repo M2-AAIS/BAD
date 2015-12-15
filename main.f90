@@ -21,10 +21,10 @@ program black_hole_diffusion
   real(x_precision), dimension(n_cell) :: S_c
   !-------------------------------------------------------------------------
 
-  integer                              :: iteration, ios, i, T_steps
+  integer                              :: start_iteration, iteration, ios, i, T_steps, S_steps
   type(state)                          :: s
-  real(x_precision), dimension(n_cell) :: prev_S, prev_T
-  real(x_precision)                    :: delta_S_max, delta_T_max, S_rel_diff
+  real(x_precision), dimension(n_cell) :: prev_S, prev_T, S_rel_diff
+  real(x_precision)                    :: delta_S_max, delta_T_max, S_rel_diff_max
   real(x_precision)                    :: t
   real(x_precision)                    :: dt_nu, dt_T, pf
   integer :: p
@@ -86,7 +86,7 @@ program black_hole_diffusion
      if (ios /= 0) then
         stop "Error while opening output file."
      end if
-     read(21,*)line, iteration
+     read(21,*)line, start_iteration
      read(21,*)line, t
      read(21,*)line
      do i = 1, n_cell
@@ -96,6 +96,7 @@ program black_hole_diffusion
      s%S = s%S / state_0%S_0 * x_state%x
      s%Mdot = s%Mdot / state_0%Mdot_0
      close(21)
+
      if (maxval(s%T - T_c) < 0) then
        ! …or right from its critical S…
        unstable = maxval(s%S - S_c) > 0
@@ -104,12 +105,15 @@ program black_hole_diffusion
        unstable = .true.
      end if
 
+     iteration = start_iteration
+
   elseif (arg == 'start') then
      s%T = IC%T / state_0%T_0
      s%S = IC%Sigma / state_0%S_0 * x_state%x
      ! Initial time = 0
      t = 0._x_precision
      ! Start
+     start_iteration = 0
      iteration = 0
      unstable = .false.
      s%Mdot(n_cell) = 1._x_precision
@@ -180,7 +184,8 @@ program black_hole_diffusion
 
         if (mod(iteration, output_freq) == 0) then
            call snapshot(s, iteration, t, 13)
-           if (arg == 'load' .and. iteration > stp_value) then
+           if ((arg == 'load' .or. arg == 'restart') &
+                .and. iteration-start_iteration > stp_value) then
               stop
            endif
            print*,'snapshot', iteration, t, 'exp', maxval(s%T - T_c), maxval(s%S - S_c), dt_T
@@ -215,7 +220,8 @@ program black_hole_diffusion
         iteration = iteration + 1
 
         if (mod(iteration, output_freq) == 0 ) then
-           if (arg == 'load' .and. iteration > stp_value) then
+           if ((arg == 'load' .or. arg == 'restart') &
+                .and. iteration-start_iteration > stp_value) then
               stop
            endif
            call snapshot(s, iteration, t, 13)
@@ -229,11 +235,13 @@ program black_hole_diffusion
 
         T_converged = .false.
 
-        t_steps = 0
+        call compute_variables(s)
+        
+        T_steps = 0
         do while (.not. T_converged)
-           t_steps = t_steps + 1
-           if (t_steps >= 20 .and. mod(t_steps, 20) == 0) then
-              print*, 'W: T is taking time to converge, already', t_steps, 'iterations'
+           T_steps = T_steps + 1
+           if (T_steps >= 20 .and. mod(T_steps, 20) == 0) then
+              print*, 'W: T is taking time to converge, already', T_steps, 'iterations'
            end if
 
            call compute_variables(s)
@@ -249,7 +257,8 @@ program black_hole_diffusion
 
            ! Do a snapshot
            if (mod(iteration, output_freq) == 0) then
-              if (arg == 'load' .and. iteration > stp_value) then
+              if ((arg == 'load' .or. arg == 'restart') &
+                   .and. iteration-start_iteration > stp_value) then
                  stop
               endif
               call snapshot(s, iteration, t, 13)
