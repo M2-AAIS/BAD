@@ -73,8 +73,12 @@ program black_hole_diffusion
   !------Call ./simul load > let the job do until n_iterations--------
   !-----------------------Call ./simul restart------------------------
   !-------------------------------------------------------------------
-  if (arg == 'restart') then  
-     call system ("tail -n 259 output.dat > restart.dat")
+  if (arg == 'restart' .or. arg == 'load') then
+     if (arg == 'restart') then
+        print*, 'Creating restart file and saving old output file to output.dat.prev'
+        call system ("tail -n 259 output.dat > restart.dat")
+        call system ("cp output.dat output.dat.prev")
+     end if
      open(21, file="restart.dat", action='read', iostat=ios)
      
      if (ios /= 0) then
@@ -90,16 +94,16 @@ program black_hole_diffusion
      s%S = s%S / state_0%S_0 * x_state%x
      s%Mdot = s%Mdot / state_0%Mdot_0
      close(21)
-  elseif (arg == 'load') then
+  elseif (arg == 'start') then
      s%T = IC%T / state_0%T_0
      s%S = IC%Sigma / state_0%S_0 * x_state%x
-     s%Mdot(n_cell) = 1._x_precision
      ! Initial time = 0
      t = 0._x_precision
      ! Start
      iteration = 0
+     s%Mdot(n_cell) = 1._x_precision
   else
-     print*, 'Unsupported action "', arg, '". Call ./simul [load|restart].'
+     print*, 'Unsupported action "', arg, '". Call ./simul [start|load|restart].'
      stop
   end if
 
