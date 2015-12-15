@@ -34,7 +34,7 @@ program black_hole_diffusion
   real(x_precision), dimension(n_cell) :: dist_crit
 
   call getarg(1, arg)
-  mean       = 0._x_precision
+  mean        = 0._x_precision
   !----------------------------------------------
   ! Convergence criteria for S and T
   !----------------------------------------------
@@ -288,6 +288,7 @@ program black_hole_diffusion
               s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
               print*, 'Converged totally!'
               print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell), S_steps
+              mean = 0._x_precision
            else
               mean = S_rel_diff / mean_size + &
                    (mean_size - 1._x_precision) / mean_size * mean
@@ -296,6 +297,7 @@ program black_hole_diffusion
                  s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
                  print*, 'Converged in mean!', maxval(abs(mean)), S_rel_diff_max
                  print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
+                 mean = 0._x_precision
               else
                  if (mod(iteration, output_freq) < 10) then
                     print*, maxval(abs(mean)), S_rel_diff_max
