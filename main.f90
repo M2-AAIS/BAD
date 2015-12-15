@@ -194,7 +194,7 @@ program black_hole_diffusion
         S_steps = S_steps + 1 
         if (wasunstable) then
            print*, 'Switched back to implicit mode!'
-           s%Mdot(n_cell) = 1._x_precision
+           s%Mdot(n_cell) = s%Mdot(n_cell) / 2._x_precision
            print*, 'Mdot un-kick! un-YOLOOOOO', s%Mdot(n_cell)
         end if
 
@@ -285,7 +285,7 @@ program black_hole_diffusion
            ! close to the convergence
            ! - - - - - - - - - - - - - - - - - - - - - - -
            if (S_rel_diff_max < delta_S_max) then
-              s%Mdot(n_cell) = s%Mdot(n_cell) * 1.1_x_precision
+              s%Mdot(n_cell) = s%Mdot(n_cell) * 1.05_x_precision
               print*, 'Converged totally!'
               print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell), S_steps
               mean = 0._x_precision
@@ -294,7 +294,7 @@ program black_hole_diffusion
                    (mean_size - 1._x_precision) / mean_size * mean
               
               if (maxval(abs(mean)) < delta_S_max) then
-                 s%Mdot(n_cell) = s%Mdot(n_cell) * 1.1_x_precision
+                 s%Mdot(n_cell) = s%Mdot(n_cell) * 1.05_x_precision
                  print*, 'Converged in mean!', maxval(abs(mean)), S_rel_diff_max
                  print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
                  mean = 0._x_precision
