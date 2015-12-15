@@ -101,6 +101,7 @@ program black_hole_diffusion
      t = 0._x_precision
      ! Start
      iteration = 0
+     wasunstable = .false.
      s%Mdot(n_cell) = 1._x_precision
   else
      print*, 'Unsupported action "', arg, '". Call ./simul [start|load|restart].'
@@ -154,8 +155,6 @@ program black_hole_diffusion
      if (unstable) then
         if (.not. wasunstable) then
            print*, 'Switched to explicit mode!'
-           s%Mdot(n_cell) = s%Mdot(n_cell) / 4._x_precision
-           print*, 'Mdot un-kick! un-YOLOOOOO', s%Mdot(n_cell)
         end if
 
         ! Do an explicit integration of both S and T over a thermic timestep
@@ -178,7 +177,9 @@ program black_hole_diffusion
 
      else
         if (wasunstable) then
-           print*, 'Switched to implicit mode!'
+           print*, 'Switched back to implicit mode!'
+           s%Mdot(n_cell) = s%Mdot(n_cell) / 4._x_precision
+           print*, 'Mdot un-kick! un-YOLOOOOO', s%Mdot(n_cell)
         end if
 
         ! Integrate S, then integrate T until we’re back on the curve
