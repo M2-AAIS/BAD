@@ -212,6 +212,7 @@ program black_hole_diffusion
 
         T_converged = .false.
 
+        call compute_variables(s)
         
         t_steps = 0
         do while (.not. T_converged)
