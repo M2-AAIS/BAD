@@ -117,15 +117,19 @@ contains
         optical_depth = 1
 
         ! S found with the dichotomy approach
+        ! sigma_t_thick(i) = brent(k, i, optical_depth) ! for some unknown reason, it doesn't work if
+        ! we activate brent only here…
         sigma_t_thick(i) = dichotomy(k, i, optical_depth)
+
         ! sigma_t_thick(i) = secant(k, i, optical_depth)
 
         ! Optical thin case (tau < 1)
         optical_depth = 0
 
-        ! S found with the dichotomy approach
-        sigma_t_thin(i)  = dichotomy(k, i, optical_depth)
+        ! S found with the brent approach
+        ! sigma_t_thin(i)  = dichotomy(k, i, optical_depth)
         ! sigma_t_thin(i) = secant(k, i, optical_depth)
+        sigma_t_thin(i) = brent(k, i, optical_depth)
 
       enddo
 
@@ -501,12 +505,117 @@ contains
       end do
 
       dichotomy = S_center
-
     endif
-
   end function dichotomy
 
+  !-------------------------------------------------------------------------
+  ! Brent method in order to determine the change of sign in a given
+  ! interval [Smin,Smax] with an epsilon precision
+  !-------------------------------------------------------------------------
+  real(x_precision) function brent(k, i, optical_depth)
+    implicit none
 
+    integer, intent(in) :: k ! Position in the disk (r/Omega)
+    integer, intent(in) :: i ! Iteration counter (Temperature)
+    integer, intent(in) :: optical_depth ! Indicator for the optical thickness
+
+    real(x_precision) :: T     ! temperature
+    real(x_precision) :: tau_eff    
+    real(x_precision) :: a     ! contrapoint (on the other side of the curve)
+    real(x_precision) :: b     ! Current guess for the root
+    real(x_precision) :: c
+    real(x_precision) :: d
+    real(x_precision) :: s     ! provisional value for the secand / the bisection method
+    real(x_precision) :: fa    ! Q+ − Q− at the lowest point
+    real(x_precision) :: fb    ! Q+ − Q− at the highest point
+    real(x_precision) :: fc, fs
+    real(x_precision) :: delta ! tolerance for convergence
+
+    real(x_precision) :: tmp
+    integer :: j
+
+    logical :: mflag
+    
+    delta = 10_x_precision*eps
+    T = temperature(i)
+
+    a = S_min
+    b = S_max
+    call variables(k, T, a, fa, optical_depth, tau_eff)
+    call variables(k, T, b, fb, optical_depth, tau_eff)
+
+    j = 0
+    
+    if (fa*fb > 0.) then
+       ! the function is not bracketed :(
+       brent = 0.
+    else
+       if (dabs(fa) < dabs(fb)) then
+          ! swap a and b
+          tmp = fa
+          fa = fb
+          fb = tmp
+
+          tmp = a
+          a = b
+          b = tmp
+       end if
+       c = a
+       fc = fa
+       mflag = .true.
+       
+       do while (dabs(fb) > eps .and. dabs(fs) > eps .and. dabs(b - a) > eps)
+          j = j+1
+          if (dabs(fa - fc) > eps .and. dabs(fb - fc) > eps) then
+             ! do an inverse quadratic interpolation
+             s =    a*fb*fc / ((fa-fb)*(fa-fc)) &
+                  + b*fa*fc / ((fb-fa)*(fb-fc)) &
+                  + c*fa*fb / ((fc-fa)*(fc-fb))
+          else
+             ! do a secant method
+             s = b - fb*(b-a) / (fb-fa)
+          end if
+          if ( ((s < (3*a+b)/4) .or. (s > b)) .or. &                ! condition 1
+               (mflag .and. dabs(s-b) >= dabs(b-c)/2._x_precision) .or. &       ! condition 2
+               (.not. mflag .and. dabs(s-b) >= dabs(c-d)/2._x_precision) .or. & ! condition 3
+               (mflag .and. dabs(b-c) < delta) .or. &               ! condition 4
+               (.not. mflag .and. dabs(c-d) < delta)) &             ! condition 5
+               then
+             s = (a+b)/2._x_precision ! do a bissection method
+             mflag = .true.
+          else
+             mflag = .false.
+          end if
+
+          call variables(k, T, s, fs, optical_depth, tau_eff)
+          ! store two previous values
+          d = c
+          c = b
+          fc = fb
+
+          if (fa*fs < 0) then
+             b = s
+             fb = fs
+          else
+             a = s
+             fa = fs
+          end if
+          ! fa is better than fb, so we use a as our guess
+          if (dabs(fa) < dabs(fb)) then
+             tmp = fa
+             fa = fb
+             fb = tmp
+
+             tmp = a
+             a = b
+             b = tmp          
+          end if
+       end do
+
+       brent = b
+    end if
+
+  end function brent
 
 
   !-------------------------------------------------------------------------
