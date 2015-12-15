@@ -53,15 +53,15 @@ class Data:
         # read ahead one line
         self.lastLineRead = self.file.readline()
         self.pause = False       # bool flag if paused (activates left<>right navigation
-        self.reread = False      # 
+        self.reread = False      #
         self.offset = 0          # Number of indexes to jump back or forth
 
     def getChunk(self):
         '''Get a chunk (niter, time, headers + data)
         starting at last line read.
-        In the end, reloads the last line read and not 
+        In the end, reloads the last line read and not
         returned into self.lastlineread'''
-        
+
         f = self.file
 
         ###########################################
@@ -90,7 +90,7 @@ class Data:
                 break
             # remove last character ('\n')
             data.append(line[:-1].split())
-            
+
             line = f.readline()
 
         pdData = pd.DataFrame(data=data, columns=headers, dtype=float)
@@ -99,10 +99,10 @@ class Data:
         return niter, time, headers, pdData, eof
 
     def getPosition(self, _from, offset):
-        ''' Given an initial position, returns the 
+        ''' Given an initial position, returns the
         index of the n'th position after and the effective offset applied.'''
         indexOfNiter = self.indexes.index(_from)
-        
+
         tmpIndex = indexOfNiter - 1 + offset
         if tmpIndex >= len(self.indexes):
             effectiveOffset = len(self.indexes) - indexOfNiter
@@ -129,7 +129,7 @@ class Data:
         ###########################################
         i = 0
         niter, time, headers, data, eof = self.getChunk()
-        while not eof:            
+        while not eof:
             if self.pause:
                 self.offset, i = self.getPosition(niter, self.offset)
                 print('i:', self.indexes, self.offset)
@@ -161,7 +161,7 @@ class Data:
                 self.indexes.sort()
 
                 self.offset = 0
-                
+
                 readAhead -= 1
                 # if reread flag activated, close and reopen the file
                 if eof and self.reread:
@@ -179,7 +179,7 @@ class Data:
                 dataKeys = list(self.data.keys())
             else:
                 dataKeys = [key for key in self.data.keys() if key in self.restrictTo]
-                
+
             dataKeys.sort()
             while True:
                 prevKey = dataKeys[-1]
@@ -198,7 +198,7 @@ class Data:
         niter, time, headers, data, eof = self.getChunk()
         self.file.seek(pos)
         return niter, time, headers, data
-        
+
     def __del__(self):
         ''' Close the file reader'''
         self.file.close()
@@ -216,7 +216,7 @@ class colorLooper:
     def __next__(self):
         self.i += 1
         return self.colors[self.i % (len(self.colors))]
-    
+
     def __iter__(self):
         self.i = 0
         while self.i < len(self.colors):
@@ -224,7 +224,7 @@ class colorLooper:
 
     def reset(self):
         self.i = 0
-        
+
 def init(ic, crit_pts, s_curves, initial_data):
     ''' Plot the initial conditions, the critical points and the s_curves'''
     #######################################################################
@@ -232,7 +232,7 @@ def init(ic, crit_pts, s_curves, initial_data):
     #######################################################################
     ax11.plot(ic['r'], ic['T'], '--', label='Initial conditions')
     ax11.plot(ic['r'], crit_pts['Temp_thick'], '--', label='critical')
-    
+
     ax11.set_xlabel('$r\ (cm)$')
     ax11.set_ylabel('$T\ (K)$')
 
@@ -261,18 +261,18 @@ def init(ic, crit_pts, s_curves, initial_data):
     ax12.plot(ic['r'], crit_pts['Sigma_thick'], '--')
 
     lines['r-Sigma'] = ax12.plot(initial_data['r'], initial_data['Sigma'])[0]
-    
+
     ax12.grid()
     ax12.set_yscale('log')
 
-        
+
     # add ticks corresponding to the s_curve
     ticks      = list(ax12.get_xticks())
     ticklabels = list(ax12.get_xticklabels())
     for ind, s_curve in s_curves:
         ticks.append(ic['r'][ind])
         ticklabels.append('$r_{'+str(ind)+'}$')
-    
+
 
     ax12.set_xticks(ticks)
     ax12.set_xticklabels(ticklabels)
@@ -288,7 +288,7 @@ def init(ic, crit_pts, s_curves, initial_data):
         ax21.legend()
     else:
         lines['r-Mdot'] = ax21.plot(initial_data['r'], initial_data['M_dot'])[0]
-    
+
     # add ticks corresponding to the s_curve
     ticks      = list(ax21.get_xticks())
     ticklabels = list(ax21.get_xticklabels())
@@ -333,7 +333,7 @@ def init(ic, crit_pts, s_curves, initial_data):
                                            c=color)[0],
                                  [(initial_data['Sigma'][ind],
                                    initial_data['T'][ind])]))
-                             
+
 
     ax22.set_xlabel('$\Sigma\ (\mathrm{g.cm^{-2}})$')
     ax22.set_ylabel('$T\ (\mathrm{K})$')
@@ -352,9 +352,9 @@ def plotData(plotArgs):
     '''
     global prevDt
     global prevTime
-    
+
     index, time, data = plotArgs
-    
+
     print('Plotting {}'.format(index))
     lines['r-T'].set_ydata(data['T'])
     # lines['r-T'].set_label('$t = {:.2}s$'.format(time))
@@ -375,7 +375,7 @@ def plotData(plotArgs):
     else:
         dt = newDt
         prevDt = dt
-    
+
     print('dt: ', dt)
     for ind, line, trace, history in lines['Sigma-T']:
         x = data['Sigma'][ind]
@@ -388,10 +388,10 @@ def plotData(plotArgs):
             history.append((x,y))
         else:
             history.append((x,y))
-            
+
         trace.set_xdata([x for x, y in history])
         trace.set_ydata([y for x, y in history])
-        
+
         # print(ind, dt * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
 
     # ax11.legend()
@@ -401,11 +401,11 @@ def onClick(data, event):
     data.pause ^= True
     data.offset = 0
     print(data.pause)
-    
+
 def onKey(data, event):
     def mod(amount):
         data.offset += amount
-        
+
     behaviour = {
         'down': lambda: mod(-1),
         'up': lambda: mod(+1),
@@ -419,12 +419,12 @@ def onKey(data, event):
         behaviour[event.key]()
     else:
         print('Unsupported key "{}"'.format(event.key))
-        
+
 
 if __name__ == '__main__':
     print('Reading initial conditions')
     ic = pd.read_csv('CI.dat', delim_whitespace=True)
-    
+
     print('Reading output file')
     simulData = Data(args.output)
 
@@ -436,7 +436,6 @@ if __name__ == '__main__':
                   pd.read_csv(args.s_curves_dir + '/Temperature_Sigma_{:0>5}_tot.dat'.format(ind),
                               delim_whitespace=True, dtype=float, header=0))
                  for ind in args.s_curves]
-    
 
     data0 = simulData.get()[-1]
     initFun = lambda: init(ic, crit_pts, s_curves, data0)
@@ -448,7 +447,7 @@ if __name__ == '__main__':
     else:
         simulData.loop = args.loop
         simulData.reRead = args.reread
-            
+
         if (len(args.plot) > 0):
             simulData.restrictTo = args.plot
 
@@ -456,7 +455,7 @@ if __name__ == '__main__':
 
         onClickHandler = lambda event: onClick(data, event)
         onKeyHandler = lambda event: onKey(data, event)
-        
+
         # fig.canvas.mpl_connect('button_press_event', onClickHandler)
         fig.canvas.mpl_connect('key_press_event', onKeyHandler)
         ani = animation.FuncAnimation(fig, plotData, data, init_func=initFun,
@@ -470,5 +469,5 @@ if __name__ == '__main__':
         # clear the axes
         for ax in (ax11, ax12, ax21, ax22):
             ax.axes.cla()
-        
+
         plt.show()
