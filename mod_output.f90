@@ -27,7 +27,7 @@ contains
     type(state) :: state_dim
 
     write(unit, fmt=*) '# ', iteration
-    write(unit, fmt=*) '# ', time
+    write(unit, fmt=*) '# ', time * state_0%temps_0
     write(unit, fmt='(21(a16))') 'r', &
                                  !'Omega', &
                                  !'nu', &
