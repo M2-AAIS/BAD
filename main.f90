@@ -11,7 +11,7 @@ program black_hole_diffusion
   implicit none
 
   character(len=10)                      :: arg
-  integer                                :: stp_value = 50000 ! select the stop iteration 
+  integer                                :: stp_value = 500000 ! select the stop iteration 
   !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   character(len=100)                     :: line
@@ -93,6 +93,7 @@ program black_hole_diffusion
   elseif (arg == 'load') then
      s%T = IC%T / state_0%T_0
      s%S = IC%Sigma / state_0%S_0 * x_state%x
+     s%Mdot(n_cell) = 1._x_precision
      ! Initial time = 0
      t = 0._x_precision
      ! Start
