@@ -30,7 +30,7 @@ else:
     _filenames = os.listdir(args.path)
     _filenames.sort()
     filenames = [os.path.join(args.path,fname) for fname in _filenames if '_tot.dat' in fname]
-    
+
     print('Visiting all files of {}'.format(args.path))
 
 axline, = plt.plot(0, 0, 'o', label='')
@@ -43,7 +43,7 @@ def draw_once(filename):
     else:
         print('Visiting {}'.format(filename))
         outfile = filename.replace('.dat', '.png')
-        
+
     for line in open(filename):
         data = line.replace('\n', '').split()
         try :
@@ -82,6 +82,4 @@ else:
     init()
     draw_once(filenames[0])
     plt.show()
-# x, y = draw_once(filenames[2])
-# plt.plot(x, y, 'o')
 
