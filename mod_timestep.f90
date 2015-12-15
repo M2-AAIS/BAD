@@ -33,10 +33,7 @@ contains
     type(state),       intent(in)  :: state_in
     real(x_precision), intent(out) :: dt_nu
 
-   ! dt_nu  = dt_T / (state_in%H / x_state%x)**(2._x_precision) / cst_dt_nu
-   ! dt_nu = x_state%x**2._x_precision / state_in%nu
-
-    dt_nu = minval(x_state%x / abs(state_in%v)) / cst_dt_nu
+    dt_nu = minval(x_state%x**2 / abs(state_in%v)) / cst_dt_nu / 2
 
   end subroutine timestep_nu
 
