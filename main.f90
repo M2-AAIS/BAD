@@ -27,13 +27,15 @@ program black_hole_diffusion
   real(x_precision)                    :: delta_S_max, delta_T_max, S_rel_diff
   real(x_precision)                    :: t
   real(x_precision)                    :: dt_nu, dt_T, pf
+  integer :: p
+  real(x_precision), dimension(n_cell) :: mean
   logical                              :: T_converged
   logical                              :: unstable, wasunstable
 
   real(x_precision), dimension(n_cell) :: dist_crit
 
   call getarg(1, arg)
-
+  mean       = 0._x_precision
   !----------------------------------------------
   ! Convergence criteria for S and T
   !----------------------------------------------
@@ -144,6 +146,7 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Start iterations
   !----------------------------------------------
+  S_steps = 0
   do while (iteration < n_iterations)
 
      !--------------------------------------------
@@ -184,6 +187,7 @@ program black_hole_diffusion
         end if
 
      else
+        S_steps = S_steps + 1 
         if (wasunstable) then
            print*, 'Switched back to implicit mode!'
            s%Mdot(n_cell) = s%Mdot(n_cell) / 4._x_precision
@@ -261,18 +265,38 @@ program black_hole_diffusion
         ! Mdot kick
         ! Increase Mdot at r_max if S is stalled
         !
-        ! the convergence parameter is the maximum relative variation of
-        ! s. We give a kick when it's below a constant.
-        ! Since it depends linearly on the time, we take it into account
+        ! we give an mdot kick when the relative variation is below delta_S_max
+        ! and when the mean over last 10 iterations does not evolve anymore
         !----------------------------------------------
-        S_rel_diff = maxval(dabs(prev_S - s%S) / s%S / dt_nu)
-        if (S_rel_diff < delta_S_max) then
-           s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
-           print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
-        else
-           ! print*, S_rel_diff
-        end if
+        S_rel_diff = (prev_S - s%S) / s%S / dt_nu
+        S_rel_diff_max = maxval(dabs(S_rel_diff))
 
+        p = mod(S_steps, mean_size)
+        if (S_rel_diff_max < delta_S_max * mean_size) then
+           ! - - - - - - - - - - - - - - - - - - - - - - -
+           ! compute the rolling mean of the latest S when getting
+           ! close to the convergence
+           ! - - - - - - - - - - - - - - - - - - - - - - -
+           if (S_rel_diff_max < delta_S_max) then
+              s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
+              print*, 'Converged lately!'
+              print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell), S_steps
+           else
+              mean = S_rel_diff / mean_size + &
+                   (mean_size - 1._x_precision) / mean_size * mean
+              
+              if (maxval(dabs(mean)) < delta_S_max) then
+                 s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
+                 print*, 'Converged in mean!', maxval(dabs(mean)), S_rel_diff_max
+                 print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
+              else
+                 if (mod(iteration, output_freq) < 10) then
+                    print*, maxval(dabs(mean)), S_rel_diff_max
+                 end if
+              end if
+           end if
+        end if
+        
      end if
 
      ! Recompute variables when the system is stable
