@@ -111,7 +111,7 @@ contains
     ! Let dT/dt = f0 and d²T/dt² = f1 so T(t+1) = T(t) + dt * f0 * (1 + dt * f1)
 
     f0 = dT_dt_imp(s)
-    fT = (dT_dt_imp(s_deriv) - f0) / dtemp
+    fT = (dT_dt_exp(s_deriv) - f0) / dtemp
 
     rhs = f0 / fT * (exp(fT*dt) - 1._x_precision)
     ! rhs = dt*f0 * (1._x_precision + 0.5_x_precision*dt*fT)
