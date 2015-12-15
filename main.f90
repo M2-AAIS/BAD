@@ -278,7 +278,7 @@ program black_hole_diffusion
         ! and when the mean over last 10 iterations does not evolve anymore
         !----------------------------------------------
         S_rel_diff = (prev_S - s%S) / s%S / dt_nu
-        S_rel_diff_max = maxval(dabs(S_rel_diff))
+        S_rel_diff_max = maxval(abs(S_rel_diff))
 
         p = mod(S_steps, mean_size)
         if (S_rel_diff_max < delta_S_max * mean_size) then
@@ -294,13 +294,13 @@ program black_hole_diffusion
               mean = S_rel_diff / mean_size + &
                    (mean_size - 1._x_precision) / mean_size * mean
               
-              if (maxval(dabs(mean)) < delta_S_max) then
+              if (maxval(abs(mean)) < delta_S_max) then
                  s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
-                 print*, 'Converged in mean!', maxval(dabs(mean)), S_rel_diff_max
+                 print*, 'Converged in mean!', maxval(abs(mean)), S_rel_diff_max
                  print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
               else
                  if (mod(iteration, output_freq) < 10) then
-                    print*, maxval(dabs(mean)), S_rel_diff_max
+                    print*, maxval(abs(mean)), S_rel_diff_max
                  end if
               end if
            end if

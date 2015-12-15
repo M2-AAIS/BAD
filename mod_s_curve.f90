@@ -481,7 +481,7 @@ contains
 
     else
 
-      do while (dabs(Smax - Smin) >= eps .and. j < max_it)
+      do while (abs(Smax - Smin) >= eps .and. j < max_it)
 
         call variables(k, T, Smin, f_min, optical_depth, tau_eff)
 
@@ -550,7 +550,7 @@ contains
        ! the function is not bracketed :(
        brent = 0.
     else
-       if (dabs(fa) < dabs(fb)) then
+       if (abs(fa) < abs(fb)) then
           ! swap a and b
           tmp = fa
           fa = fb
@@ -564,9 +564,9 @@ contains
        fc = fa
        mflag = .true.
        
-       do while (dabs(fb) > eps .and. dabs(fs) > eps .and. dabs(b - a) > eps)
+       do while (abs(fb) > eps .and. abs(fs) > eps .and. abs(b - a) > eps)
           j = j+1
-          if (dabs(fa - fc) > eps .and. dabs(fb - fc) > eps) then
+          if (abs(fa - fc) > eps .and. abs(fb - fc) > eps) then
              ! do an inverse quadratic interpolation
              s =    a*fb*fc / ((fa-fb)*(fa-fc)) &
                   + b*fa*fc / ((fb-fa)*(fb-fc)) &
@@ -576,10 +576,10 @@ contains
              s = b - fb*(b-a) / (fb-fa)
           end if
           if ( ((s < (3*a+b)/4) .or. (s > b)) .or. &                ! condition 1
-               (mflag .and. dabs(s-b) >= dabs(b-c)/2._x_precision) .or. &       ! condition 2
-               (.not. mflag .and. dabs(s-b) >= dabs(c-d)/2._x_precision) .or. & ! condition 3
-               (mflag .and. dabs(b-c) < delta) .or. &               ! condition 4
-               (.not. mflag .and. dabs(c-d) < delta)) &             ! condition 5
+               (mflag .and. abs(s-b) >= abs(b-c)/2._x_precision) .or. &       ! condition 2
+               (.not. mflag .and. abs(s-b) >= abs(c-d)/2._x_precision) .or. & ! condition 3
+               (mflag .and. abs(b-c) < delta) .or. &               ! condition 4
+               (.not. mflag .and. abs(c-d) < delta)) &             ! condition 5
                then
              s = (a+b)/2._x_precision ! do a bissection method
              mflag = .true.
@@ -601,7 +601,7 @@ contains
              fa = fs
           end if
           ! fa is better than fb, so we use a as our guess
-          if (dabs(fa) < dabs(fb)) then
+          if (abs(fa) < abs(fb)) then
              tmp = fa
              fa = fb
              fb = tmp
