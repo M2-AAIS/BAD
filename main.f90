@@ -195,7 +195,7 @@ program black_hole_diffusion
         S_steps = S_steps + 1 
         if (wasunstable) then
            print*, 'Switched back to implicit mode!'
-           s%Mdot(n_cell) = s%Mdot(n_cell) / 4._x_precision
+           s%Mdot(n_cell) = 1._x_precision
            print*, 'Mdot un-kick! un-YOLOOOOO', s%Mdot(n_cell)
         end if
 
