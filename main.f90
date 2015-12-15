@@ -94,6 +94,14 @@ program black_hole_diffusion
      s%S = s%S / state_0%S_0 * x_state%x
      s%Mdot = s%Mdot / state_0%Mdot_0
      close(21)
+     if (maxval(s%T - T_c) < 0) then
+       ! …or right from its critical S…
+       unstable = maxval(s%S - S_c) > 0
+     else
+       ! …then we’re unstable.
+       unstable = .true.
+     end if
+
   elseif (arg == 'start') then
      s%T = IC%T / state_0%T_0
      s%S = IC%Sigma / state_0%S_0 * x_state%x
@@ -101,7 +109,7 @@ program black_hole_diffusion
      t = 0._x_precision
      ! Start
      iteration = 0
-     wasunstable = .false.
+     unstable = .false.
      s%Mdot(n_cell) = 1._x_precision
   else
      print*, 'Unsupported action "', arg, '". Call ./simul [start|load|restart].'
