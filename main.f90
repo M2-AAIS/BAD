@@ -173,7 +173,7 @@ program black_hole_diffusion
 
         ! Do an explicit integration of both S and T over a thermic timestep
         call timestep_T(s, dt_T)
-        dt_T = 0.01_x_precision * dt_T
+        !dt_T = 0.2_x_precision * dt_T ! FIXME: This probably need to be tweaked a bit
         call do_timestep_S_exp(s, dt_T)
         call do_timestep_T(s, dt_T)
 
@@ -285,7 +285,7 @@ program black_hole_diffusion
            ! close to the convergence
            ! - - - - - - - - - - - - - - - - - - - - - - -
            if (S_rel_diff_max < delta_S_max) then
-              s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
+              s%Mdot(n_cell) = s%Mdot(n_cell) * 1.1_x_precision
               print*, 'Converged totally!'
               print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell), S_steps
               mean = 0._x_precision
@@ -294,7 +294,7 @@ program black_hole_diffusion
                    (mean_size - 1._x_precision) / mean_size * mean
               
               if (maxval(abs(mean)) < delta_S_max) then
-                 s%Mdot(n_cell) = s%Mdot(n_cell) * 2._x_precision
+                 s%Mdot(n_cell) = s%Mdot(n_cell) * 1.1_x_precision
                  print*, 'Converged in mean!', maxval(abs(mean)), S_rel_diff_max
                  print*, 'Mdot kick! YOLOOOOO', s%Mdot(n_cell)
                  mean = 0._x_precision
