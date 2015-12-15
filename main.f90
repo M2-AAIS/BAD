@@ -182,11 +182,11 @@ program black_hole_diffusion
         iteration = iteration + 1
 
         if (mod(iteration, output_freq) == 0) then
-           call snapshot(s, iteration, t, 13)
            if ((arg == 'load' .or. arg == 'restart') &
                 .and. iteration-start_iteration > stp_value) then
               stop
            endif
+           call snapshot(s, iteration, t, 13)
            print*,'snapshot', iteration, t, 'exp', maxval(s%T - T_c), maxval(s%S - S_c), dt_T
         end if
 
