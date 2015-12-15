@@ -35,6 +35,7 @@ parser.add_argument('--interval', default=1000, type=int,
                     help='Interval (in ms) between each frames (default %(default)s)')
 parser.add_argument('--plot-Qs', default=False, action='store_true', dest='plot_Qs',
                     help='Plot Q⁺ and Q⁻ instead of Mdot')
+parser.add_argument('--trace', default=100, type=int)
 args = parser.parse_args()
 
 fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2, 2)
@@ -214,7 +215,7 @@ class colorLooper:
 
     def __next__(self):
         self.i += 1
-        return self.colors[self.i - 1 % len(self.colors)]
+        return self.colors[self.i % (len(self.colors))]
     
     def __iter__(self):
         self.i = 0
@@ -315,15 +316,23 @@ def init(ic, crit_pts, s_curves, initial_data):
     colorsIter = colorLooper()
     for ind, s_curve in s_curves:
         ax22.plot(s_curve['Surface_density'], s_curve['Temperature'],
+                  linewidth=0.5,
                   label='$r_{'+str(ind)+'}$',
                   c=colorsIter.__next__())
 
     # add the initial data on the s_curve plot
     colorsIter.reset()
-    lines['Sigma-T'] = [ (ind, ax22.plot(initial_data['Sigma'][ind],
-                                         initial_data['T'][ind], 'o',
-                                         c=colorsIter.__next__())[0])
-                     for ind, foo in s_curves]
+    for ind, foo in s_curves:
+        color = colorsIter.__next__()
+        lines['Sigma-T'].append((ind,
+                                 ax22.plot(initial_data['Sigma'][ind],
+                                           initial_data['T'][ind], 'o',
+                                           c=color)[0],
+                                 ax22.plot(initial_data['Sigma'][ind],
+                                           initial_data['T'][ind], '-.',
+                                           c=color)[0],
+                                 [(initial_data['Sigma'][ind],
+                                   initial_data['T'][ind])]))
                              
 
     ax22.set_xlabel('$\Sigma\ (\mathrm{g.cm^{-2}})$')
@@ -368,13 +377,22 @@ def plotData(plotArgs):
         prevDt = dt
     
     print('dt: ', dt)
-    for ind, line in lines['Sigma-T']:
+    for ind, line, trace, history in lines['Sigma-T']:
         x = data['Sigma'][ind]
         y = data['T'][ind]
         line.set_xdata(x)
         line.set_ydata(y)
 
-        print(ind, dt * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
+        if len(history) >= args.trace:
+            history.pop(0)
+            history.append((x,y))
+        else:
+            history.append((x,y))
+            
+        trace.set_xdata([x for x, y in history])
+        trace.set_ydata([y for x, y in history])
+        
+        # print(ind, dt * (data['Q_+'][ind] - data['Q_-'][ind]) / data['Cv'][ind])
 
     # ax11.legend()
     fig.suptitle('$t = {:.2f}s$, iteration {}'.format(time, index))
