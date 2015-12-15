@@ -27,7 +27,6 @@ program black_hole_diffusion
   real(x_precision)                    :: delta_S_max, delta_T_max, S_rel_diff_max
   real(x_precision)                    :: t
   real(x_precision)                    :: dt_nu, dt_T, pf
-  integer :: p
   real(x_precision), dimension(n_cell) :: mean
   logical                              :: T_converged
   logical                              :: unstable, wasunstable
@@ -280,7 +279,6 @@ program black_hole_diffusion
         S_rel_diff = (prev_S - s%S) / s%S / dt_nu
         S_rel_diff_max = maxval(abs(S_rel_diff))
 
-        p = mod(S_steps, mean_size)
         if (S_rel_diff_max < delta_S_max * mean_size) then
            ! - - - - - - - - - - - - - - - - - - - - - - -
            ! compute the rolling mean of the latest S when getting
