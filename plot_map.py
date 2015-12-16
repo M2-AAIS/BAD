@@ -35,29 +35,28 @@ if __name__ == '__main__':
                                      for l in lines.split('#')][1:]
 
     extents = Sigma[0], Sigma[1], T[0], T[1]
+
     X = np.logspace(np.log10(Sigma[0]), np.log10(Sigma[1]), nb_S)
     Y = np.logspace(np.log10(T[1]), np.log10(T[0]), nb_T)
 
     #fig, ax = plt.subplots()
 
-    for element in ({'data': Q, 'title': 'Q^+ - Q^-', 'threshold': 5e13,
-                     'data unit': 'Chauffage spécifique ($erg.g^{-1}s^{-1}$)'},
-                    {'data': tau, 'title': '\\tau', 'threshold': 1e-5,
-                     'data unit': 'Profondeur optique'}):
+    for element in ({'var': 'Q', 'data': Q, 'title': u"Chauffage spécifique $Q^+ - Q^-$ (erg·g$^{-1}$·s$^{-1}$)", 'threshold': 1e15, 'ticks': [-1e20,0,1e20]},
+                    {'var': 'tau', 'data': tau, 'title': u"Opacité $\\tau$", 'threshold': 1e-5, 'ticks': [0.06, 1, 10]}):
         plt.figure()
-        plt.title(u"${}$".format(element['title']))
+        plt.title(element['title'])
         plt.xscale('log')
         plt.yscale('log')
         CSQ = plt.contour(X, Y, Q, origin='image', levels=[0], colors=('w'), extent=extents)
         plt.clabel(CSQ, inline=1, fontsize=10)
-        CStau = plt.contour(X, Y, tau, origin='image', levels=[0.06,1], colors=('r','m'), extent=extents)
+        CStau = plt.contour(X, Y, tau, origin='image', levels=[0.06,1, 10], colors=('r','m','k'), extent=extents)
         plt.clabel(CStau, inline=1, fontsize=10)
-        plt.imshow(element['data'], interpolation='none', cmap='viridis', extent=extents, aspect='auto',
+        plt.imshow(element['data'], interpolation='none', cmap='viridis', extent=extents, aspect='equal',
                    norm=matplotlib.colors.SymLogNorm(element['threshold']))
-        plt.colorbar(label=element['data unit'])
-        plt.xlabel('$\Sigma$ ($g.cm^{-2}$)')
-        plt.ylabel('$T$ ($K$)')
-
+        plt.colorbar(ticks=element['ticks'],shrink=1)
+        plt.xlabel(u"Densité surfacique $\Sigma$ (g·cm$^{-2}$)")
+        plt.ylabel(u"Température $T$ (K)")
         plt.tight_layout()
+        plt.savefig('maps/'+element['var']+'_map.pdf', transparent=True, dpi=300, bbox_inches='tight', pad_inches=0)
 
     plt.show()
