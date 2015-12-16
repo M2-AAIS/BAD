@@ -79,7 +79,7 @@ module mod_constants
   end type adim_state
 
   type state_zero
-    real(x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, Mdot_0, rho_0, T_0, Fz_0, Cv_0, Pgaz_0, Prad_0, beta_0
+    real(x_precision) :: temps_0, Omega_0, nu_0, v_0, cs_0, S_0, H_0, Mdot_0, rho_0, T_0, Fz_0, Cv_0, Pgaz_0, Prad_0, beta_0, Q_0
     ! Usefull quantities to get the dimensionless ones
   end type state_zero
 

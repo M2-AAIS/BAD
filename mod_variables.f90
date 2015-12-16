@@ -112,31 +112,37 @@ contains
 
     select case(mode)
     case(0)
-      state_in%nu   = state_in%nu   / state_0%nu_0
-      state_in%v    = state_in%v    / state_0%v_0
-      state_in%cs   = state_in%cs   / state_0%cs_0
-      state_in%S    = state_in%S    / state_0%S_0
-      state_in%H    = state_in%H    / state_0%H_0
-      state_in%Mdot = state_in%Mdot / state_0%Mdot_0
-      state_in%rho  = state_in%rho  / state_0%rho_0
-      state_in%T    = state_in%T    / state_0%T_0
-      state_in%Fz   = state_in%Fz   / state_0%Fz_0
-      state_in%Cv   = state_in%Cv   / state_0%Cv_0
-      state_in%Pgaz = state_in%Pgaz / state_0%Pgaz_0
-      state_in%Prad = state_in%Prad / state_0%Prad_0
+      state_in%nu     = state_in%nu     / state_0%nu_0
+      state_in%v      = state_in%v      / state_0%v_0
+      state_in%cs     = state_in%cs     / state_0%cs_0
+      state_in%S      = state_in%S      / state_0%S_0
+      state_in%H      = state_in%H      / state_0%H_0
+      state_in%Mdot   = state_in%Mdot   / state_0%Mdot_0
+      state_in%rho    = state_in%rho    / state_0%rho_0
+      state_in%T      = state_in%T      / state_0%T_0
+      state_in%Fz     = state_in%Fz     / state_0%Fz_0
+      state_in%Cv     = state_in%Cv     / state_0%Cv_0
+      state_in%Pgaz   = state_in%Pgaz   / state_0%Pgaz_0
+      state_in%Prad   = state_in%Prad   / state_0%Prad_0
+      state_in%Qplus  = state_in%Qplus  / state_0%Q_0
+      state_in%Qminus = state_in%Qminus / state_0%Q_0
+      state_in%Qadv   = state_in%Qadv   / state_0%Q_0
     case(1)
-      state_in%nu   = state_in%nu   * state_0%nu_0
-      state_in%v    = state_in%v    * state_0%v_0
-      state_in%cs   = state_in%cs   * state_0%cs_0
-      state_in%S    = state_in%S    * state_0%S_0
-      state_in%H    = state_in%H    * state_0%H_0
-      state_in%Mdot = state_in%Mdot * state_0%Mdot_0
-      state_in%rho  = state_in%rho  * state_0%rho_0
-      state_in%T    = state_in%T    * state_0%T_0
-      state_in%Fz   = state_in%Fz   * state_0%Fz_0
-      state_in%Cv   = state_in%Cv   * state_0%Cv_0
-      state_in%Pgaz = state_in%Pgaz * state_0%Pgaz_0
-      state_in%Prad = state_in%Prad * state_0%Prad_0
+      state_in%nu     = state_in%nu     * state_0%nu_0
+      state_in%v      = state_in%v      * state_0%v_0
+      state_in%cs     = state_in%cs     * state_0%cs_0
+      state_in%S      = state_in%S      * state_0%S_0
+      state_in%H      = state_in%H      * state_0%H_0
+      state_in%Mdot   = state_in%Mdot   * state_0%Mdot_0
+      state_in%rho    = state_in%rho    * state_0%rho_0
+      state_in%T      = state_in%T      * state_0%T_0
+      state_in%Fz     = state_in%Fz     * state_0%Fz_0
+      state_in%Cv     = state_in%Cv     * state_0%Cv_0
+      state_in%Pgaz   = state_in%Pgaz   * state_0%Pgaz_0
+      state_in%Prad   = state_in%Prad   * state_0%Prad_0
+      state_in%Qplus  = state_in%Qplus  * state_0%Q_0
+      state_in%Qminus = state_in%Qminus * state_0%Q_0
+      state_in%Qadv   = state_in%Qadv   * state_0%Q_0
     case default
        stop
     end select

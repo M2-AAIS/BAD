@@ -142,6 +142,7 @@ contains
     state_0%Pgaz_0  = state_0%rho_0 * params%RTM
     state_0%Prad_0  = cst_rad * state_0%T_0**4 / 3._x_precision
     state_0%beta_0  = state_0%Prad_0 / state_0%Pgaz_0
+    state_0%Q_0     = 1._x_precision / state_0%temps_0
 
     ! Display parameters
     write(*,"('#           Input Parameters             ')")
@@ -176,6 +177,7 @@ contains
     write(*,"('# Cv_0        =',1p,E12.4)") state_0%Cv_0
     write(*,"('# P_gaz_0     =',1p,E12.4)") state_0%Pgaz_0
     write(*,"('# P_rad_0     =',1p,E12.4)") state_0%Prad_0
+    write(*,"('# Q_0         =',1p,E12.4)") state_0%Q_0
     write(*,"('#****************************************')")
 
   end subroutine get_parameters

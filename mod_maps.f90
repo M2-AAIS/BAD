@@ -59,6 +59,8 @@ contains
        end do
     end do
 
+    Q_res = Q_res * state_0%Q_0
+
   end subroutine build_grid
 
   subroutine save_data(Q_res, tau_res)
