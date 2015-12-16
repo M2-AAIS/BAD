@@ -41,7 +41,9 @@ program black_hole_diffusion
   delta_S_max = 1e-8_x_precision
   delta_T_max = 1e-4_x_precision
 
+  !----------------------------------------------
   ! Read the parameters, generate state_0 and create adim state
+  !----------------------------------------------
   call get_parameters()
   call make_temperature()
   call set_conditions()
@@ -314,5 +316,4 @@ program black_hole_diffusion
   end do
 
   close(13)
-
-end program
+end program black_hole_diffusion
