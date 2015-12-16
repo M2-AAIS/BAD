@@ -11,7 +11,7 @@ program black_hole_diffusion
   implicit none
 
   character(len=10)                      :: arg
-  integer                                :: stp_value = 500000 ! select the stop iteration
+  integer                                :: stp_value = 100000 ! select the stop iteration
   !  don't kill the job without stp_value
   real(x_precision), dimension(n_cell)   :: jnk1, jnk3
   character(len=100)                     :: line
@@ -129,9 +129,13 @@ program black_hole_diffusion
   call compute_variables(s)
 
   !----------------------------------------------
-  ! Open file to write output to
+  ! Open files to write output to
   !----------------------------------------------
   open(13, file="output.dat", status="replace", iostat=ios)
+  if (ios /= 0) then
+     stop "Error while opening output file."
+  end if
+  open(14, file="output_integrated.dat", status="replace", iostat=ios)
   if (ios /= 0) then
      stop "Error while opening output file."
   end if
@@ -139,7 +143,7 @@ program black_hole_diffusion
   !----------------------------------------------
   ! Save initial snapshot
   !----------------------------------------------
-  call snapshot(s, iteration, t, 13)
+  call snapshot(s, iteration, t, 13, 14)
 
   !----------------------------------------------
   ! Compute initial timestep
@@ -177,7 +181,7 @@ program black_hole_diffusion
         call timestep_T(s, dt_T)
         !dt_T = 0.2_x_precision * dt_T ! FIXME: This probably need to be tweaked a bit
         call do_timestep_S_exp(s, dt_T)
-        call do_timestep_T(s, dt_T)
+        call do_timestep_T_exp(s, dt_T)
 
         ! Increase time, increment number of iterations
         t = t + dt_T
@@ -188,7 +192,7 @@ program black_hole_diffusion
                 .and. iteration-start_iteration > stp_value) then
               stop
            endif
-           call snapshot(s, iteration, t, 13)
+           call snapshot(s, iteration, t, 13, 14)
            print*,'snapshot', iteration, t, 'exp', maxval(s%T - T_c), maxval(s%S - S_c), dt_T
         end if
 
@@ -225,7 +229,7 @@ program black_hole_diffusion
                 .and. iteration-start_iteration > stp_value) then
               stop
            endif
-           call snapshot(s, iteration, t, 13)
+           call snapshot(s, iteration, t, 13, 14)
            print*,'snapshot', iteration, t, 'S', dt_nu, dt_T, pf
         end if
 
@@ -250,7 +254,7 @@ program black_hole_diffusion
 
            ! Do a single T integration
            prev_T = s%T ! We need to keep the old value for comparison
-           call do_timestep_T(s, dt_T)
+           call do_timestep_T_imp(s, dt_T)
 
            ! Increase time, increment number of iterations
            t = t + dt_T
@@ -262,7 +266,7 @@ program black_hole_diffusion
                    .and. iteration-start_iteration > stp_value) then
                  stop
               endif
-              call snapshot(s, iteration, t, 13)
+              call snapshot(s, iteration, t, 13, 14)
               print*,'snapshot', iteration, t, 'T', dt_nu, dt_T, pf
            end if
 
@@ -316,4 +320,5 @@ program black_hole_diffusion
   end do
 
   close(13)
+  close(14)
 end program black_hole_diffusion

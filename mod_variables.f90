@@ -99,8 +99,6 @@ contains
                      state_out%T / state_out%S * (dS_over_dt + state_out%v * dSigma_over_dx) - &
                      state_out%Cv * state_out%v / x_state%x * dT_over_dx
 
-    !-----------------------
-
   end subroutine compute_variables
 
   ! Transform dimensions of variables

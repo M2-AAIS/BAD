@@ -9,7 +9,7 @@ module mod_integrator
   implicit none
   private
 
-  public :: do_timestep_T, do_timestep_S_imp, do_timestep_S_exp
+  public :: do_timestep_T_imp, do_timestep_T_exp, do_timestep_S_imp, do_timestep_S_exp
 
 contains
 
@@ -91,7 +91,7 @@ contains
   end subroutine do_timestep_S_exp
 
   ! Process the temporal evolution of T with an explicit algorithm.
-  subroutine do_timestep_T(s, dt)
+  subroutine do_timestep_T_imp(s, dt)
     implicit none
 
     real(x_precision), intent(in)    :: dt
@@ -113,6 +113,29 @@ contains
 
     s%T = s%T + f0 / fT * (exp(fT*dt) - 1._x_precision)
 
-  end subroutine do_timestep_T
+  end subroutine do_timestep_T_imp
+  
+  ! Process the temporal evolution of T with an explicit algorithm.
+  subroutine do_timestep_T_exp(s, dt)
+    implicit none
 
+    real(x_precision), intent(in)    :: dt
+    type(state),       intent(inout) :: s
+
+
+    real(x_precision), dimension(n_cell) :: dtemp
+    real(x_precision), dimension(n_cell) :: f0
+    type(state)                          :: s_deriv
+
+    dtemp     = s%T * 1.e-3_x_precision
+    s_deriv   = s
+    s_deriv%T = s%T + dtemp
+
+    call compute_variables(s_deriv)
+
+    f0 = dT_dt_exp(s)
+
+    s%T = s%T + f0 * dt
+
+  end subroutine do_timestep_T_exp
 end module mod_integrator
