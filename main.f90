@@ -179,7 +179,7 @@ program black_hole_diffusion
 
         ! Do an explicit integration of both S and T over a thermic timestep
         call timestep_T(s, dt_T)
-        !dt_T = 0.2_x_precision * dt_T ! FIXME: This probably need to be tweaked a bit
+        dt_T = 0.01_x_precision * dt_T ! FIXME: This probably need to be tweaked a bit
         call do_timestep_S_exp(s, dt_T)
         call do_timestep_T_exp(s, dt_T)
 
@@ -261,7 +261,7 @@ program black_hole_diffusion
            iteration = iteration + 1
 
            ! Do a snapshot
-           if (mod(iteration, output_freq) == 0) then
+           if (mod(iteration, output_freq) == 0 .or. (iteration < 24000 .and. mod(iteration,500) == 0)) then
               if ((arg == 'load' .or. arg == 'restart') &
                    .and. iteration-start_iteration > stp_value) then
                  stop
