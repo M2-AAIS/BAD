@@ -443,6 +443,8 @@ if __name__ == '__main__':
     if len(args.plot) == 1:
         initFun()
         plotData((0, 0, data0))
+        figManager = plt.get_current_fig_manager()
+        figManager.window.showMaximized()
         plt.show()
     else:
         simulData.loop = args.loop
@@ -470,4 +472,6 @@ if __name__ == '__main__':
         for ax in (ax11, ax12, ax21, ax22):
             ax.axes.cla()
 
+        figManager = plt.get_current_fig_manager()
+        figManager.window.showMaximized()
         plt.show()

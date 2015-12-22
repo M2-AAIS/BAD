@@ -77,9 +77,13 @@ if len(filenames) > 1:
     ani = animation.FuncAnimation(fig, draw_once, filenames, init_func=init, interval=10)
     if args.video:
         ani.save('s_curve.mp4', writer='ffmpeg', fps=10, bitrate=10000, dpi=180)
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
     plt.show()
 else:
     init()
     draw_once(filenames[0])
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
     plt.show()
 

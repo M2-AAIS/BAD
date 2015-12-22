@@ -59,4 +59,6 @@ if __name__ == '__main__':
         plt.tight_layout()
         plt.savefig('maps/'+element['var']+'_map.pdf', transparent=True, dpi=300, bbox_inches='tight', pad_inches=0)
 
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
     plt.show()
